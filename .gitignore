@@ -1,0 +1,54 @@
+# ======================
+# Node.js / Frontend
+# ======================
+node_modules/
+dist/
+build/
+.cache/
+.next/
+out/
+*.log
+
+# Vite
+vite.config.ts.timestamp-*
+
+# Storybook
+.storybook-out/
+storybook-static/
+
+# ======================
+# Python / Backend
+# ======================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.db
+*.sqlite3
+
+# Virtual envs
+venv/
+env/
+.venv/
+ENV/
+*.egg-info/
+.eggs/
+
+# FastAPI/uvicorn logs
+*.log
+
+# ======================
+# General
+# ======================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local

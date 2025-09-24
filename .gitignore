@@ -32,6 +32,11 @@ Thumbs.db
 .env.test.local
 .env.production.local
 
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Archivos de editor
 .vscode/
 .idea/

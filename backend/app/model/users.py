@@ -19,5 +19,3 @@ users = Table("users", meta_data,
     Column("delete_date", DateTime, nullable=True),
     Column("id_role", Integer, ForeignKey("roles.id_role"), nullable=False),  # FK a rol
 )
-
-meta_data.create_all(engine)

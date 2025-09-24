@@ -1,16 +1,25 @@
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "mysql+pymysql://user:password@127.0.0.1:3306/proyecto_obras",
+)
 
 engine = create_engine(
-    "mysql+pymysql://root:c4b3rl456@localhost:3306/team2_digidat",
+    DATABASE_URL,
     echo=True,
-    future=True
+    future=True,
+    pool_pre_ping=True,
 )
 
 Base = declarative_base()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-
-meta_data = MetaData()
+meta_data = Base.metadata

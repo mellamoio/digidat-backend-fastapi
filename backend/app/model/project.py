@@ -7,7 +7,7 @@ class Project(Base):
     name = Column(String(100), nullable=False)
     description = Column(Text)
     addres = Column(String(255))
-    state_project = Column(Enum('pendiente', 'en_progreso', 'finalizado'), default='pendiente')
+    state_project = Column(Enum('priorizacion', 'actos_previos', 'seleccion', 'ejecucion', 'emision_de_ciprl_o_cipgn'), default='pendiente')
     start_date = Column(Date)
     end_date = Column(Date)
     create_date = Column(TIMESTAMP)

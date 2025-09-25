@@ -1,15 +1,17 @@
 from sqlalchemy import Column, Integer, Text, ForeignKey
 from sqlalchemy.orm import relationship
-from .base import Base
+from app.config.db import Base
 
 class InformacionContratista(Base):
-    __tablename__ = "informacioncontratista"
+    __tablename__ = "informacion_contratista"
     
-    id = Column(Integer, primary_key=True, index=True)
-    id_obra = Column(Integer, ForeignKey('obras.id_obra'), nullable=False)
-    detalle = Column(Text)
-    id_responsable = Column(Integer, ForeignKey('responsables.id_responsable'))
+    id_informacion_contratista = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id_obra = Column(Integer, ForeignKey("obras.id_obra"), nullable=False)
+    detalle = Column(Text, nullable=True)
+    id_responsable = Column(Integer, ForeignKey("responsables.id_responsable"), nullable=True)
     
-    # Relaciones
     obra = relationship("Obra", back_populates="info_contratista")
-    responsable = relationship("Responsable", back_populates="info_contratista")
+    responsable_rel = relationship("Responsable", back_populates="info_contratista")
+
+    def __repr__(self):
+        return f"<InformacionContratista(id={self.id_informacion_contratista}, id_obra={self.id_obra})>"

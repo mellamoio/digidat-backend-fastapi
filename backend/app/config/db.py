@@ -5,22 +5,17 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 import os
 from dotenv import load_dotenv
 
-# Cargar variables de entorno
 load_dotenv()
 
-# Configuración de metadatos
 meta_data = MetaData()
 
-# Base para los modelos
 Base = declarative_base(metadata=meta_data)
 
-# URL de conexión a la base de datos
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "mysql+pymysql://digidat_user:digidat_password@localhost:3306/digidat_db?charset=utf8mb4"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Configuración del motor de base de datos síncrono
+if not DATABASE_URL:
+    raise ValueError("No se encontró la variable de entorno DATABASE_URL en el archivo .env")
+
 engine = create_engine(
     DATABASE_URL,
     echo=True,
@@ -31,7 +26,6 @@ engine = create_engine(
     max_overflow=20,
 )
 
-# Configuración del motor de base de datos asíncrono
 ASYNC_DATABASE_URL = DATABASE_URL.replace("mysql+pymysql", "mysql+aiomysql")
 async_engine = create_async_engine(
     ASYNC_DATABASE_URL,
@@ -42,7 +36,6 @@ async_engine = create_async_engine(
     max_overflow=20,
 )
 
-# Configuración de la sesión síncrona
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
@@ -50,7 +43,6 @@ SessionLocal = sessionmaker(
     expire_on_commit=False
 )
 
-# Configuración de la sesión asíncrona
 AsyncSessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
@@ -59,7 +51,6 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False
 )
 
-# Dependencia para inyección de dependencias síncrona
 def get_db() -> scoped_session:
     """
     Obtiene una sesión de base de datos síncrona.
@@ -70,7 +61,6 @@ def get_db() -> scoped_session:
     finally:
         db.close()
 
-# Dependencia para inyección de dependencias asíncrona
 async def get_async_db() -> AsyncSession:
     """
     Obtiene una sesión de base de datos asíncrona.
@@ -84,30 +74,20 @@ async def get_async_db() -> AsyncSession:
             raise
 
 def create_tables():
-    """
-    Crea todas las tablas definidas en los modelos.
-    """
+    """Crea todas las tablas definidas en los modelos."""
     Base.metadata.create_all(bind=engine)
 
 async def async_create_tables():
-    """
-    Crea todas las tablas de forma asíncrona.
-    """
+    """Crea todas las tablas de forma asíncrona."""
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 def drop_tables():
-    """
-    Elimina todas las tablas de la base de datos.
-    ¡ADVERTENCIA! Esto eliminará todos los datos.
-    """
+    """Elimina todas las tablas de la base de datos. ⚠️ Destruye todos los datos."""
     Base.metadata.drop_all(bind=engine)
 
 async def async_drop_tables():
-    """
-    Elimina todas las tablas de forma asíncrona.
-    ¡ADVERTENCIA! Esto eliminará todos los datos.
-    """
+    """Elimina todas las tablas de forma asíncrona. ⚠️ Destruye todos los datos."""
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 

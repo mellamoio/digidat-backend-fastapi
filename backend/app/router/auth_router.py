@@ -1,43 +1,77 @@
-from fastapi import APIRouter, HTTPException
-from starlette.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from fastapi import APIRouter, Depends, HTTPException
+from starlette.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 from werkzeug.security import check_password_hash
-from app.config.db import engine
-from app.model.users import users
-from app.schema.auth_schema import LoginRequest, LoginResponse, LoginUser
+from sqlalchemy.orm import Session
+from app.config.db import get_db
+from app.model.users import User
+from app.schema.auth_schema import LoginRequest
 from app.utils.auth import create_access_token
 from app.utils.response import custom_response
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Auth"])
 
-
 @router.post("/login", status_code=HTTP_200_OK)
-def login(payload: LoginRequest):
-    with engine.begin() as conn:
-        result = conn.execute(users.select().where(users.c.email == payload.email, users.c.delete_date.is_(None))).first()
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
+    try:
+        logger.debug(f"Request payload: {payload.dict()}")
+        user = db.query(User).filter(User.correo == payload.correo).first()
+        if not user:
+            logger.warning(f"Intento de inicio de sesión fallido para el correo: {payload.correo}")
+            return custom_response(
+                HTTP_400_BAD_REQUEST,
+                "Credenciales inválidas",
+                False,
+                {}
+            )
 
-    if not result:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Credenciales inválidas")
+        if not user.contrasena_hash or not check_password_hash(user.contrasena_hash, payload.password):
+            logger.warning(f"Contraseña incorrecta para el usuario: {payload.correo}")
+            return custom_response(
+                HTTP_400_BAD_REQUEST,
+                "Credenciales inválidas",
+                False,
+                {}
+            )
 
-    row = dict(result._mapping)
-    if not check_password_hash(row["password_hash"], payload.password):
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Credenciales inválidas")
+        token = create_access_token({
+            "sub": str(user.id_responsable),
+            "correo": user.correo,
+            "role": user.id_role,  # Cambiado de id_rol a id_role
+            "status": user.estado,
+        })
 
-    token = create_access_token({
-        "sub": str(row["id_user"]),
-        "email": row["email"],
-        "role": row["id_role"],
-        "status": row["status"],
-    })
+        user_data = {
+            "id_user": user.id_responsable,
+            "name": user.nombre,
+            "email": user.correo,
+            "id_role": user.id_role,  # Cambiado de id_rol a id_role
+            "status": user.estado.value if hasattr(user.estado, "value") else user.estado,
+            "url_photo": None,
+            "create_date": None
+        }
 
-    user = LoginUser(
-        id_user=row["id_user"],
-        name=row["name"],
-        email=row["email"],
-        id_role=row["id_role"],
-        status=row["status"],
-        url_photo=row.get("url_photo"),
-        create_date=row.get("create_date"),
-    )
+        response_data = {
+            "access_token": token,
+            "token_type": "bearer",
+            "user": user_data
+        }
 
-    data = LoginResponse(access_token=token, user=user)
-    return custom_response(HTTP_200_OK, "Login exitoso", True, data.model_dump())
+        logger.info(f"Inicio de sesión exitoso para el usuario: {payload.correo}")
+        return custom_response(
+            HTTP_200_OK,
+            "Inicio de sesión exitoso",
+            True,
+            response_data
+        )
+
+    except Exception as e:
+        logger.error(f"Error en el inicio de sesión: {str(e)}", exc_info=True)
+        return custom_response(
+            HTTP_500_INTERNAL_SERVER_ERROR,
+            "Error interno del servidor al procesar la solicitud",
+            False,
+            {"error": str(e)}
+        )

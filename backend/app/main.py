@@ -1,5 +1,5 @@
 import logging
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -8,7 +8,6 @@ from contextlib import asynccontextmanager
 from typing import List, Optional
 from pydantic import AnyHttpUrl
 
-# Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -19,12 +18,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Configuración de la aplicación
 from app.core.config import settings
 from app.core.database import create_tables, async_create_tables
 from app.core.exceptions import register_exception_handlers
 
-# Importar routers
 from app.router import (
     obra_router,
     estado_etapa_router,
@@ -43,7 +40,6 @@ from app.router import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Código que se ejecuta al iniciar la aplicación
     logger.info("Iniciando la aplicación...")
     try:
         create_tables()
@@ -55,35 +51,26 @@ async def lifespan(app: FastAPI):
     
     yield
     
-    # Código que se ejecuta al detener la aplicación
     logger.info("Deteniendo la aplicación...")
 
-# Crear la aplicación FastAPI
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="API para la gestión de obras, proyectos y usuarios",
     version="1.0.0",
-    debug=settings.DEBUG,
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
     openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.DEBUG else None,
-    lifespan=lifespan
 )
 
 # Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS] if settings.BACKEND_CORS_ORIGINS else ["*"],
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Redirigir a HTTPS en producción
-if not settings.DEBUG:
-    app.add_middleware(HTTPSRedirectMiddleware)
-
-# Middleware para manejo de sesiones
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
@@ -91,25 +78,26 @@ app.add_middleware(
     max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 )
 
-# Registrar manejadores de excepciones
 app = register_exception_handlers(app)
 
-# Incluir routers
-app.include_router(auth_router.router, prefix=settings.API_V1_STR, tags=["Autenticación"])
-app.include_router(user_router.router, prefix=settings.API_V1_STR, tags=["Usuarios"])
-app.include_router(role_router.router, prefix=settings.API_V1_STR, tags=["Roles"])
-app.include_router(role_permission_router.router, prefix=settings.API_V1_STR, tags=["Permisos de Roles"])
-app.include_router(project_router.router, prefix=settings.API_V1_STR, tags=["Proyectos"])
-app.include_router(document_router.router, prefix=settings.API_V1_STR, tags=["Documentos"])
-app.include_router(obra_router.router, prefix=settings.API_V1_STR, tags=["Obras"])
-app.include_router(estado_etapa_router.router, prefix=settings.API_V1_STR, tags=["Estados de Etapa"])
-app.include_router(etapa_ejecucion_router.router, prefix=settings.API_V1_STR, tags=["Etapas de Ejecución"])
-app.include_router(responsable_router.router, prefix=settings.API_V1_STR, tags=["Responsables"])
-app.include_router(beneficiario_router.router, prefix=settings.API_V1_STR, tags=["Beneficiarios"])
-app.include_router(informacion_financista_router.router, prefix=settings.API_V1_STR, tags=["Información Financistas"])
-app.include_router(informacion_contratista_router.router, prefix=settings.API_V1_STR, tags=["Información Contratistas"])
+api_router = APIRouter()
 
-# Ruta de verificación de salud
+api_router.include_router(auth_router.router, prefix="/auth", tags=["Autenticación"])
+api_router.include_router(user_router.router, prefix="/users", tags=["Usuarios"])
+api_router.include_router(role_router.router, prefix="/roles", tags=["Roles"])
+api_router.include_router(role_permission_router.router, prefix="/role-permissions", tags=["Permisos de Roles"])
+api_router.include_router(project_router.router, prefix="/projects", tags=["Proyectos"])
+api_router.include_router(document_router.router, prefix="/documents", tags=["Documentos"])
+api_router.include_router(obra_router.router, prefix="/obras", tags=["Obras"])
+api_router.include_router(estado_etapa_router.router, prefix="/estados-etapa", tags=["Estados de Etapa"])
+api_router.include_router(etapa_ejecucion_router.router, prefix="/etapas-ejecucion", tags=["Etapas de Ejecución"])
+api_router.include_router(responsable_router.router, prefix="/responsables", tags=["Responsables"])
+api_router.include_router(beneficiario_router.router, prefix="/beneficiarios", tags=["Beneficiarios"])
+api_router.include_router(informacion_financista_router.router, prefix="/informacion-financistas", tags=["Información Financistas"])
+api_router.include_router(informacion_contratista_router.router, prefix="/informacion-contratistas", tags=["Información Contratistas"])
+
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
 @app.get(f"{settings.API_V1_STR}/health")
 async def health_check():
     """
@@ -121,7 +109,6 @@ async def health_check():
         "environment": "development" if settings.DEBUG else "production"
     }
 
-# Ruta de bienvenida
 @app.get("/")
 async def root():
     """

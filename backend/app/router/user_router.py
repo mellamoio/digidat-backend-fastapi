@@ -1,73 +1,78 @@
-from fastapi import APIRouter, Response, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.encoders import jsonable_encoder
 from starlette.status import HTTP_201_CREATED, HTTP_200_OK
-from app.schema.user_schema import UserSchema, UserCreateSchema, UserEditSchema
-from app.config.db import engine
-from app.model.users import users
-from datetime import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.orm import Session
+from werkzeug.security import generate_password_hash
 from typing import List
-from app.utils.response import custom_response
 
+from app.schema.user_schema import UserSchema, UserCreateSchema, UserEditSchema
+from app.model.users import User
+from app.config.db import get_db
+from app.utils.response import custom_response
 
 router = APIRouter(tags=["User"])
 
+@router.get("/", status_code=HTTP_200_OK, response_model=List[UserSchema])
+def get_users(db: Session = Depends(get_db)):
+    users_list = db.query(User).all()
+    return custom_response(
+        HTTP_200_OK,
+        "Usuarios obtenidos correctamente",
+        True,
+        jsonable_encoder(users_list),
+    )
 
-@router.get('/', status_code=HTTP_200_OK, response_model=List[UserSchema], tags=['User'])
-def get_users():
-    with engine.begin() as conn:
-        result = conn.execute(users.select().where(users.c.delete_date.is_(None))).fetchall()
-        users_list = [dict(row._mapping) for row in result]
-        return custom_response(HTTP_200_OK, "Usuarios obtenidos correctamente", True, jsonable_encoder(users_list))
-
-@router.post('/', status_code=HTTP_201_CREATED, tags=['User'])
-def create_user(data_user: UserCreateSchema):
-    new_user = data_user.dict()
-    new_user['password_hash'] = generate_password_hash(data_user.password_hash, "pbkdf2:sha256:30",30)
-
-    with engine.begin() as conn:
-        conn.execute(users.insert().values(new_user))
+@router.post("/", status_code=HTTP_201_CREATED)
+def create_user(data_user: UserCreateSchema, db: Session = Depends(get_db)):
+    hashed_password = generate_password_hash(data_user.password, "pbkdf2:sha256:30", 30)
+    new_user = User(
+        nombre=data_user.nombre,
+        correo=data_user.correo,
+        contrasena_hash=hashed_password,
+        estado=data_user.estado,  # Cambia status por estado
+        id_rol=data_user.id_rol,
+        cargo=data_user.cargo,
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
     return custom_response(HTTP_201_CREATED, "Usuario creado correctamente", True)
 
-
-@router.get('/{id}', status_code=HTTP_200_OK, response_model=UserSchema, tags=['User'])
-def get_user(id:int):
-    with engine.begin() as conn:
-        result = conn.execute(users.select().where(users.c.id_user == id)).first()
-    
-    if not result:
+@router.get("/{id}", status_code=HTTP_200_OK, response_model=UserSchema)
+def get_user(id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id_responsable == id).first()
+    if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    
-    return custom_response(HTTP_200_OK, "Usuario encontrado", True, jsonable_encoder(dict(result._mapping)))
+    return custom_response(HTTP_200_OK, "Usuario encontrado", True, jsonable_encoder(user))
 
-@router.put('/{id}',status_code=HTTP_200_OK, response_model=UserEditSchema, tags=['User'])
-def update_user(id:int, data_update:UserEditSchema):
-    with engine.begin() as conn:
-        encryp_passw = generate_password_hash(data_update.password_hash, "pbkdf2:sha256:30",30)
-        conn.execute(users.update().values(
-            name = data_update.name,
-            email = data_update.email,
-            password_hash = encryp_passw,
-            status = data_update.status,
-            url_photo = data_update.url_photo,
-            id_role = data_update.id_role
-        ).where(users.c.id_user == id))
-        result = conn.execute(users.select().where(users.c.id_user == id)).first()
-    
-    if not result:
+@router.put("/{id}", status_code=HTTP_200_OK, response_model=UserEditSchema)
+def update_user(id: int, data_update: UserEditSchema, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id_responsable == id).first()
+    if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    return custom_response(HTTP_200_OK, "Usuario actualizado", True, jsonable_encoder(dict(result._mapping)))
+    if data_update.password:
+        user.contrasena_hash = generate_password_hash(data_update.password, "pbkdf2:sha256:30", 30)
+    if data_update.nombre is not None:
+        user.nombre = data_update.nombre
+    if data_update.correo is not None:
+        user.correo = data_update.correo
+    if data_update.estado is not None:  # Cambia status por estado
+        user.estado = data_update.estado
+    if data_update.id_rol is not None:
+        user.id_rol = data_update.id_rol
+    if data_update.cargo is not None:
+        user.cargo = data_update.cargo
 
-@router.delete('/{id}', response_model=UserSchema, status_code=HTTP_200_OK, tags=['User'])
-def soft_delete_user(id:int):
-    with engine.begin() as conn:
-        conn.execute(users.update().values(
-            delete_date = datetime.now()
-        ).where(users.c.id_user == id))
-        result = conn.execute(users.select().where(users.c.id_user == id)).first()
+    db.commit()
+    db.refresh(user)
+    return custom_response(HTTP_200_OK, "Usuario actualizado", True, jsonable_encoder(user))
 
-    if not result:
+@router.delete("/{id}", status_code=HTTP_200_OK, response_model=UserSchema)
+def delete_user(id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id_responsable == id).first()
+    if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
+    db.delete(user)
+    db.commit()
     return custom_response(HTTP_200_OK, "Usuario eliminado correctamente", True)

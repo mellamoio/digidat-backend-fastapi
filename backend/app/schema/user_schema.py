@@ -1,49 +1,40 @@
-from app.model.users import MyEnum
-from pydantic import BaseModel
-from datetime import datetime
+from pydantic import BaseModel, ConfigDict
+from app.model.users import StatusEnum
 from typing import Optional
 
-
 class UserCreateSchema(BaseModel):
-    name: str
-    email: str
-    id_role: int
-    password_hash: str
-    status: MyEnum = MyEnum.ACTIVO
-    url_photo: Optional[str] = None
+    nombre: str
+    correo: str
+    id_rol: int
+    password: str
+    estado: StatusEnum = StatusEnum.ACTIVO
+    cargo: Optional[str] = None
 
-    model_config = {
-        "use_enum_values": True
-    }
+    model_config = ConfigDict(
+        use_enum_values=True
+    )
 
 class UserEditSchema(BaseModel):
-    name: Optional[str] = None
-    email: Optional[str] = None
-    password_hash: Optional[str] = None
-    id_role: Optional[int] = None
-    status: Optional[MyEnum] = None
-    url_photo: Optional[str] = None
+    nombre: Optional[str] = None
+    correo: Optional[str] = None
+    password: Optional[str] = None
+    id_rol: Optional[int] = None
+    estado: Optional[StatusEnum] = None
+    cargo: Optional[str] = None
 
-    model_config = {
-        "use_enum_values": True
-    }
+    model_config = ConfigDict(
+        use_enum_values=True
+    )
 
 class UserSchema(BaseModel):
-    id_user: int
-    name: str
-    email: str
-    id_role: int
-    status: MyEnum
-    url_photo: Optional[str] = None
-    create_date: Optional[datetime] = None
-    delete_date: Optional[datetime] = None
+    id_responsable: int
+    nombre: str
+    correo: str
+    id_rol: int
+    estado: StatusEnum
+    cargo: Optional[str] = None
 
-    model_config = {
-        "use_enum_values": True
-    }
-
-UserCreateSchema.model_rebuild()
-UserSchema.model_rebuild()
-UserEditSchema.model_rebuild()
-
-
+    model_config = ConfigDict(
+        use_enum_values=True,
+        from_attributes=True
+    )

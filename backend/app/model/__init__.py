@@ -11,18 +11,27 @@ from .tipo_gasto import TipoGasto
 from .estado_reembolso import EstadoReembolso
 from .pago import Pago
 from .auditoria import Auditoria
+from .project import Project
+from .document import Document
+from .roles import Role, Permission
+from .users import User
 
 __all__ = [
-    'Base',
-    'Obra',
-    'EstadoEtapa',
-    'EtapaEjecucion',
-    'Responsable',
-    'Beneficiario',
-    'InformacionFinancista',
-    'InformacionContratista',
-    'TipoGasto',
-    'EstadoReembolso',
-    'Pago',
-    'Auditoria'
+    "Base",
+    "Obra",
+    "EstadoEtapa",
+    "EtapaEjecucion",
+    "Responsable",
+    "Beneficiario",
+    "InformacionFinancista",
+    "InformacionContratista",
+    "TipoGasto",
+    "EstadoReembolso",
+    "Pago",
+    "Auditoria",
+    "Project",
+    "Document",
+    "Role",
+    "Permission",
+    "User",
 ]

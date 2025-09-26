@@ -29,8 +29,8 @@ def create_user(data_user: UserCreateSchema, db: Session = Depends(get_db)):
         nombre=data_user.nombre,
         correo=data_user.correo,
         contrasena_hash=hashed_password,
-        estado=data_user.estado,  # Cambia status por estado
-        id_rol=data_user.id_rol,
+        estado=data_user.estado,
+        id_role=data_user.id_role,
         cargo=data_user.cargo,
     )
     db.add(new_user)
@@ -57,10 +57,10 @@ def update_user(id: int, data_update: UserEditSchema, db: Session = Depends(get_
         user.nombre = data_update.nombre
     if data_update.correo is not None:
         user.correo = data_update.correo
-    if data_update.estado is not None:  # Cambia status por estado
+    if data_update.estado is not None:
         user.estado = data_update.estado
-    if data_update.id_rol is not None:
-        user.id_rol = data_update.id_rol
+    if data_update.id_role is not None:
+        user.id_role = data_update.id_role
     if data_update.cargo is not None:
         user.cargo = data_update.cargo
 

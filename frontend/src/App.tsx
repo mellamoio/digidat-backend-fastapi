@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ConfigProvider } from 'antd';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import { Login } from './pages/Login/index';
+import { Dashboard } from './pages/Dashboard/index';
+import Ajustes from './pages/Ajustes';
 import type { JSX } from 'react';
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -38,10 +38,17 @@ function App() {
               }
             />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route
+              path="/digidat/ajustes"
+              element={
+                <ProtectedRoute>
+                  <Ajustes />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Router>
       </ConfigProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

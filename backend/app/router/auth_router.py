@@ -39,7 +39,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         token = create_access_token({
             "sub": str(user.id_responsable),
             "correo": user.correo,
-            "role": user.id_role,  # Cambiado de id_rol a id_role
+            "role": user.id_role,
             "status": user.estado,
         })
 
@@ -47,7 +47,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
             "id_user": user.id_responsable,
             "name": user.nombre,
             "email": user.correo,
-            "id_role": user.id_role,  # Cambiado de id_rol a id_role
+            "id_role": user.id_role,
             "status": user.estado.value if hasattr(user.estado, "value") else user.estado,
             "url_photo": None,
             "create_date": None

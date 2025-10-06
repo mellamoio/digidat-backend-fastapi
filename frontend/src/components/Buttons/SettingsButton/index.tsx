@@ -1,19 +1,30 @@
 import { Tooltip } from "antd"
+import { SettingOutlined } from '@ant-design/icons'
 import { AnchorButton } from "./index.styled"
 
-// The SESSION_OBJ type is now globally available from types/session.d.ts
-
-interface Props {
+interface SettingsButtonProps {
     path: string;
+    tooltip?: string;
+    icon?: React.ReactNode;
+    className?: string;
 }
 
-export const SettingsButton = ({ path }: Props) => {
+export const SettingsButton: React.FC<SettingsButtonProps> = ({
+    path,
+    tooltip = "Ajustes",
+    icon = <SettingOutlined />,
+    className
+}) => {
     const baseUrl = window.SESSION_OBJ?.url || '';
-    
+
     return (
-        <Tooltip title="Ajustes" placement="top">
-            <AnchorButton href={`${baseUrl}${path}`} data-action="cambiarAjustes">
-                <i className="mdi mdi-settings mdi-18px"></i>
+        <Tooltip title={tooltip} placement="top">
+            <AnchorButton
+                href={`${baseUrl}${path}`}
+                data-action="cambiarAjustes"
+                className={className}
+            >
+                {icon}
             </AnchorButton>
         </Tooltip>
     )

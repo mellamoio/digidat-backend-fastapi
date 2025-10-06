@@ -39,6 +39,14 @@ function App() {
             />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route
+              path="/ajustes"
+              element={
+                <ProtectedRoute>
+                  <Ajustes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/digidat/ajustes"
               element={
                 <ProtectedRoute>

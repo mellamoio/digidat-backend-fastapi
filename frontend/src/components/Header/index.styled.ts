@@ -1,5 +1,4 @@
-import styled, { css } from 'styled-components';
-import { Menu } from 'antd';
+import styled from 'styled-components';
 
 export const HeaderContainer = styled.div`
   position: relative;
@@ -42,7 +41,6 @@ export const ActionsContainer = styled.div`
 
 export const RegisterButton = styled.button<{ $isHovered: boolean }>`
   background-color: ${props => props.$isHovered ? '#5f21b9' : '#722AE9'};
-  border: 1px solid #5f21b9;
   color: white;
   padding: 8px 16px;
   border-radius: 6px;
@@ -54,27 +52,24 @@ export const RegisterButton = styled.button<{ $isHovered: boolean }>`
   white-space: nowrap;
 
   &:hover {
-    background-color: #5f21b9;
   }
 `;
 
 export const SettingsButtonWrapper = styled.div<{ $isHovered: boolean }>`
   background-color: ${props => props.$isHovered ? '#5f21b9' : '#722AE9'};
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 1px solid #5f21b9;
   transition: all 0.2s ease;
 `;
 
 export const SettingsIconWrapper = styled.div`
   transform: scale(1.2);
   display: flex;
-  align-items: center;
   justify-content: center;
 `;
 

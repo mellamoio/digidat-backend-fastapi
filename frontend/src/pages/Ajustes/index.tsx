@@ -299,7 +299,7 @@ const Ajustes = () => {
 
   return (
     <AjustesContainer>
-      <Header title="Ajustes" />
+      <Header />
       <Tabs
         activeKey={activeTab}
         items={items}

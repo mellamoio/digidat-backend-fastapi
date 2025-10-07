@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { message } from 'antd';
 import api from '../api/axiosConfig';
 
-interface KPI {
+// Interface para los KPIs
+type KPI = {
   totalObras: number;
   montoProyectos: number;
-}
+  [key: string]: any;
+};
 
 export const useSateliteActores = () => {
   const [kpis, setKpis] = useState<any | null>(null);
@@ -48,11 +50,11 @@ export const useSateliteActores = () => {
   return {
     kpis,
     empresaId,
+    loading,
+    error,
     obrasFiltradas,
     selectedId,
-    setSelectedId,
-    loading,
-    error
+    setSelectedId
   };
 };
 

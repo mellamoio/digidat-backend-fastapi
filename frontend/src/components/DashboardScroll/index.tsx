@@ -30,7 +30,7 @@ export const DashboardScroll = ({ children }: Props) => {
                 </ButtonScroll>
             </div>
             <ContainerScroll
-                onScroll={(e) => {
+                onScroll={() => {
                     const scrollLeft = scrollRef.current?.scrollLeft
                     const scrollWidth = scrollRef.current?.scrollWidth
                     const clientWidth = scrollRef.current?.clientWidth

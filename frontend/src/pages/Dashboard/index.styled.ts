@@ -1,124 +1,108 @@
-import { Layout, Menu } from 'antd';
+import { Layout } from 'antd';
 import styled from 'styled-components';
 
-const { Sider, Header, Content } = Layout;
+const { Content, Sider } = Layout;
 
 export const DashboardLayout = styled(Layout)`
-  min-height: 100vh;
-  background: #f5f7fa;
-  max-width: 100%;
+  min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: row;
-  overflow: hidden;
+  flex-wrap: nowrap;
+  padding: 20px;
+  gap: 20px;
+  width: 100%;
+`;
+
+export const MainContent = styled(Content)<{ $fullscreen?: boolean }>`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: ${({ $fullscreen }) => ($fullscreen ? '20px' : '0')};
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: width 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+
+  max-width: ${({ $fullscreen }) => ($fullscreen ? '100%' : 'min(95vw, 1920px)')};
+  min-width: ${({ $fullscreen }) => ($fullscreen ? '100%' : '300px')};
+
+  overflow-x: ${({ $fullscreen }) => ($fullscreen ? 'hidden' : 'auto')};
+  overflow-y: ${({ $fullscreen }) => ($fullscreen ? 'auto' : 'visible')};
+
+  @media (max-width: 1920px) {
+    max-width: min(95vw, 1920px);
+    padding: 1.5rem;
+  }
+
+  @media (max-width: 1600px) {
+    max-width: min(97vw, 1600px);
+    padding: 1.25rem;
+  }
+
+  @media (max-width: 1200px) {
+    max-width: min(98vw, 1200px);
+    padding: 1.25rem;
+  }
+
+  @media (max-width: 992px) {
+    max-width: min(99vw, 992px);
+    padding: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    margin: 0.75rem;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 576px) {
+    max-width: 100%;
+    margin: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  ${({ $fullscreen }) =>
+    $fullscreen &&
+    `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    z-index: 1000;
+    border-radius: 0;
+    margin: 0;
+    max-width: 100%;
+    min-width: 100%;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    overflow-y: auto;
+    overflow-x: hidden;
+  `}
+
+  @media (orientation: portrait) and not ${({ $fullscreen }) => $fullscreen && 'all'} {
+    border-radius: 8px;
+    margin: 1rem auto;
+    max-width: min(98vw, 1200px);
+  }
 `;
 
 export const Sidebar = styled(Sider)`
   background: #fff !important;
-  box-shadow: 2px 0 8px 0 rgba(0, 0, 0, 0.05);
   z-index: 10;
   position: fixed !important;
   height: 100vh;
   left: 0;
   top: 0;
   bottom: 0;
-  
+
   .ant-layout-sider-trigger {
     background: #f5f7fa;
     color: #722AE9;
-  }
-
-  .ant-menu {
-    border-right: none;
-  }
-
-  .ant-menu-item {
-    margin: 4px 0;
-    border-radius: 8px;
-    padding-left: 24px !important;
-    
-    &:hover {
-      color: #722AE9;
-      background: rgba(114, 42, 233, 0.1);
-    }
-
-    &.ant-menu-item-selected {
-      background: rgba(114, 42, 233, 0.1);
-      color: #722AE9;
-      font-weight: 500;
-      
-      &::after {
-        border-right: 3px solid #722AE9;
-      }
-    }
-  }
-`;
-
-export const MainHeader = styled(Header)`
-  background: #fff !important;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  z-index: 1;
-  position: sticky;
-  top: 0;
-`;
-
-export const MainContent = styled(Content)`
-  margin: 24px 16px 24px 266px; /* Ajustamos el margen izquierdo para la barra lateral */
-  padding: 24px;
-  min-height: 280px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  width: calc(100% - 282px); /* Restamos el ancho de la barra lateral + márgenes */
-  max-width: 100%;
-  overflow-x: hidden;
-  margin-top: 0;
-  padding-top: 24px;
-`;
-
-export const UserMenu = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: all 0.3s;
-  
-  &:hover {
-    background: rgba(0, 0, 0, 0.025);
-  }
-`;
-
-export const LogoContainer = styled.div`
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
-  
-  h1 {
-    color: #722AE9;
-    margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    background: linear-gradient(90deg, #722AE9, #8c4dff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-`;
-
-export const StatCard = styled.div`
-  padding: 20px;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  transition: all 0.3s;
-  
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 `;

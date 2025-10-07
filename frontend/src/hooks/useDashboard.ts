@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useSateliteActores } from '../../../hooks/useUsuarios';
-import type { DashboardState } from '../types/dashboard.types';
+import { useSateliteActores } from '../hooks/useUsuarios';
+import type { DashboardState } from '../types/dashboard';
 
 export const useDashboard = () => {
   const { kpis, obrasFiltradas } = useSateliteActores();

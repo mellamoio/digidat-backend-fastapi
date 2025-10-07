@@ -1,22 +1,42 @@
-import React from 'react';
 import { useBoolean } from '../../hooks/useBoolean';
-import { ContainerStyled } from '../../components/Containers/Container.styled';
-import { DashboardHeader } from './components/DashboardHeader';
-import { DashboardContent } from './components/DashboardContent';
-import { useDashboard } from './hooks/useDashboard';
+import { useDashboard } from '../../hooks/useDashboard';
+import { Header } from '../../components/Header';
+import { Row } from '../../components/Row';
+import { DashboardTodos } from '../../components/Kpis';
+import ProgressBar from '../../components/Progreso';
+import { TableTodos } from '../../components/Tables/TableTodos';
+import FiltroVerticalSatelite from '../../components/Filtros/FiltroVerticalSatelite';
+import { DashboardLayout, MainContent, Sidebar } from './index.styled';
 
 export const Dashboard: React.FC = () => {
   const { value: fullScreen } = useBoolean();
   const { state } = useDashboard();
 
-  console.log('Current page:', state.page);
-  console.log('Current obra ID:', state.idObra);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Dashboard state:', {
+      page: state.page,
+      obraId: state.idObra,
+    });
+  }
 
   return (
-    <ContainerStyled $fullscreen={fullScreen}>
-      <DashboardHeader />
-      <DashboardContent />
-    </ContainerStyled>
+    <div className="page-container">
+      <Header />
+      <DashboardLayout>
+        <FiltroVerticalSatelite />
+        <MainContent $fullscreen={fullScreen}>
+          <Row>
+            <DashboardTodos />
+          </Row>
+          <Row style={{ marginTop: '24px' }}>
+            <ProgressBar />
+          </Row>
+          <Row style={{ marginTop: '24px' }}>
+            <TableTodos />
+          </Row>
+        </MainContent>
+      </DashboardLayout>
+    </div>
   );
 };
 

@@ -48,7 +48,7 @@ export const ArrowScroll = styled.button<{ direction: 'left' | 'right' }>`
     cursor: pointer;
     z-index: 10;
     i {
-        color: #722AE9;
+        color: #2e2eda;
         font-size: 32px;
         color: #999;
     }
@@ -61,7 +61,6 @@ export const ArrowScroll = styled.button<{ direction: 'left' | 'right' }>`
 export const ProgressItemWrapper = styled.div<{}>`
     display: flex;
     align-items: center;
-
     @media (min-width: 992px) {
         flex: 1;
     }
@@ -95,7 +94,6 @@ export const ProgressItem = styled.div<{
         isSelected ? '#ffffff' : textColor};
 
     .content {
-        display: flex;
         flex-direction: row;
         align-items: center;
         width: 100%;

@@ -153,8 +153,32 @@ export const DataTableCustom = <T extends DataRow>({
         <DataTable
             title={title}
             customStyles={{
-                headRow: { style: { backgroundColor: '#F1F1F1' } },
-                headCells: { style: { backgroundColor: '#F1F1F1' } }
+                table: {
+                    style: {
+                        borderRadius: '8px',
+                        overflow: 'hidden'
+                    }
+                },
+                headRow: { 
+                    style: { 
+                        backgroundColor: '#F1F1F1',
+                        borderTopLeftRadius: '8px',
+                        borderTopRightRadius: '8px',
+                        overflow: 'hidden'
+                    } 
+                },
+                headCells: { 
+                    style: { 
+                        backgroundColor: '#F1F1F1'
+                    } 
+                },
+                pagination: {
+                    style: {
+                        borderBottomLeftRadius: '8px',
+                        borderBottomRightRadius: '8px',
+                        overflow: 'hidden'
+                    }
+                }
             }}
             columns={newColumns}
             data={data}

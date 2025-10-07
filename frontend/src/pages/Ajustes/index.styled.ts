@@ -44,7 +44,7 @@ export const StyledTabs = styled(Tabs)`
   }
 
   .ant-tabs-content {
-    background: #fff;
+    background: #f5f7fa;
     border-radius: 8px;
     padding: 24px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

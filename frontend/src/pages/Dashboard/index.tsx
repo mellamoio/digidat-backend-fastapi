@@ -1,47 +1,42 @@
-import React from 'react';
 import { useBoolean } from '../../hooks/useBoolean';
-import { ContainerStyled } from '../../components/Containers/Container.styled';
-import { Header } from '../../components/Header';
 import { useDashboard } from '../../hooks/useDashboard';
+import { Header } from '../../components/Header';
 import { Row } from '../../components/Row';
-import { Column } from '../../components/Column';
 import { DashboardTodos } from '../../components/Kpis';
 import ProgressBar from '../../components/Progreso';
 import { TableTodos } from '../../components/Tables/TableTodos';
-import { PageContainer, ContentWrapper } from './index.styled';
+import FiltroVerticalSatelite from '../../components/Filtros/FiltroVerticalSatelite';
+import { DashboardLayout, MainContent, Sidebar } from './index.styled';
 
 export const Dashboard: React.FC = () => {
   const { value: fullScreen } = useBoolean();
   const { state } = useDashboard();
 
-  console.log('Current page:', state.page);
-  console.log('Current obra ID:', state.idObra);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Dashboard state:', {
+      page: state.page,
+      obraId: state.idObra,
+    });
+  }
 
   return (
-    <PageContainer>
+    <div className="page-container">
       <Header />
-      <ContentWrapper>
-        <ContainerStyled $fullscreen={fullScreen}>
+      <DashboardLayout>
+        <FiltroVerticalSatelite />
+        <MainContent $fullscreen={fullScreen}>
           <Row>
-            <Column>
-              <DashboardTodos />
-            </Column>
+            <DashboardTodos />
           </Row>
-          
           <Row style={{ marginTop: '24px' }}>
-            <Column>
-              <ProgressBar />
-            </Column>
+            <ProgressBar />
           </Row>
-
           <Row style={{ marginTop: '24px' }}>
-            <Column>
-                <TableTodos />
-            </Column>
+            <TableTodos />
           </Row>
-        </ContainerStyled>
-      </ContentWrapper>
-    </PageContainer>
+        </MainContent>
+      </DashboardLayout>
+    </div>
   );
 };
 

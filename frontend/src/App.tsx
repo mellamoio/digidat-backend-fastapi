@@ -46,14 +46,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/digidat/ajustes"
-              element={
-                <ProtectedRoute>
-                  <Ajustes />
-                </ProtectedRoute>
-              }
-            />
           </Routes>
         </Router>
       </ConfigProvider>

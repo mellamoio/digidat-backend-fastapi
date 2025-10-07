@@ -12,7 +12,6 @@ export interface DashboardContextType {
 
 export interface KPI {
   totalObras: number;
-  // Agrega aquí otros KPIs según sea necesario
 }
 
 export interface DashboardProps {

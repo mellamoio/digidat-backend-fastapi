@@ -6,7 +6,7 @@ export const Container = styled.div`
     background-color: #fff;
     padding: 4px 16px;
     border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 `;
 
 export const ButtonScroll = styled.button`

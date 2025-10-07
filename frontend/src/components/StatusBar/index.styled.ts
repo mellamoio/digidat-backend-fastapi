@@ -48,7 +48,7 @@ export const ArrowScroll = styled.button<{ direction: 'left' | 'right' }>`
     cursor: pointer;
     z-index: 10;
     i {
-        color: #722AE9;
+        color: #2e2eda;
         font-size: 32px;
         color: #999;
     }

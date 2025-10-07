@@ -2,7 +2,6 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
     display: flex;
-    gap: 20px;
     align-items: center;
     background-color: #fff;
     padding: 4px 16px;
@@ -19,16 +18,14 @@ export const ButtonScroll = styled.button`
 
 export const ContainerScroll = styled.div`
     display: flex;
-    gap: 20px;
     align-items: center;
     background-color: #fff;
-    padding: 0 16px;
     overflow-x: scroll;
     height: 195px;
-    scrollbar-width: none; /* Para Firefox */
-    -ms-overflow-style: none; /* Para Internet Explorer y Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     
     &::-webkit-scrollbar {
-        display: none; /* Para Chrome, Safari y Opera */
+        display: none;
     }
 `;

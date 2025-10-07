@@ -48,8 +48,12 @@ export const Header = () => {
   return (
     <HeaderContainer>
       <HeaderContent>
-        <Title onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
-          Digidat
+        <Title onClick={() => navigate('/dashboard')}>
+          <img 
+            src="/digidat.svg" 
+            alt="Digidat" 
+            style={{ height: '40px' }} 
+          />
         </Title>
 
         <ActionsContainer>

@@ -128,7 +128,7 @@ const FiltroVertical: React.FC<FiltroVerticalProps> = ({ children, isCollapsed, 
   );
 };
 
-const FiltroVerticalSatelite: React.FC = () => {
+const FiltroVerticalDigidat: React.FC = () => {
   const { obras, obrasFiltradas, params, setParams, resetFilters } = useSateliteActores();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [obraSeleccionada, setObraSeleccionada] = useState<string | undefined>(undefined);
@@ -279,4 +279,4 @@ const FiltroVerticalSatelite: React.FC = () => {
   );
 };
 
-export default FiltroVerticalSatelite;
+export default FiltroVerticalDigidat;

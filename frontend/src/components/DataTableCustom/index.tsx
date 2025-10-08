@@ -1,6 +1,9 @@
-import { type ReactNode } from 'react'
-import DataTable, { 
-    type TableColumn} from 'react-data-table-component'
+import type { ReactNode } from 'react'
+import DataTable, { type TableColumn } from 'react-data-table-component'
+import type {
+    PaginationChangePage,
+    PaginationChangeRowsPerPage
+} from 'react-data-table-component/dist/DataTable/types'
 
 export interface DataRow {
     [key: string]: any
@@ -13,8 +16,8 @@ interface DataTableCustomProps<T extends DataRow> {
     totalRows: number
     currentPage: number
     rowsPerPage: number
-    onPageChange: (page: number) => void
-    onRowsPerPageChange: (rowsPerPage: number, currentPage: number) => void
+    onPageChange: PaginationChangePage
+    onRowsPerPageChange: PaginationChangeRowsPerPage
     onEdit?: (row: T) => void
     onDelete?: (row: T) => void
     onView?: (row: T) => void
@@ -153,32 +156,8 @@ export const DataTableCustom = <T extends DataRow>({
         <DataTable
             title={title}
             customStyles={{
-                table: {
-                    style: {
-                        borderRadius: '8px',
-                        overflow: 'hidden'
-                    }
-                },
-                headRow: { 
-                    style: { 
-                        backgroundColor: '#F1F1F1',
-                        borderTopLeftRadius: '8px',
-                        borderTopRightRadius: '8px',
-                        overflow: 'hidden'
-                    } 
-                },
-                headCells: { 
-                    style: { 
-                        backgroundColor: '#F1F1F1'
-                    } 
-                },
-                pagination: {
-                    style: {
-                        borderBottomLeftRadius: '8px',
-                        borderBottomRightRadius: '8px',
-                        overflow: 'hidden'
-                    }
-                }
+                headRow: { style: { backgroundColor: '#F1F1F1' } },
+                headCells: { style: { backgroundColor: '#F1F1F1' } }
             }}
             columns={newColumns}
             data={data}

@@ -1,82 +1,82 @@
-import React, { useRef, useState } from 'react'
-import {
-    ButtonScroll,
-    Container,
-    ContainerScroll
-} from './index.styled'
+import React, { useRef, useState, useEffect } from 'react';
+import { Container, ButtonScroll, ContainerScroll } from './index.styled';
+
 interface Props {
-    children: React.ReactNode
+    children: React.ReactNode;
 }
+
 export const DashboardScroll = ({ children }: Props) => {
     const [scrollButtons, setScrollButtons] = useState({
         left: false,
         right: true
-    })
-    const scrollRef = useRef<HTMLDivElement>(null)
+    });
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const checkScroll = () => {
+        if (!scrollRef.current) return;
+        
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        const isAtStart = scrollLeft === 0;
+        const isAtEnd = Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 1;
+
+        setScrollButtons({
+            left: !isAtStart,
+            right: !isAtEnd
+        });
+    };
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (!scrollRef.current) return;
+        
+        const scrollAmount = 300;
+        scrollRef.current.scrollBy({
+            left: direction === 'left' ? -scrollAmount : scrollAmount,
+            behavior: 'smooth'
+        });
+
+        // Verificar posición después de completar el desplazamiento
+        setTimeout(checkScroll, 300);
+    };
+
+    // Verificar posición al montar y al cambiar el tamaño
+    useEffect(() => {
+        const currentRef = scrollRef.current;
+        if (currentRef) {
+            // Verificación inicial con retraso para asegurar que el DOM esté listo
+            const timer = setTimeout(checkScroll, 100);
+            
+            // Event listeners
+            currentRef.addEventListener('scroll', checkScroll);
+            const resizeObserver = new ResizeObserver(checkScroll);
+            resizeObserver.observe(currentRef);
+            
+            return () => {
+                clearTimeout(timer);
+                currentRef.removeEventListener('scroll', checkScroll);
+                resizeObserver.disconnect();
+            };
+        }
+    }, []);
+
     return (
         <Container>
-            <div>
-                <ButtonScroll
-                    className="md-button md-button--icon scroll-button"
-                    disabled={!scrollButtons.left}
-                    onClick={() => {
-                        scrollRef.current?.scrollBy({
-                            left: -300,
-                            behavior: 'smooth'
-                        })
-                    }}
-                >
-                    <i className="mdi mdi-chevron-left"></i>
-                </ButtonScroll>
-            </div>
-            <ContainerScroll
-                onScroll={() => {
-                    const scrollLeft = scrollRef.current?.scrollLeft
-                    const scrollWidth = scrollRef.current?.scrollWidth
-                    const clientWidth = scrollRef.current?.clientWidth
-                    if (
-                        typeof scrollLeft !== 'number' ||
-                        !scrollWidth ||
-                        !clientWidth
-                    )
-                        return
-                    if (scrollLeft === 0) {
-                        setScrollButtons({
-                            left: false,
-                            right: true
-                        })
-                        return
-                    }
-                    if (scrollLeft + clientWidth === scrollWidth) {
-                        setScrollButtons({
-                            left: true,
-                            right: false
-                        })
-                    } else {
-                        setScrollButtons({
-                            left: true,
-                            right: true
-                        })
-                    }
-                }}
-                ref={scrollRef}
-            >
+            <ButtonScroll
+                className="left"
+                onClick={() => scroll('left')}
+                disabled={!scrollButtons.left}
+            />
+            
+            <ContainerScroll ref={scrollRef}>
                 {children}
             </ContainerScroll>
-            <div>
-                <ButtonScroll
-                    onClick={() => {
-                        scrollRef.current?.scrollBy({
-                            left: 300,
-                            behavior: 'smooth'
-                        })
-                    }}
-                    disabled={!scrollButtons.right}
-                    className="md-button md-button--icon scroll-button"
-                >
-                    <i className="mdi mdi-chevron-right"></i>
-                </ButtonScroll>
-            </div>
+
+            <ButtonScroll
+                className="right"
+                onClick={() => scroll('right')}
+                disabled={!scrollButtons.right}
+            />
         </Container>
-    )
-}
+    );
+};
+
+export default DashboardScroll;

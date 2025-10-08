@@ -4,6 +4,7 @@ import { ConfigProvider } from 'antd';
 import { Login } from './pages/Login/index';
 import { Dashboard } from './pages/Dashboard/index';
 import Ajustes from './pages/Ajustes';
+import { SateliteProvider } from './context/DigidatContext'
 import type { JSX } from 'react';
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -18,6 +19,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 
 function App() {
   return (
+    <SateliteProvider>
     <QueryClientProvider client={new QueryClient()}>
       <ConfigProvider
         theme={{
@@ -50,6 +52,7 @@ function App() {
         </Router>
       </ConfigProvider>
     </QueryClientProvider>
+    </SateliteProvider>
   );
 }
 

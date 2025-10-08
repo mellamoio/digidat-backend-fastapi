@@ -18,7 +18,7 @@ export const ScrollWrapper = styled.div`
 export const ScrollArea = styled.div`
     display: flex;
     overflow-x: auto;
-    gap: 5px;
+    gap: 10px;
     flex-grow: 1;
     max-width: 100%;
     scroll-behavior: smooth;
@@ -47,8 +47,8 @@ export const ArrowScroll = styled.button<{ direction: 'left' | 'right' }>`
     padding: 0 8px;
     cursor: pointer;
     z-index: 10;
+
     i {
-        color: #2e2eda;
         font-size: 32px;
         color: #999;
     }
@@ -58,7 +58,7 @@ export const ArrowScroll = styled.button<{ direction: 'left' | 'right' }>`
     }
 `
 
-export const ProgressItemWrapper = styled.div<{}>`
+export const ProgressItemWrapper = styled.div`
     display: flex;
     align-items: center;
     @media (min-width: 992px) {
@@ -77,15 +77,13 @@ export const ProgressItem = styled.div<{
 }>`
     background-color: ${({ isSelected, bgColor, selectedColor }) =>
         isSelected ? selectedColor : bgColor};
-    padding: 16px 24px;
-    min-width: 194px;
+    padding: 24px;
+    min-width: ${({ isFirst }) => (isFirst ? '260px' : '210px')};
     width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
-    height: 90px;
+    height: 120px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
     font-weight: 400;
     z-index: 2;
@@ -94,9 +92,13 @@ export const ProgressItem = styled.div<{
         isSelected ? '#ffffff' : textColor};
 
     .content {
-        flex-direction: row;
-        align-items: center;
+        display: flex;
+        flex-direction: ${({ isFirst }) => (isFirst ? 'row' : 'column')};
+        align-items: ${({ isFirst }) => (isFirst ? 'center' : 'flex-start')};
+        justify-content: ${({ isFirst }) => (isFirst ? 'flex-start' : 'center')};
+        gap: ${({ isFirst }) => (isFirst ? '16px' : '6px')};
         width: 100%;
+        height: 100%;
     }
 
     .text-content {
@@ -106,15 +108,17 @@ export const ProgressItem = styled.div<{
     }
 
     .number {
-        font-size: 18px;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1.2;
         color: ${({ isSelected, numberColor }) =>
             isSelected ? '#ffffff' : numberColor};
     }
 
     .label {
-        font-size: 14px;
-        font-weight: 500;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1.3;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -124,5 +128,8 @@ export const ProgressItem = styled.div<{
 `
 
 export const IconWrapper = styled.div`
-    margin-right: 10px;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `

@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DataTableCustom } from '../DataTableCustom';
 import type { TableColumn } from 'react-data-table-component';
 import {
@@ -10,6 +11,13 @@ import {
 } from './TableTodos.styled';
 import { Row } from '../Row';
 import type { Obra } from '../../types/obra';
+import dayjs from 'dayjs';
+
+interface EstadoAtencion {
+  id: number;
+  name: string;
+  color?: string;
+}
 
 // Datos estáticos de ejemplo
 const obrasEjemplo: Obra[] = [
@@ -45,9 +53,15 @@ const obrasEjemplo: Obra[] = [
   },
 ];
 
+// Estados de atención estáticos
+const estadosAtencionEjemplo: EstadoAtencion[] = [
+  { id: 1, name: 'En Progreso', color: '#722AE9' },
+  { id: 2, name: 'Completado', color: '#28A745' },
+];
+
 export const TableTodos: React.FC = () => {
-  const [loading, setLoading] = React.useState(false);
   const [rows, setRows] = React.useState<Obra[]>(obrasEjemplo);
+  const navigate = useNavigate();
 
   const formatCurrency = (value: number | string | undefined): string => {
     if (value === undefined || value === null || value === '') {
@@ -58,28 +72,46 @@ export const TableTodos: React.FC = () => {
     if (isNaN(numericValue)) {
       return 'S/. 0.00';
     }
-    return `S/. ${numericValue.toLocaleString('es-PE', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    const fixedValue = numericValue.toFixed(2);
+    const [integerPart, decimalPart] = fixedValue.split('.');
+    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return `S/. ${formattedInteger}.${decimalPart}`;
   };
 
   const formatDate = (date: string | undefined): string => {
     if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString('es-PE');
+    return dayjs(date).format('DD/MM/YYYY');
+  };
+
+  const getEstadoInfo = (estadoId?: number) => {
+    const estado = estadosAtencionEjemplo.find((e) => e.id === estadoId);
+    return {
+      name: estado?.name ?? 'N/A',
+      color: estado?.color ?? '#000000',
+    };
+  };
+
+  const getCostoProyecto = (obra: Obra) => {
+    return formatCurrency(obra.costo_proyecto || 0);
+  };
+
+  const getMontoPagado = (obra: Obra) => {
+    return formatCurrency(obra.monto_pagado || 0);
+  };
+
+  const getMontoRecuperado = (obra: Obra) => {
+    return formatCurrency(obra.monto_recuperado || 0);
   };
 
   const handleOnViewComponent = (row: Obra) => {
-    window.location.href = `/satelite/detalles/${row.id}`;
+    navigate(`/detalles/${row.id}`);
   };
 
   const columns: TableColumn<Obra>[] = [
     {
       name: 'Obra',
       center: true,
-      minWidth: '150px',
-      maxWidth: '200px',
-      grow: 0,
+      grow: 1,
       cell: (row: Obra) => (
         <Row>
           <ContainerLabel pointer="true">{row.nombre || 'Sin nombre'}</ContainerLabel>
@@ -89,8 +121,7 @@ export const TableTodos: React.FC = () => {
     {
       name: 'Centro de Operación',
       center: true,
-      maxWidth: '200px',
-      grow: 0,
+      grow: 1,
       cell: (row: Obra) => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {Array.isArray(row.centros_operacion) && row.centros_operacion.length > 0 ? (
@@ -105,59 +136,73 @@ export const TableTodos: React.FC = () => {
     },
     {
       name: 'Fecha de Inicio',
-      maxWidth: '200px',
       center: true,
-      grow: 0,
+      grow: 1,
       cell: (row: Obra) => <span>{formatDate(row.fecha_reembolso)}</span>,
     },
     {
       name: 'Fecha de Culminación',
-      maxWidth: '200px',
       center: true,
-      grow: 0,
+      grow: 1,
       cell: (row: Obra) => <span>{formatDate(row.fecha_conclusion)}</span>,
     },
     {
       name: 'Estado',
-      maxWidth: '200px',
       center: true,
-      grow: 0,
-      cell: (row: Obra) => (
-        <ContainerSelectTable>
-          <EstadoRow>
-            <EstadoField $backgroundColor="#722AE9">{row.estado_id || 'N/A'}</EstadoField>
-          </EstadoRow>
-        </ContainerSelectTable>
-      ),
+      grow: 1,
+      cell: (row: Obra) => {
+        const { name, color } = getEstadoInfo(row.estado_id);
+        return (
+          <ContainerSelectTable>
+            <EstadoRow>
+              <EstadoField $backgroundColor={color}>
+                {name}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </EstadoField>
+            </EstadoRow>
+          </ContainerSelectTable>
+        );
+      },
     },
     {
       name: 'Costo del Proyecto',
-      maxWidth: '200px',
       center: true,
-      grow: 0,
-      cell: (row: Obra) => <span>{formatCurrency(row.costo_proyecto)}</span>,
+      grow: 1,
+      cell: (row: Obra) => <span>{getCostoProyecto(row)}</span>,
     },
     {
       name: 'Monto Pagado',
-      maxWidth: '200px',
       center: true,
-      grow: 0,
-      cell: (row: Obra) => <span>{formatCurrency(row.monto_pagado)}</span>,
+      grow: 1,
+      cell: (row: Obra) => <span>{getMontoPagado(row)}</span>,
     },
     {
       name: 'Monto Recuperado',
-      maxWidth: '200px',
       center: true,
-      grow: 0,
-      cell: (row: Obra) => <span>{formatCurrency(row.monto_recuperado)}</span>,
+      grow: 1,
+      cell: (row: Obra) => <span>{getMontoRecuperado(row)}</span>,
     },
   ];
 
   return (
-    <div className="row" style={{ position: 'relative' }}>
+    <div className="row" style={{ position: 'relative', width: '100%' }}>
       <div
         className="col-md-12 md-max-type-b"
-        style={{ backgroundColor: 'white', marginTop: 20 }}
+        style={{ backgroundColor: 'white', marginTop: 20, width: '100%' }}
       >
         <StickyTableStyles />
         <DataTableCustom

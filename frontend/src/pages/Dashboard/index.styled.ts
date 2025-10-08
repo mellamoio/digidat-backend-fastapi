@@ -29,7 +29,7 @@ export const MainContent = styled(Content)<{ $fullscreen?: boolean }>`
   max-width: ${({ $fullscreen }) => ($fullscreen ? '100%' : 'min(95vw, 1920px)')};
   min-width: ${({ $fullscreen }) => ($fullscreen ? '100%' : '300px')};
 
-  overflow-x: ${({ $fullscreen }) => ($fullscreen ? 'hidden' : 'auto')};
+  overflow-x: ${({ $fullscreen }) => ($fullscreen ? 'hidden' : 'hidden')}; /* Cambio aquí */
   overflow-y: ${({ $fullscreen }) => ($fullscreen ? 'auto' : 'visible')};
 
   @media (max-width: 1920px) {

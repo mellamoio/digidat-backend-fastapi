@@ -11,9 +11,21 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Variables reutilizables */
+  --min-width-sticky: 100px;
+  --sticky-bg-head: #f1f1f1;
+  --sticky-bg-body: #fff;
+  --border-color: #DDDDDD;
+  --breakpoint-lg: 1200px;
+  --breakpoint-md: 992px;
+  --breakpoint-sm: 768px;
+  --breakpoint-xs: 576px;
 }
 
-* {
+*,
+*:before,
+*:after {
   box-sizing: border-box;
 }
 
@@ -45,4 +57,64 @@ button {
   border: none;
   background: none;
   cursor: pointer;
+}
+
+.table-sticky {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.table-sticky__head,
+.table-sticky__body {
+  display: flex;
+  width: 100%;
+}
+
+.table-sticky__row {
+  display: flex;
+  width: 100%;
+}
+
+.table-sticky__cell--sticky {
+  position: sticky;
+  box-sizing: border-box;
+  width: inherit;
+  min-width: var(--min-width-sticky);
+  z-index: 300;
+}
+
+.table-sticky__cell--sticky:first-child {
+  left: 0;
+  background-color: var(--sticky-bg-head);
+  border-right: 1px solid var(--border-color);
+}
+
+.table-sticky__cell--sticky:last-child {
+  right: 0;
+  background-color: var(--sticky-bg-body);
+  border-left: 1px solid var(--border-color);
+}
+
+@media (max-width: var(--breakpoint-lg)) {
+  .table-sticky__cell--sticky {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: var(--breakpoint-sm)) {
+  .table-sticky__cell--sticky {
+    min-width: 60px;
+  }
+  .table-sticky__row > div:nth-child(n+3) {
+    display: none;
+  }
+  .table-sticky__cell {
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }

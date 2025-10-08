@@ -1,4 +1,4 @@
-# 🚀 Digidat Project
+# Digidat Project
 
 Proyecto para la gestión y visualización de datos.  
 Incluye frontend en React (Vite + TypeScript), backend en FastAPI y base de datos MySQL.
@@ -11,10 +11,8 @@ Incluye frontend en React (Vite + TypeScript), backend en FastAPI y base de dato
 - React → Framework de UI
 - TypeScript → Tipado estático
 - styled-components → Estilos dinámicos
-- Ant Design → Componentes de UI
 - RxJS (Subjects) → Manejo de eventos reactivos
 - React Router DOM → Rutas privadas y navegación
-- Jest + React Testing Library → Testing
 
 ## Backend
 ### Tecnologías

@@ -3,11 +3,10 @@ import { DashboardScroll } from '../DashboardScroll'
 import { Divider } from 'antd'
 import { ItemQuantity } from '../ItemQuantity'
 
-export const DashboardTodos = () => {
+export const Kpis = () => {
     // Datos estáticos para pruebas
     const montoPagado = 125000;
     const montoRecuperado = 87500;
-    const loading = false;
     
     // Datos estáticos para los KPIs
     const kpis = {
@@ -25,10 +24,7 @@ export const DashboardTodos = () => {
                 />
             </LargeFontCard>
 
-            <Divider
-                type="vertical"
-                style={{ height: '100%', borderColor: '#dddddd' }}
-            />
+            <Divider type="vertical" style={{ height: '200px', borderColor: '#dddddd' }} />
 
             <LargeFontCard>
                 <ItemQuantity
@@ -39,10 +35,7 @@ export const DashboardTodos = () => {
                 />
             </LargeFontCard>
 
-            <Divider
-                type="vertical"
-                style={{ height: '100%', borderColor: '#dddddd' }}
-            />
+            <Divider type="vertical" style={{ height: '200px', borderColor: '#dddddd' }} />
 
             <LargeFontCard>
                 <ItemQuantity
@@ -53,10 +46,7 @@ export const DashboardTodos = () => {
                 />
             </LargeFontCard>
 
-            <Divider
-                type="vertical"
-                style={{ height: '100%', borderColor: '#dddddd' }}
-            />
+            <Divider type="vertical" style={{ height: '200px', borderColor: '#dddddd' }} />
 
             <LargeFontCard>
                 <ItemQuantity
@@ -70,4 +60,4 @@ export const DashboardTodos = () => {
     )
 }
 
-export default DashboardTodos
+export default Kpis

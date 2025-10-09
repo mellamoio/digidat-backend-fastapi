@@ -55,7 +55,7 @@ export const DataTableCustom = <T extends DataRow>({
     onChangeCheckbox
 }: DataTableCustomProps<T>) => {
     const actionColumn: TableColumn<T> = {
-        name: 'Opciones',
+        name: 'Detalles',
         center: true,
         grow: 0,
         minWidth: '130px',

@@ -2,7 +2,6 @@ import { setQueryParams } from '../helpers/setQueryParams'
 import { handleErrorRequest } from '../helpers/handleErrorRequest'
 import type { Obra, ObraResponse } from '../types/obra'
 import apiClient from '../api/api'
-import type { ObraPorImpuesto } from '../types/obraPorImpuesto'
 import type { ResponseError, ResponseSuccess } from '../types/responses'
 
 interface GetObrasRequest {
@@ -10,7 +9,7 @@ interface GetObrasRequest {
     unidades_gestion?: string[]
 }
 
-export const getObrasPorImpuesto = async ({
+export const getObra = async ({
     id_empresa,
     unidades_gestion
 }: GetObrasRequest): Promise<ObraResponse[]> => {
@@ -20,7 +19,7 @@ export const getObrasPorImpuesto = async ({
             unidades_gestion: unidades_gestion?.map((el) => el.toString())
         }
 
-        const url = setQueryParams(params, '/all/obraporimpuestoco')
+        const url = setQueryParams(params, '/all/obra')
 
         const { data } = await apiClient.get<any>(url)
 
@@ -34,12 +33,12 @@ export const getObrasPorImpuesto = async ({
     }
 }
 
-export const createObraPorImpuesto = async (
-    obraData: ObraPorImpuesto
+export const createObra = async (
+    obraData: Obra
 ): Promise<any> => {
     try {
         const response = await apiClient.post(
-            '/add/obraporimpuestov2',
+            '/add/obra',
             obraData
         )
         return response.data
@@ -52,11 +51,11 @@ export const createObraPorImpuesto = async (
     }
 }
 
-export const editObraPorImpuesto = async (
-    obraData: ObraPorImpuesto
+export const editObra = async (
+    obraData: Obra
 ): Promise<any> => {
     try {
-        const response = await apiClient.post('/edit/obraporimpuesto', obraData)
+        const response = await apiClient.post('/edit/obra', obraData)
         return response.data
     } catch (error: any) {
         console.error('Error al actualizar la obra por impuesto:', error)
@@ -67,9 +66,9 @@ export const editObraPorImpuesto = async (
     }
 }
 
-export const deleteObraPorImpuesto = async (id: number): Promise<any> => {
+export const deleteObra = async (id: number): Promise<any> => {
     try {
-        const response = await apiClient.post('/delete/obraporimpuesto', { id })
+        const response = await apiClient.post('/delete/obra', { id })
         return response.data
     } catch (error: any) {
         console.error('Error al eliminar la obra por impuesto:', error)

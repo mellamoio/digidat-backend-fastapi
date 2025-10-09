@@ -12,8 +12,7 @@ import { useSatelite } from './DigidatContext'
 import type { Obra } from '../types/obra'
 import dayjs from 'dayjs'
 import { filterDateRange } from '../helpers/filterDateRange'
-import { getObrasPorImpuesto } from '../services/getObraPorImpuesto.service'
-import { useSearchParams } from 'react-router-dom'
+import { getObra } from '../services/getObra.service'
 
 interface TipoGasto {
     id: number
@@ -83,11 +82,11 @@ export const SateliteActoresProvider: React.FC<{ children: ReactNode }> = ({
 
     const { data: obrasData, mutate: mutateObras } = useSWR(
         [
-            `/all/obraporimpuesto`,
+            `/all/obra`,
             empresaId,
         ],
         () =>
-            getObrasPorImpuesto({
+            getObra({
                 id_empresa: parseInt(empresaId),
             }),
         { revalidateOnFocus: false }

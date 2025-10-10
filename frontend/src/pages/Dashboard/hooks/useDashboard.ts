@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSateliteActores } from '../hooks/useUsuarios';
+import { useSateliteActores } from '../../../hooks/useUsuarios';
 import type { DashboardState } from '../types/dashboard';
 
 export const useDashboard = () => {

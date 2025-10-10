@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { SettingsButton } from "../Buttons/SettingsButton";
-import { ButtonPrimary } from "../Buttons/Primary";
-import { UserButton } from "../Buttons/UserButton";
-import { useUserMenu } from '../../hooks/useUserMenu';
+import { SettingsButton } from "../../../Buttons/SettingsButton";
+import { ButtonPrimary } from "../../../Buttons/Primary";
+import { UserButton } from "../../../Buttons/UserButton";
+import { useUserMenu } from '../../../../../hooks/useUserMenu';
 import { UserSwitchOutlined, LogoutOutlined } from '@ant-design/icons';
 import {
   HeaderContainer,

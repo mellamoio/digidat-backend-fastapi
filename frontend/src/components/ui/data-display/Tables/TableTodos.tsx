@@ -9,8 +9,8 @@ import {
   EstadoField,
   StickyTableStyles,
 } from './TableTodos.styled';
-import { Row } from '../Row';
-import type { Obra } from '../../types/obra';
+import { Row } from '../../layout/Grid/Row';
+import type { Obra } from '../../../../types/obra';
 import dayjs from 'dayjs';
 
 interface EstadoAtencion {

@@ -1,13 +1,13 @@
-import { useBoolean } from '../../hooks/useBoolean';
-import { useDashboard } from '../../hooks/useDashboard';
-import { Header } from '../../components/Header';
-import { Row } from '../../components/Row';
-import { Kpis } from '../../components/Kpis';
-import ProgressBar from '../../components/Progreso';
-import { TableTodos } from '../../components/Tables/TableTodos';
-import FiltroVerticalDigidat from '../../components/Filtros/FiltroVerticalSatelite';
+import { useBoolean } from '../../../hooks/useBoolean';
+import { useDashboard } from '../hooks/useDashboard';
+import { Header } from '../../../components/ui/layout/Container/Header';
+import { Row } from '../../../components/ui/layout/Grid/Row';
+import { Kpis } from '../../../components/ui/data-display/Kpis';
+import ProgressBar from '../../../components/ui/data-display/Progreso';
+import { TableTodos } from '../../../components/ui/data-display/Tables/TableTodos';
+import FiltroVerticalDigidat from '../../../components/ui/data-display/Filtros/FiltroVerticalSatelite';
 import { DashboardLayout, MainContent } from './index.styled';
-import { SateliteActoresProvider } from '../../context/ContextSateliteActores'
+import { SateliteActoresProvider } from '../../../context/ContextSateliteActores'
 
 export const Dashboard: React.FC = () => {
   const { value: fullScreen } = useBoolean();

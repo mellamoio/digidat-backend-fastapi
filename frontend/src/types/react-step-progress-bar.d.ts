@@ -7,7 +7,7 @@ declare module 'react-step-progress-bar' {
       activeColor: string;
       completeColor: string;
       uncompletedColor: string;
-      onChange: (step: number) => void; // Agregamos la propiedad 'onChange'
+      onChange: (step: number) => void;
     }
   
     const ProgressBar: React.FC<ProgressBarProps>;

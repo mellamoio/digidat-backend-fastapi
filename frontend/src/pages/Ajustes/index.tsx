@@ -3,11 +3,11 @@ import { Table, message, Tag, Button, Modal, Form, Input, Select, Space, Tabs } 
 import type { TabsProps } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { AjustesContainer } from "./index.styled";
-import Header from "../../components/Header";
+import Header from "../../components/ui/layout/Container/Header";
 import { userService } from '../../services/getUser.service';
 import type { User } from '../../types/user';
-import ModalEliminar from '../../components/Modal/ModalEliminar';
-import { ButtonPrimary } from '../../components/Buttons/Primary';
+import ModalEliminar from '../../components/ui/feedback/Modal/ModalEliminar';
+import { ButtonPrimary } from '../../components/ui/Buttons/Primary';
 
 const { Column } = Table;
 const { Option } = Select;

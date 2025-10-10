@@ -1,4 +1,4 @@
-import { CheckboxIcon } from "../../Icons/CheckboxIcon";
+import { CheckboxIcon } from "../Icons/CheckboxIcon";
 
 interface CheckboxButtonProps {
     checked: boolean;

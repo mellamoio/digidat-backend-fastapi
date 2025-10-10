@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { ConfigProvider } from 'antd';
 import { Login } from './pages/Login/index';
-import { Dashboard } from './pages/Dashboard/index';
+import { Dashboard } from './pages/Dashboard/components/index';
 import Ajustes from './pages/Ajustes';
 import { SateliteProvider } from './context/DigidatContext'
 import type { JSX } from 'react';

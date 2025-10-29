@@ -30,6 +30,20 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr = "admin@test.com"
     FIRST_SUPERUSER_PASSWORD: str = "123"
 
+    #PRUEBA TEST AUTH
+    EMAIL_AUTH_ADMIN: EmailStr = "admin@test.com"
+    PASS_AUTH_ADMIN: str = "admin123"
+    EMAIL_AUTH_IOSEF: EmailStr = "iosef@test.com"
+    PASS_AUTH_IOSEF: str = "iosef123"
+    EMAIL_AUTH_ERICK: EmailStr = "erick@test.com"
+    PASS_AUTH_ERICK: str = "erick123"
+
+    #USARIO DE PRUEBA
+    TEST_USER_NAME: str = "usuario_prueba"
+    TEST_USER_PASSWORD: str = "prueba123"
+    TEST_USER_PASSWORD_NO_EXISTS: str = "noexiste123"
+    TEST_USER_EMAIL: EmailStr = "prueba@test.com"
+
     class Config:
         case_sensitive = True
         env_file = ".env"

@@ -10,7 +10,7 @@ from app.model.users import User
 from app.config.db import get_db
 from app.utils.response import custom_response
 
-router = APIRouter(tags=["User"])
+router = APIRouter()
 
 @router.get("/", status_code=HTTP_200_OK, response_model=List[UserSchema])
 def get_users(db: Session = Depends(get_db)):

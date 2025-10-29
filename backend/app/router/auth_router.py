@@ -11,7 +11,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=["Auth"])
+router = APIRouter()
 
 @router.post("/login", status_code=HTTP_200_OK)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):

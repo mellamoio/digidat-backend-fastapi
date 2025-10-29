@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta, timezone
-import jwt
+from jose import jwt
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "change_this_dev_secret")
 JWT_ALG = os.environ.get("JWT_ALG", "HS256")

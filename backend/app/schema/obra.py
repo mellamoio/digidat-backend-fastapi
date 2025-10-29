@@ -20,7 +20,7 @@ class ObraInDBBase(ObraBase):
     id_obra: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Obra(ObraInDBBase):
     pass

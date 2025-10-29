@@ -1,3 +1,4 @@
+
 from fastapi.testclient import TestClient
 from app.main import app
 from app.core.config import settings
@@ -5,13 +6,17 @@ from app.core.config import settings
 client = TestClient(app)
 BASE_URL = f"{settings.API_V1_STR}/users"
 
+TEST_USER_NAME = settings.TEST_USER_NAME
+TEST_USER_PASSWORD = settings.TEST_USER_PASSWORD
+TEST_USER_PASSWORD_NO_EXISTS = settings.TEST_USER_PASSWORD_NO_EXISTS
+TEST_USER_EMAIL = settings.TEST_USER_EMAIL
 
 def test_crear_usuario():
     #DATOS NUEVOS DE PRUEBA
     datos = {
-        "nombre": "Keiko Fujimori",
-        "correo": "keiko@test.com",
-        "password": "keiko123",
+        "nombre": TEST_USER_NAME,
+        "correo": TEST_USER_EMAIL,
+        "password": TEST_USER_PASSWORD,
         "estado": "ACTIVO",
         "id_role": 2,
         "cargo": "Presidenta"
@@ -39,15 +44,15 @@ def test_listar_usuarios():
 def test_actualizar_usuario():
     # buscamos el usuario creado en el test anterior
     usuarios = client.get(BASE_URL).json()["data"]
-    usuario = next((u for u in usuarios if u["correo"] == "keiko@test.com"), None)
+    usuario = next((u for u in usuarios if u["correo"] == TEST_USER_EMAIL), None)
     assert usuario is not None
 
     id_usuario = usuario["id_responsable"]
 
     datos_actualizados = {
         "nombre": "Keiko Fujimori",
-        "correo": "keikoo@test.com",
-        "password": "keikosofia123",
+        "correo": TEST_USER_EMAIL,
+        "password": TEST_USER_PASSWORD,
         "estado": "ACTIVO",
         "id_role": 2,
         "cargo": "Prisionera"
@@ -64,7 +69,7 @@ def test_actualizar_usuario():
 def test_eliminar_usuario():
     # buscamos el usuario editado para eliminarlo
     usuarios = client.get(BASE_URL).json()["data"]
-    usuario = next((u for u in usuarios if u["correo"] == "keikoo@test.com"), None)
+    usuario = next((u for u in usuarios if u["correo"] == TEST_USER_EMAIL), None)
     assert usuario is not None
 
     id_usuario = usuario["id_responsable"]

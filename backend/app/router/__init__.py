@@ -10,12 +10,10 @@ def init_routers():
     from . import user_router
     from . import role_router
     from . import role_permission_router
-    from . import project_router
     from . import document_router
     from . import obra_router
     from . import estado_etapa_router
     from . import etapa_ejecucion_router
-    from . import responsable_router
     from . import beneficiario_router
     from . import informacion_financista_router
     from . import informacion_contratista_router
@@ -25,12 +23,10 @@ def init_routers():
     router.include_router(user_router.router, prefix="/users", tags=["Users"])
     router.include_router(role_router.router, prefix="/roles", tags=["Roles"])
     router.include_router(role_permission_router.router, prefix="/role-permissions", tags=["Role Permissions"])
-    router.include_router(project_router.router, prefix="/projects", tags=["Projects"])
     router.include_router(document_router.router, prefix="/documents", tags=["Documents"])
     router.include_router(obra_router.router, prefix="/obras", tags=["Obras"])
     router.include_router(estado_etapa_router.router, prefix="/estados-etapa", tags=["Estados de Etapa"])
     router.include_router(etapa_ejecucion_router.router, prefix="/etapas-ejecucion", tags=["Etapas de Ejecución"])
-    router.include_router(responsable_router.router, prefix="/responsables", tags=["Responsables"])
     router.include_router(beneficiario_router.router, prefix="/beneficiarios", tags=["Beneficiarios"])
     router.include_router(informacion_financista_router.router, prefix="/informacion-financistas", tags=["Información Financistas"])
     router.include_router(informacion_contratista_router.router, prefix="/informacion-contratistas", tags=["Información Contratistas"])

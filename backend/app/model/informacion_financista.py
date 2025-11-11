@@ -2,25 +2,25 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.config.db import Base
+from app.model.users import User
 
 class InformacionFinancista(Base):
     __tablename__ = "informacion_financista"
     
-    id_informacion_financista = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    id_responsable = Column(Integer, ForeignKey("responsables.id_responsable"), nullable=False)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id_responsable = Column(Integer, ForeignKey("usuarios.id_responsable"), nullable=False)
     id_obra = Column(Integer, ForeignKey("obras.id_obra"), nullable=False)
-    entidad = Column(String(255), nullable=False)
-    nit = Column(String(50), nullable=False)
-    direccion = Column(String(255), nullable=False)
-    telefono = Column(String(20), nullable=False)
-    email = Column(String(100), nullable=False)
-    representante_legal = Column(String(255), nullable=False)
-    cargo_representante = Column(String(255), nullable=False)
-    fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
-    fecha_actualizacion = Column(DateTime(timezone=True), onupdate=func.now())
+    responsable = relationship("User", back_populates="informaciones_financistas")
     
-    responsable_rel = relationship("Responsable", back_populates="info_financista")
     obra = relationship("Obra", back_populates="info_financista")
 
+    # 👇 ESTA ES LA RELACIÓN QUE FALTABA
+    documentos = relationship(
+        "Documento",
+        back_populates="informacion_financista",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
+
     def __repr__(self):
-        return f"<InformacionFinancista(id={self.id_informacion_financista}, entidad='{self.entidad}')>"
+        return f"<InformacionFinancista(id={self.id}, entidad='{self.entidad}')>"

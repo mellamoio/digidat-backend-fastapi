@@ -140,7 +140,7 @@ export const DataTableCustom = <T extends DataRow>({
                   left: 0,
                   zIndex: 400,
                   minWidth: '200px',
-                  padding: '12px',
+                  padding: '0px 16px',
                   backgroundColor: '#fff',
                   borderRight: '1px solid #D9D9D9'
               }

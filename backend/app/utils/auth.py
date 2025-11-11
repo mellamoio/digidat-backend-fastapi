@@ -1,11 +1,14 @@
 import os
 from datetime import datetime, timedelta, timezone
-from jose import jwt
+from jose import jwt, JWTError
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "change_this_dev_secret")
 JWT_ALG = os.environ.get("JWT_ALG", "HS256")
 JWT_EXPIRES_MIN = int(os.environ.get("JWT_EXPIRES_MIN", "60"))
 
+security = HTTPBearer()
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
@@ -17,3 +20,24 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 def decode_access_token(token: str) -> dict:
     return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    try:
+        payload = decode_access_token(token)
+        # Aquí puedes agregar más validaciones con el payload,
+        # por ejemplo verificar si existe el usuario en DB, estado activo, etc.
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token inválido: subject no encontrado",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return payload  # O una instancia User obtenida de la DB con user_id
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido o expirado",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

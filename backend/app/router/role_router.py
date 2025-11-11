@@ -10,8 +10,9 @@ from app.config.db import get_db
 from app.model.roles import Role
 from app.schema.role_schema import RoleSchema, RoleCreateSchema
 from app.utils.response import custom_response
+from app.utils.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get('/', status_code=HTTP_200_OK, response_model=List[RoleSchema])

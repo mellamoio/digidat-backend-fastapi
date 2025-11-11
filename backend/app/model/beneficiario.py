@@ -17,6 +17,7 @@ class Beneficiario(Base):
     fecha_actualizacion = Column(DateTime(timezone=True), onupdate=func.now())
     
     pagos = relationship("Pago", back_populates="beneficiario")
+    obra = relationship("Obra", back_populates="beneficiario")
 
     def __repr__(self):
         return f"<Beneficiario(id={self.id_beneficiario}, nombre='{self.nombre}', tipo='{self.tipo}')>"

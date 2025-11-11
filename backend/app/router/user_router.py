@@ -9,7 +9,9 @@ from app.schema.user_schema import UserSchema, UserCreateSchema, UserEditSchema
 from app.model.users import User
 from app.config.db import get_db
 from app.utils.response import custom_response
+from app.utils.auth import get_current_user
 
+#router = APIRouter(dependencies=[Depends(get_current_user)])
 router = APIRouter()
 
 @router.get("/", status_code=HTTP_200_OK, response_model=List[UserSchema])
@@ -36,7 +38,7 @@ def create_user(data_user: UserCreateSchema, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return custom_response(HTTP_201_CREATED, "Usuario creado correctamente", True)
+    return custom_response(HTTP_201_CREATED, "Usuario creado correctamente", True, jsonable_encoder(new_user))
 
 @router.get("/{id}", status_code=HTTP_200_OK, response_model=UserSchema)
 def get_user(id: int, db: Session = Depends(get_db)):

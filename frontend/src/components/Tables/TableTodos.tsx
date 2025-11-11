@@ -95,13 +95,13 @@ export const TableTodos: React.FC = () => {
     return formatCurrency(obra.costo_proyecto || 0);
   };
 
-  const getMontoPagado = (obra: Obra) => {
+/*   const getMontoPagado = (obra: Obra) => {
     return formatCurrency(obra.monto_pagado || 0);
   };
 
   const getMontoRecuperado = (obra: Obra) => {
     return formatCurrency(obra.monto_recuperado || 0);
-  };
+  }; */
 
   const handleOnViewComponent = (row: Obra) => {
     navigate(`/detalles/${row.id}`);
@@ -118,7 +118,7 @@ export const TableTodos: React.FC = () => {
         </Row>
       ),
     },
-    {
+/*     {
       name: 'Centro de Operación',
       center: true,
       grow: 1,
@@ -133,7 +133,15 @@ export const TableTodos: React.FC = () => {
           )}
         </div>
       ),
+    }, */
+
+        {
+      name: 'Costo del Proyecto',
+      center: true,
+      grow: 1,
+      cell: (row: Obra) => <span>{getCostoProyecto(row)}</span>,
     },
+
     {
       name: 'Fecha de Inicio',
       center: true,
@@ -146,6 +154,7 @@ export const TableTodos: React.FC = () => {
       grow: 1,
       cell: (row: Obra) => <span>{formatDate(row.fecha_conclusion)}</span>,
     },
+    
     {
       name: 'Estado',
       center: true,
@@ -178,13 +187,8 @@ export const TableTodos: React.FC = () => {
         );
       },
     },
-    {
-      name: 'Costo del Proyecto',
-      center: true,
-      grow: 1,
-      cell: (row: Obra) => <span>{getCostoProyecto(row)}</span>,
-    },
-    {
+
+/*     {
       name: 'Monto Pagado',
       center: true,
       grow: 1,
@@ -195,7 +199,7 @@ export const TableTodos: React.FC = () => {
       center: true,
       grow: 1,
       cell: (row: Obra) => <span>{getMontoRecuperado(row)}</span>,
-    },
+    }, */
   ];
 
   return (

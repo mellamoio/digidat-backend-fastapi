@@ -1,24 +1,31 @@
-import enum
-from sqlalchemy import Column, Integer, String, Enum, TIMESTAMP, ForeignKey, func
-from sqlalchemy.orm import relationship
 from app.config.db import Base
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, TIMESTAMP, func
+from sqlalchemy.orm import relationship
+from app.model.users import User
 
-class StateDocumentEnum(str, enum.Enum):
-    ACTIVO = "activo"
-    INACTIVO = "inactivo"
+class Documento(Base):
+    __tablename__ = "documentos"
 
-class Document(Base):
-    __tablename__ = "document"
-    
-    id_document = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String(100), nullable=False)
-    path_document = Column(String(255), nullable=False)
-    state_document = Column(Enum(StateDocumentEnum), default=StateDocumentEnum.ACTIVO, nullable=False)
-    id_project = Column(Integer, ForeignKey("project.id_project"), nullable=False)
+    id_documento = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(255), nullable=False)
+    ruta = Column(String(1000), nullable=False)
+    mime_type = Column(String(255))
+    tamano_bytes = Column(Integer)
+    uploaded_by = Column(Integer, ForeignKey("usuarios.id_responsable", ondelete="SET NULL"))
+    id_obra = Column(Integer, ForeignKey("obras.id_obra", ondelete="SET NULL"))
+    id_etapa = Column(Integer, ForeignKey("etapas_ejecucion.id_etapa", ondelete="SET NULL"))
+    id_informacion_financista = Column(Integer, ForeignKey("informacion_financista.id", ondelete="SET NULL"))
+    id_informacion_contratista = Column(Integer, ForeignKey("informacion_contratista.id", ondelete="SET NULL"))
+    id_pago = Column(Integer, ForeignKey("pagos.id_pago", ondelete="SET NULL"))
     create_date = Column(TIMESTAMP, server_default=func.now())
     delete_date = Column(TIMESTAMP, nullable=True)
 
-    project = relationship("Project", back_populates="documents")
+    # Relaciones (opcional, si las necesitas para joins o backrefs)
+    obra = relationship("Obra", back_populates="documentos", foreign_keys=[id_obra])
+    etapa = relationship("EtapaEjecucion", back_populates="documentos", foreign_keys=[id_etapa])
+    informacion_financista = relationship("InformacionFinancista", back_populates="documentos", foreign_keys=[id_informacion_financista])
+    informacion_contratista = relationship("InformacionContratista", back_populates="documentos", foreign_keys=[id_informacion_contratista])
+    pago = relationship("Pago", back_populates="documentos", foreign_keys=[id_pago])
+    responsable = relationship("User", back_populates="documentos", foreign_keys=[uploaded_by])
 
-    def __repr__(self):
-        return f"<Document(id={self.id_document}, name='{self.name}', state='{self.state_document}')>"
+

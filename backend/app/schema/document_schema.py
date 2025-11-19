@@ -2,19 +2,38 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-class DocumentBase(BaseModel):
-    name: str
-    path_document: str
-    state_document: Optional[str] = "activo"
-    id_project: int
+class DocumentoBase(BaseModel):
+    nombre: str
+    ruta: str
+    mime_type: Optional[str] = None
+    tamano_bytes: Optional[int] = None
+    uploaded_by: Optional[int] = None
+    id_obra: Optional[int] = None
+    id_etapa: Optional[int] = None
+    id_informacion_financista: Optional[int] = None
+    id_informacion_contratista: Optional[int] = None
+    id_pago: Optional[int] = None
 
-class DocumentCreate(DocumentBase):
+class DocumentoCreate(DocumentoBase):
     pass
 
-class Document(DocumentBase):
-    id_document: int
-    create_date: Optional[datetime]
-    delete_date: Optional[datetime]
+class DocumentoUpdate(BaseModel):
+    nombre: Optional[str] = None
+    ruta: Optional[str] = None
+    mime_type: Optional[str] = None
+    tamano_bytes: Optional[int] = None
+    uploaded_by: Optional[int] = None
+    id_obra: Optional[int] = None
+    id_etapa: Optional[int] = None
+    id_informacion_financista: Optional[int] = None
+    id_informacion_contratista: Optional[int] = None
+    id_pago: Optional[int] = None
+
+
+class DocumentoResponse(DocumentoBase):
+    id_documento: int
+    create_date: datetime
+    delete_date: Optional[datetime] = None
 
     class Config:
         orm_mode = True

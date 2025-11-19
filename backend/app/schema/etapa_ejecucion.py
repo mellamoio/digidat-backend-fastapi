@@ -1,28 +1,20 @@
-# app/schemas/etapa_ejecucion.py
 from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import date
+from datetime import datetime
 
 class EtapaEjecucionBase(BaseModel):
     id_obra: int
-    id_estado_etapa: int
-    fecha_inicio: date
-    fecha_fin: Optional[date] = None
-    descripcion: Optional[str] = None
-    avance: float = Field(0.0, ge=0.0, le=100.0)
+    id_estado: Optional[int] = Field(None, description="ID del estado actual de la obra")
 
 class EtapaEjecucionCreate(EtapaEjecucionBase):
     pass
 
 class EtapaEjecucionUpdate(BaseModel):
-    id_estado_etapa: Optional[int] = None
-    fecha_inicio: Optional[date] = None
-    fecha_fin: Optional[date] = None
-    descripcion: Optional[str] = None
-    avance: Optional[float] = Field(None, ge=0.0, le=100.0)
+    id_estado: Optional[int] = None
 
 class EtapaEjecucionInDBBase(EtapaEjecucionBase):
-    id_etapa_ejecucion: int
+    id_etapa: int
+    fecha_registro: Optional[datetime] = None
 
     class Config:
         from_attributes = True

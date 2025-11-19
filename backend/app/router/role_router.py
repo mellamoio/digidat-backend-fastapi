@@ -10,11 +10,12 @@ from app.config.db import get_db
 from app.model.roles import Role
 from app.schema.role_schema import RoleSchema, RoleCreateSchema
 from app.utils.response import custom_response
+from app.utils.auth import get_current_user
 
-router = APIRouter(tags=["Role"])
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
-@router.get('/', status_code=HTTP_200_OK, response_model=List[RoleSchema], tags=['Role'])
+@router.get('/', status_code=HTTP_200_OK, response_model=List[RoleSchema])
 def get_roles(db: Session = Depends(get_db)):
     """Obtener todos los roles activos"""
     roles = db.query(Role).filter(Role.delete_date.is_(None)).all()
@@ -26,7 +27,7 @@ def get_roles(db: Session = Depends(get_db)):
     )
 
 
-@router.post('/', status_code=HTTP_201_CREATED, response_model=RoleSchema, tags=['Role'])
+@router.post('/', status_code=HTTP_201_CREATED, response_model=RoleSchema)
 def create_roles(role_data: RoleCreateSchema, db: Session = Depends(get_db)):
     """Crear un nuevo rol"""
     # Verificar si el rol ya existe
@@ -50,7 +51,7 @@ def create_roles(role_data: RoleCreateSchema, db: Session = Depends(get_db)):
         jsonable_encoder(new_role)
     )
 
-@router.get('/{role_id}', status_code=HTTP_200_OK, response_model=RoleSchema, tags=['Role'])
+@router.get('/{role_id}', status_code=HTTP_200_OK, response_model=RoleSchema)
 def get_role(role_id: int, db: Session = Depends(get_db)):
     """Obtener un rol por su ID"""
     role = db.query(Role).filter(
@@ -71,7 +72,7 @@ def get_role(role_id: int, db: Session = Depends(get_db)):
         jsonable_encoder(role)
     )
 
-@router.put('/{role_id}', status_code=HTTP_200_OK, response_model=RoleSchema, tags=['Role'])
+@router.put('/{role_id}', status_code=HTTP_200_OK, response_model=RoleSchema)
 def update_role(
     role_id: int, 
     role_data: RoleCreateSchema, 
@@ -116,7 +117,7 @@ def update_role(
         jsonable_encoder(role)
     )
 
-@router.delete('/{role_id}', status_code=HTTP_200_OK, tags=['Role'])
+@router.delete('/{role_id}', status_code=HTTP_200_OK)
 def delete_role(role_id: int, db: Session = Depends(get_db)):
     """Eliminar un rol (borrado lógico)"""
     role = db.query(Role).filter(

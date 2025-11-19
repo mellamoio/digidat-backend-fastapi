@@ -35,7 +35,8 @@ from app.router import (
     auth_router,
     project_router,
     document_router,
-    role_permission_router
+    role_permission_router,
+    centro_operacion_router
 )
 
 @asynccontextmanager
@@ -60,6 +61,7 @@ app = FastAPI(
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
     openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.DEBUG else None,
+    lifespan=lifespan
 )
 
 # Configuración de CORS
@@ -78,7 +80,8 @@ app.add_middleware(
     max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 )
 
-app = register_exception_handlers(app)
+# Sin asignar a 'app'
+# register_exception_handlers(app)
 
 api_router = APIRouter()
 
@@ -89,6 +92,7 @@ api_router.include_router(role_permission_router.router, prefix="/role-permissio
 api_router.include_router(project_router.router, prefix="/projects", tags=["Proyectos"])
 api_router.include_router(document_router.router, prefix="/documents", tags=["Documentos"])
 api_router.include_router(obra_router.router, prefix="/obras", tags=["Obras"])
+api_router.include_router(centro_operacion_router.router, prefix="/centros-operacion", tags=["Centros de Operación"])  # ← NUEVO
 api_router.include_router(estado_etapa_router.router, prefix="/estados-etapa", tags=["Estados de Etapa"])
 api_router.include_router(etapa_ejecucion_router.router, prefix="/etapas-ejecucion", tags=["Etapas de Ejecución"])
 api_router.include_router(responsable_router.router, prefix="/responsables", tags=["Responsables"])

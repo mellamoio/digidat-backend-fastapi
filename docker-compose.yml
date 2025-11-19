@@ -9,7 +9,7 @@ services:
       MYSQL_USER: digidat_user
       MYSQL_PASSWORD: digidat_password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sql/digidat.sql:/docker-entrypoint-initdb.d/digidat.sql

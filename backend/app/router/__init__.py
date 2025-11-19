@@ -19,6 +19,7 @@ def init_routers():
     from . import beneficiario_router
     from . import informacion_financista_router
     from . import informacion_contratista_router
+    from . import centro_operacion_router
     
     # Incluir los routers
     router.include_router(auth_router.router, prefix="/auth", tags=["Authentication"])
@@ -34,5 +35,6 @@ def init_routers():
     router.include_router(beneficiario_router.router, prefix="/beneficiarios", tags=["Beneficiarios"])
     router.include_router(informacion_financista_router.router, prefix="/informacion-financistas", tags=["Información Financistas"])
     router.include_router(informacion_contratista_router.router, prefix="/informacion-contratistas", tags=["Información Contratistas"])
+    router.include_router(centro_operacion_router.router, prefix="/centro_operacion_router", tags=["Centro de Operación"])
     
     return router

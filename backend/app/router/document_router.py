@@ -9,13 +9,11 @@ from app.schema.document_schema import DocumentoCreate, DocumentoResponse, Docum
 
 router = APIRouter()
 
-# Crear uno o varios documentos
 @router.post("/", response_model=List[DocumentoResponse], status_code=status.HTTP_201_CREATED)
 def create_documentos(
     documentos: Union[DocumentoCreate, List[DocumentoCreate]],
     db: Session = Depends(get_db),
 ):
-    # Aceptamos un solo documento o lista
     if isinstance(documentos, list):
         new_docs = [Documento(**doc.dict()) for doc in documentos]
     else:
@@ -29,7 +27,6 @@ def create_documentos(
     return new_docs
 
 
-# Obtener todos los documentos no borrados
 @router.get("/", response_model=List[DocumentoResponse])
 def get_documentos(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     documentos = (
@@ -42,7 +39,6 @@ def get_documentos(skip: int = 0, limit: int = 100, db: Session = Depends(get_db
     return documentos
 
 
-# Obtener un documento por ID (si no está borrado)
 @router.get("/{documento_id}", response_model=DocumentoResponse)
 def get_documento(documento_id: int, db: Session = Depends(get_db)):
     documento = (
@@ -55,7 +51,6 @@ def get_documento(documento_id: int, db: Session = Depends(get_db)):
     return documento
 
 
-# Actualizar documento (parcialmente)
 @router.patch("/{documento_id}", response_model=DocumentoResponse)
 def update_documento(documento_id: int, data_update: DocumentoUpdate, db: Session = Depends(get_db)):
     documento = db.query(Documento).filter(Documento.id_documento == documento_id, Documento.delete_date.is_(None)).first()
@@ -71,7 +66,6 @@ def update_documento(documento_id: int, data_update: DocumentoUpdate, db: Sessio
     return documento
 
 
-# Soft delete (actualiza delete_date)
 @router.delete("/{documento_id}", status_code=status.HTTP_204_NO_CONTENT)
 def soft_delete_documento(documento_id: int, db: Session = Depends(get_db)):
     documento = db.query(Documento).filter(Documento.id_documento == documento_id, Documento.delete_date.is_(None)).first()

@@ -1,4 +1,3 @@
-// src/components/Buttons/UserButton/index.styled.ts
 import styled from 'styled-components';
 
 interface AnchorButtonProps {

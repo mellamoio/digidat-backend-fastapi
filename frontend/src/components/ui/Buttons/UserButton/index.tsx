@@ -1,4 +1,3 @@
-// src/components/Buttons/UserButton/index.tsx
 import { UserOutlined } from '@ant-design/icons';
 import { AnchorButton } from "./index.styled";
 

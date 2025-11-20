@@ -1,11 +1,10 @@
-// frontend/src/components/ui/layout/Container/Header/index.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SettingsButton } from "../../../Buttons/SettingsButton";
 import { ButtonPrimary } from "../../../Buttons/Primary";
 import { UserButton } from "../../../Buttons/UserButton";
 import { useUserMenu } from '../../../../../hooks/useUserMenu';
-import { useAuth } from '../../../../../hooks/useAuth'; // IMPORTAR
+import { useAuth } from '../../../../../hooks/useAuth';
 import { UserSwitchOutlined, LogoutOutlined } from '@ant-design/icons';
 import { ModalObra } from '../../../feedback/Modal/ModalObra';
 import {
@@ -21,7 +20,7 @@ import {
 
 const UserMenu = () => {
   const { isOpen, menuRef, toggleMenu, isHovered, setIsHovered, handleLogout } = useUserMenu();
-  const { user } = useAuth(); // OBTENER DATOS DEL USUARIO
+  const { user } = useAuth();
 
   return (
     <UserMenuContainer ref={menuRef}>
@@ -50,7 +49,7 @@ const UserMenu = () => {
 export const Header = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { isAdmin } = useAuth(); // VERIFICAR SI ES ADMIN
+  const { isAdmin } = useAuth();
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -61,9 +60,7 @@ export const Header = () => {
   };
 
   const handleObraCreated = () => {
-    console.log('Obra creada exitosamente');
     setIsModalOpen(false);
-    // Disparar evento para refrescar la tabla
     window.dispatchEvent(new Event('obraCreated'));
   };
 

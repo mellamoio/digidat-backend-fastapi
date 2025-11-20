@@ -3,7 +3,7 @@ import pymysql
 try:
     connection = pymysql.connect(
     host='127.0.0.1',
-    port=3307,  # ← Cambio aquí
+    port=3307,
     user='root',
     password='rootpassword',
     database='digidat',

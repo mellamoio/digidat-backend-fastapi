@@ -11,7 +11,7 @@ class Pago(Base):
     monto_pagado = Column(Numeric(15, 2), nullable=False)
     fecha_pago = Column(Date, nullable=False)
     id_tipo_gasto = Column(Integer, ForeignKey("tipos_gasto.id"), nullable=False)
-    id_estado_reembolso = Column(Integer, ForeignKey("estados_reembolso.id_estado_reembolso"), nullable=False)  # ✅ corregido
+    id_estado_reembolso = Column(Integer, ForeignKey("estados_reembolso.id_estado_reembolso"), nullable=False)
     id_responsable = Column(Integer, ForeignKey("usuarios.id_responsable"))
     id_beneficiario = Column(Integer, ForeignKey("beneficiarios.id_beneficiario"))
     

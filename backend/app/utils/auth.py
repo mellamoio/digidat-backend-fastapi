@@ -25,8 +25,6 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     token = credentials.credentials
     try:
         payload = decode_access_token(token)
-        # Aquí puedes agregar más validaciones con el payload,
-        # por ejemplo verificar si existe el usuario en DB, estado activo, etc.
         user_id = payload.get("sub")
         if user_id is None:
             raise HTTPException(
@@ -34,7 +32,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
                 detail="Token inválido: subject no encontrado",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return payload  # O una instancia User obtenida de la DB con user_id
+        return payload
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

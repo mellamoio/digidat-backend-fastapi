@@ -12,7 +12,6 @@ TEST_USER_PASSWORD_NO_EXISTS = settings.TEST_USER_PASSWORD_NO_EXISTS
 TEST_USER_EMAIL = settings.TEST_USER_EMAIL
 
 def test_crear_usuario():
-    #DATOS NUEVOS DE PRUEBA
     datos = {
         "nombre": TEST_USER_NAME,
         "correo": TEST_USER_EMAIL,
@@ -42,7 +41,6 @@ def test_listar_usuarios():
 
 
 def test_actualizar_usuario():
-    # buscamos el usuario creado en el test anterior
     usuarios = client.get(BASE_URL).json()["data"]
     usuario = next((u for u in usuarios if u["correo"] == TEST_USER_EMAIL), None)
     assert usuario is not None
@@ -67,7 +65,6 @@ def test_actualizar_usuario():
 
 
 def test_eliminar_usuario():
-    # buscamos el usuario editado para eliminarlo
     usuarios = client.get(BASE_URL).json()["data"]
     usuario = next((u for u in usuarios if u["correo"] == TEST_USER_EMAIL), None)
     assert usuario is not None

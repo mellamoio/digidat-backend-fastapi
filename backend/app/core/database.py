@@ -7,26 +7,24 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from app.core.config import settings
 
 
-# Configuración de la base de datos síncrona
 engine = create_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,
-    pool_recycle=3600,  # ← Agregado
+    pool_recycle=3600,
     connect_args={
-        "connect_timeout": 60,  # ← Agregado
+        "connect_timeout": 60,
     },
     echo=os.getenv("SQL_ECHO", "False").lower() == "true",
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-# Configuración de la base de datos asíncrona
 async_engine = create_async_engine(
     settings.DATABASE_URL.replace("mysql+pymysql", "mysql+aiomysql"),
     pool_pre_ping=True,
-    pool_recycle=3600,  # ← Agregado
+    pool_recycle=3600,
     connect_args={
-        "connect_timeout": 60,  # ← Agregado
+        "connect_timeout": 60,
     },
     echo=os.getenv("SQL_ECHO", "False").lower() == "true",
 )
@@ -41,7 +39,6 @@ AsyncSessionLocal = sessionmaker(
 )
 
 
-# Base para los modelos
 Base = declarative_base()
 
 
@@ -60,8 +57,6 @@ async def async_create_tables():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-
-# Dependencia para inyección de dependencias síncrona
 def get_db() -> Generator:
     db = SessionLocal()
     try:
@@ -70,7 +65,6 @@ def get_db() -> Generator:
         db.close()
 
 
-# Dependencia para inyección de dependencias asíncrona
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         try:

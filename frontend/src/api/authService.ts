@@ -29,7 +29,6 @@ export const authService = {
           name: decoded.correo.split('@')[0]
         };
         localStorage.setItem("user", JSON.stringify(userData));
-        console.log('Usuario guardado:', userData);
       } catch (error) {
         console.error('Error al decodificar token:', error);
       }

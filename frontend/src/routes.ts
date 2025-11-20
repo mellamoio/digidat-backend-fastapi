@@ -1,3 +1,18 @@
 export enum DigidatRoutes {
-    GET_RESPONSABLES = 'digidat/responsables',
-  }
+  GET_USERS = '/users/',
+  GET_USER_BY_ID = '/users/:id',
+  CREATE_USER = '/users/',
+  UPDATE_USER = '/users/:id',
+  DELETE_USER = '/users/:id',
+  GET_OBRAS = '/obras/',
+  GET_OBRA_BY_ID = '/obras/:id',
+  CREATE_OBRA = '/obras/',
+  UPDATE_OBRA = '/obras/:id',
+  DELETE_OBRA = '/obras/:id',
+  GET_CENTROS_OPERACION = '/centros-operacion/',
+  GET_ESTADOS_ETAPA = '/estados-etapa/',
+  LOGIN = '/auth/login',
+  LOGOUT = '/auth/logout',
+  REFRESH_TOKEN = '/auth/refresh-token',
+  GET_TIPOS_GASTO = '/all/tipogasto',
+}

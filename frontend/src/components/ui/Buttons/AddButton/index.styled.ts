@@ -1,4 +1,3 @@
-// src/components/common/AddButton.tsx
 import styled from "styled-components";
 
 export const StyledButton = styled.button`

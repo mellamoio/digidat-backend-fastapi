@@ -2,17 +2,10 @@ import { LargeFontCard } from './index.styled'
 import { DashboardScroll } from '../DashboardScroll'
 import { Divider } from 'antd'
 import { ItemQuantity } from '../ItemQuantity'
+import { useObras } from '../../../../context/ObrasContext'
 
 export const Kpis = () => {
-    // Datos estáticos para pruebas
-    const montoPagado = 125000;
-    const montoRecuperado = 87500;
-    
-    // Datos estáticos para los KPIs
-    const kpis = {
-        totalObras: 42,
-        montoTotal: 1250000
-    };
+    const { kpis } = useObras();
 
     return (
         <DashboardScroll>
@@ -20,7 +13,7 @@ export const Kpis = () => {
                 <ItemQuantity
                     title="Obras por Impuestos en Total"
                     variant="regular"
-                    total={kpis.totalObras}
+                    total={kpis?.totalObras || 0}
                 />
             </LargeFontCard>
 
@@ -31,7 +24,7 @@ export const Kpis = () => {
                     title="Monto Total de Proyectos"
                     variant="money"
                     simbolo="S/."
-                    total={kpis.montoTotal}
+                    total={kpis?.montoProyectos || 0}
                 />
             </LargeFontCard>
 
@@ -42,7 +35,7 @@ export const Kpis = () => {
                     title="Montos Pagados"
                     variant="money"
                     simbolo="S/."
-                    total={montoPagado}
+                    total={kpis?.montoPagado || 0}
                 />
             </LargeFontCard>
 
@@ -53,7 +46,7 @@ export const Kpis = () => {
                     title="Montos Recuperados"
                     variant="money"
                     simbolo="S/."
-                    total={montoRecuperado}
+                    total={kpis?.montoRecuperado || 0}
                 />
             </LargeFontCard>
         </DashboardScroll>

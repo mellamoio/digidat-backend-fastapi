@@ -1,7 +1,6 @@
-// frontend/src/services/getObra.service.ts
 import { setQueryParams } from '../helpers/setQueryParams'
 import { handleErrorRequest } from '../helpers/handleErrorRequest'
-import type { Obra, ObraResponse } from '../types/obra'
+import type { ObraResponse } from '../types/obra'
 import apiClient from '../api/api'
 
 interface GetObrasRequest {
@@ -11,7 +10,7 @@ interface GetObrasRequest {
 interface CreateObraRequest {
     nombre: string
     tipo_id: number
-    id_responsable: number
+    usuarios: number[]
     fecha_inicio?: string | null
     fecha_fin?: string | null
     costo_proyecto?: number
@@ -23,14 +22,13 @@ interface UpdateObraRequest {
     id: number
     nombre?: string
     tipo_id?: number
-    id_responsable?: number
+    usuarios?: number[]
     fecha_inicio?: string | null
     fecha_fin?: string | null
     costo_proyecto?: number
     centros_operacion?: number[]
 }
 
-// GET - Obtener todas las obras
 export const getObra = async ({
     id_empresa
 }: GetObrasRequest): Promise<ObraResponse[]> => {
@@ -39,7 +37,7 @@ export const getObra = async ({
             id_empresa: id_empresa.toString()
         }
 
-        const url = setQueryParams(params, 'v1/obras/')  // ← Barra final agregada
+        const url = setQueryParams(params, 'v1/obras/')
 
         const { data } = await apiClient.get<ObraResponse[]>(url)
 
@@ -49,7 +47,6 @@ export const getObra = async ({
     }
 }
 
-// GET - Obtener una obra por ID
 export const getObraById = async (id: number): Promise<ObraResponse> => {
     try {
         const { data } = await apiClient.get<ObraResponse>(`v1/obras/${id}`)
@@ -59,13 +56,12 @@ export const getObraById = async (id: number): Promise<ObraResponse> => {
     }
 }
 
-// POST - Crear una nueva obra
 export const createObra = async (
     obraData: CreateObraRequest
 ): Promise<ObraResponse> => {
     try {
         const response = await apiClient.post<ObraResponse>(
-            'v1/obras/',  // ← Barra final agregada
+            'v1/obras/',
             obraData
         )
         return response.data
@@ -79,14 +75,13 @@ export const createObra = async (
     }
 }
 
-// PUT - Actualizar una obra existente
 export const editObra = async (
     obraData: UpdateObraRequest
 ): Promise<ObraResponse> => {
     try {
         const { id, ...data } = obraData
         const response = await apiClient.put<ObraResponse>(
-            `v1/obras/${id}/`,  // ← Barra final agregada
+            `v1/obras/${id}`,
             data
         )
         return response.data
@@ -100,10 +95,9 @@ export const editObra = async (
     }
 }
 
-// DELETE - Eliminar una obra
 export const deleteObra = async (id: number): Promise<void> => {
     try {
-        await apiClient.delete(`v1/obras/${id}/`)  // ← Barra final agregada
+        await apiClient.delete(`v1/obras/${id}`)
     } catch (error: any) {
         console.error('Error al eliminar la obra:', error)
         throw new Error(

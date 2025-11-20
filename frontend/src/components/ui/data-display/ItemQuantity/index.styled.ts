@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 
-// En ItemQuantity/index.styled.ts
 export const Container = styled.div`
     display: flex;
     flex-direction: column;

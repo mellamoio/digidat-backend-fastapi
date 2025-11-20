@@ -1,4 +1,3 @@
-# app/schema/__init__.py
 from .auth_schema import *
 from .document_schema import *
 from .obra import *

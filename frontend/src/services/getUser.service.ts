@@ -1,32 +1,6 @@
 // frontend/src/services/getUser.service.ts
 import api from '../api/api';
-
-export interface User {
-  id_responsable: number;
-  nombre: string;
-  correo: string;
-  estado: string;
-  id_role: number;
-  cargo: string;
-}
-
-export interface UserCreate {
-  nombre: string;
-  correo: string;
-  password: string;
-  estado: string;
-  id_role: number;
-  cargo: string;
-}
-
-export interface UserEdit {
-  nombre?: string;
-  correo?: string;
-  password?: string;
-  estado?: string;
-  id_role?: number;
-  cargo?: string;
-}
+import type { User } from '../types/user';
 
 // Obtener todos los usuarios
 export const getUsers = async (): Promise<User[]> => {
@@ -51,7 +25,7 @@ export const getUserById = async (id: number): Promise<User> => {
 };
 
 // Crear un nuevo usuario
-export const createUser = async (userData: UserCreate): Promise<User> => {
+export const createUser = async (userData: any): Promise<User> => {
   try {
     const response = await api.post('/users/', userData);
     return response.data.data;
@@ -62,7 +36,7 @@ export const createUser = async (userData: UserCreate): Promise<User> => {
 };
 
 // Actualizar un usuario
-export const updateUser = async (id: number, userData: UserEdit): Promise<User> => {
+export const updateUser = async (id: number, userData: any): Promise<User> => {
   try {
     const response = await api.put(`/users/${id}`, userData);
     return response.data.data;

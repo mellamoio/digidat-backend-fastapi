@@ -7,7 +7,7 @@ import { ButtonPrimary } from '../../Buttons/Primary';
 import { ButtonSecondary } from '../../Buttons/Secondary';
 import { createObra, editObra } from '../../../../services/getObra.service';
 import { centroOperacionService } from '../../../../services/getCentroOperacion.service';
-import { userService } from '../../../../services/getUser.service';
+import { getUsers } from '../../../../services/getUser.service';
 import type { ObraResponse } from '../../../../types/obra';
 import type { User } from '../../../../types/user';
 import {
@@ -93,7 +93,7 @@ export const ModalObra: React.FC<ModalObraProps> = ({
       setCentrosOperacion(centros);
 
       // Cargar usuarios (responsables)
-      const users = await userService.getUsers();
+      const users = await getUsers();
       setResponsables(users);
 
       // Tipos de obra hardcodeados

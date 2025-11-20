@@ -4,7 +4,7 @@ from app.config.db import Base
 
 
 class InformacionContratista(Base):
-    __tablename__ = "informacioncontratista"  # ← Corregido: sin guion bajo
+    __tablename__ = "informacioncontratista"
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     id_obra = Column(Integer, ForeignKey("obras.id_obra"), nullable=False)

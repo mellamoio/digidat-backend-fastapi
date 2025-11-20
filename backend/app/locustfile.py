@@ -8,19 +8,6 @@ class UserApiUser(HttpUser):
     base_url = f"{settings.API_V1_STR}/users"
     user_counter = 0
     
-    # Datos base para crear usuarios de prueba
-    def generate_user_payload(self):
-        UserApiUser.user_counter += 1
-        n = UserApiUser.user_counter
-        return {
-            "nombre": f"UsuarioTest{n}",
-            "correo": f"usuario{n}@test.com",
-            "password": "Password123!",
-            "estado": "ACTIVO",
-            "id_role": 2,
-            "cargo": "Tester"
-        }
-    
     @task(2)
     def list_users(self):
         self.client.get(self.base_url + "/")

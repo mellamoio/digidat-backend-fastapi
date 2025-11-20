@@ -57,7 +57,7 @@ Thumbs.db
 # Base de datos
 *.db
 *.sqlite3
-*.sql
+*.sql  # ← QUITA ESTO si quieres versionar tu dump_completo.sql
 migrations/
 
 # Cobertura de pruebas
@@ -95,3 +95,14 @@ Thumbs.db
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Frontend (Node.js)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.cache/
+frontend/.vite/
+
+# Docker
+docker-compose.override.yml
+.

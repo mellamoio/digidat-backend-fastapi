@@ -4,12 +4,8 @@ import { DataTableCustom } from '../DataTableCustom';
 import type { TableColumn } from 'react-data-table-component';
 import {
   ContainerLabel,
-  ContainerSelectTable,
-  EstadoRow,
   EstadoField,
-  StickyTableStyles,
 } from './TableTodos.styled';
-import { Row } from '../Row';
 import type { Obra } from '../../types/obra';
 import dayjs from 'dayjs';
 
@@ -60,7 +56,9 @@ const estadosAtencionEjemplo: EstadoAtencion[] = [
 ];
 
 export const TableTodos: React.FC = () => {
-  const [rows, setRows] = React.useState<Obra[]>(obrasEjemplo);
+  const [rows] = React.useState<Obra[]>(obrasEjemplo);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const navigate = useNavigate();
 
   const formatCurrency = (value: number | string | undefined): string => {
@@ -91,37 +89,35 @@ export const TableTodos: React.FC = () => {
     };
   };
 
-  const getCostoProyecto = (obra: Obra) => {
-    return formatCurrency(obra.costo_proyecto || 0);
-  };
-
-/*   const getMontoPagado = (obra: Obra) => {
-    return formatCurrency(obra.monto_pagado || 0);
-  };
-
-  const getMontoRecuperado = (obra: Obra) => {
-    return formatCurrency(obra.monto_recuperado || 0);
-  }; */
-
   const handleOnViewComponent = (row: Obra) => {
     navigate(`/detalles/${row.id}`);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
   };
 
   const columns: TableColumn<Obra>[] = [
     {
       name: 'Obra',
       center: true,
-      grow: 1,
+      grow: 1.5,
       cell: (row: Obra) => (
-        <Row>
-          <ContainerLabel pointer="true">{row.nombre || 'Sin nombre'}</ContainerLabel>
-        </Row>
+        <ContainerLabel pointer="true">
+          {row.nombre || 'Sin nombre'}
+        </ContainerLabel>
       ),
+      sortable: true,
     },
-/*     {
+    {
       name: 'Centro de Operación',
       center: true,
-      grow: 1,
+      grow: 1.5,
       cell: (row: Obra) => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {Array.isArray(row.centros_operacion) && row.centros_operacion.length > 0 ? (
@@ -133,28 +129,22 @@ export const TableTodos: React.FC = () => {
           )}
         </div>
       ),
-    }, */
-
-        {
-      name: 'Costo del Proyecto',
-      center: true,
-      grow: 1,
-      cell: (row: Obra) => <span>{getCostoProyecto(row)}</span>,
+      sortable: true,
     },
-
     {
       name: 'Fecha de Inicio',
       center: true,
       grow: 1,
       cell: (row: Obra) => <span>{formatDate(row.fecha_reembolso)}</span>,
+      sortable: true,
     },
     {
       name: 'Fecha de Culminación',
       center: true,
       grow: 1,
       cell: (row: Obra) => <span>{formatDate(row.fecha_conclusion)}</span>,
+      sortable: true,
     },
-    
     {
       name: 'Estado',
       center: true,
@@ -162,67 +152,66 @@ export const TableTodos: React.FC = () => {
       cell: (row: Obra) => {
         const { name, color } = getEstadoInfo(row.estado_id);
         return (
-          <ContainerSelectTable>
-            <EstadoRow>
-              <EstadoField $backgroundColor={color}>
-                {name}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#ffffff"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-              </EstadoField>
-            </EstadoRow>
-          </ContainerSelectTable>
+          <EstadoField $backgroundColor={color}>
+            {name}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </EstadoField>
         );
       },
+      sortable: true,
     },
-
-/*     {
+    {
+      name: 'Costo del Proyecto',
+      center: true,
+      grow: 1,
+      cell: (row: Obra) => <span>{formatCurrency(row.costo_proyecto)}</span>,
+      sortable: true,
+    },
+    {
       name: 'Monto Pagado',
       center: true,
       grow: 1,
-      cell: (row: Obra) => <span>{getMontoPagado(row)}</span>,
+      cell: (row: Obra) => <span>{formatCurrency(row.monto_pagado)}</span>,
+      sortable: true,
     },
     {
       name: 'Monto Recuperado',
       center: true,
       grow: 1,
-      cell: (row: Obra) => <span>{getMontoRecuperado(row)}</span>,
-    }, */
+      cell: (row: Obra) => <span>{formatCurrency(row.monto_recuperado)}</span>,
+      sortable: true,
+    },
   ];
 
   return (
-    <div className="row" style={{ position: 'relative', width: '100%' }}>
-      <div
-        className="col-md-12 md-max-type-b"
-        style={{ backgroundColor: 'white', marginTop: 20, width: '100%' }}
-      >
-        <StickyTableStyles />
-        <DataTableCustom
-          title=""
-          columns={columns}
-          data={rows || []}
-          totalRows={rows.length}
-          currentPage={1}
-          rowsPerPage={10}
-          onPageChange={() => {}}
-          onRowsPerPageChange={() => {}}
-          emptyText="No existen Obras registradas"
-          stickyColumns
-          onViewComponent={handleOnViewComponent}
-        />
-      </div>
+    <div style={{ width: '100%' }}>
+      <DataTableCustom
+        title=""
+        columns={columns}
+        data={rows || []}
+        totalRows={rows.length}
+        currentPage={currentPage}
+        rowsPerPage={rowsPerPage}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        emptyText="No existen Obras registradas"
+        stickyColumns={true}
+        onViewComponent={handleOnViewComponent}
+      />
     </div>
   );
 };

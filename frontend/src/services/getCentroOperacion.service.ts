@@ -7,12 +7,12 @@ export interface CentroOperacion {
 
 class CentroOperacionService {
   async getCentrosOperacion(): Promise<CentroOperacion[]> {
-    const response = await apiClient.get('/centros-operacion');
+    const response = await apiClient.get('v1/centros-operacion');
     return response.data;
   }
 
   async createCentroOperacion(nombre: string): Promise<CentroOperacion> {
-    const response = await apiClient.post('/centros-operacion', { nombre });
+    const response = await apiClient.post('v1/centros-operacion', { nombre });
     return response.data;
   }
 }

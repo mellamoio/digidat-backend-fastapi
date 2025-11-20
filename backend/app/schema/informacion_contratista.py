@@ -16,7 +16,7 @@ class InformacionContratistaBase(BaseModel):
     valor_contrato: float
     fecha_inicio: datetime
     fecha_fin: datetime
-    plazo_ejecucion: int  # Días de plazo para la ejecución
+    plazo_ejecucion: int
 
 class InformacionContratistaCreate(InformacionContratistaBase):
     pass

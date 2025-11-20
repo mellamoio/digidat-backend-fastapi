@@ -78,23 +78,22 @@ app.add_middleware(
     max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 )
 
-# Sin asignar a 'app'
 # register_exception_handlers(app)
 
 api_router = APIRouter()
 
-api_router.include_router(auth_router.router, prefix="/auth", tags=["Autenticación"])
-api_router.include_router(user_router.router, prefix="/users", tags=["Usuarios"])
-api_router.include_router(role_router.router, prefix="/roles", tags=["Roles"])
-api_router.include_router(role_permission_router.router, prefix="/role-permissions", tags=["Permisos de Roles"])
-api_router.include_router(document_router.router, prefix="/documentos", tags=["Documentos"])
-api_router.include_router(obra_router.router, prefix="/obras", tags=["Obras"])
-api_router.include_router(centro_operacion_router.router, prefix="/centros-operacion", tags=["Centros de Operación"])  # ← NUEVO
-api_router.include_router(estado_etapa_router.router, prefix="/estados-etapa", tags=["Estados de Etapa"])
-api_router.include_router(etapa_ejecucion_router.router, prefix="/etapas-ejecucion", tags=["Etapas de Ejecución"])
-api_router.include_router(beneficiario_router.router, prefix="/beneficiarios", tags=["Beneficiarios"])
-api_router.include_router(informacion_financista_router.router, prefix="/informacion-financistas", tags=["Información Financistas"])
-api_router.include_router(informacion_contratista_router.router, prefix="/informacion-contratistas", tags=["Información Contratistas"])
+api_router.include_router(auth_router, prefix="/auth", tags=["Autenticación"])
+api_router.include_router(user_router, prefix="/users", tags=["Usuarios"])
+api_router.include_router(role_router, prefix="/roles", tags=["Roles"])
+api_router.include_router(role_permission_router, prefix="/role-permissions", tags=["Permisos de Roles"])
+api_router.include_router(document_router, prefix="/documents", tags=["Documentos"])
+api_router.include_router(obra_router, prefix="/obras", tags=["Obras"])
+api_router.include_router(centro_operacion_router, prefix="/centros-operacion", tags=["Centros de Operación"])
+api_router.include_router(estado_etapa_router, prefix="/estados-etapa", tags=["Estados de Etapa"])
+api_router.include_router(etapa_ejecucion_router, prefix="/etapas-ejecucion", tags=["Etapas de Ejecución"])
+api_router.include_router(beneficiario_router, prefix="/beneficiarios", tags=["Beneficiarios"])
+api_router.include_router(informacion_financista_router, prefix="/informacion-financistas", tags=["Información Financistas"])
+api_router.include_router(informacion_contratista_router, prefix="/informacion-contratistas", tags=["Información Contratistas"])
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

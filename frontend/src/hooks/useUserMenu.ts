@@ -22,7 +22,7 @@ export const useUserMenu = () => {
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
       message.error('Error al cerrar sesión');
-      localStorage.removeItem('access_token');
+      localStorage.clear();
       navigate('/login');
     }
   }, [navigate]);

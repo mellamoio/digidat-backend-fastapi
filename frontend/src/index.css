@@ -12,7 +12,6 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Variables reutilizables */
   --min-width-sticky: 100px;
   --sticky-bg-head: #f1f1f1;
   --sticky-bg-body: #fff;

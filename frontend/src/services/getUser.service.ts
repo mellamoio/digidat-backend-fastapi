@@ -24,7 +24,7 @@ class UserService {
    */
   async getUsers(): Promise<User[]> {
     try {
-      const response = await api.get<ApiResponse<User[]>>('/v1/users/');  // ← Agregado /
+      const response = await api.get<ApiResponse<User[]>>('/v1/users/');
       return response.data.data || [];
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
@@ -32,13 +32,9 @@ class UserService {
     }
   }
 
-  /**
-   * Get a single user by ID
-   * @param id User ID
-   */
   async getUserById(id: number): Promise<User> {
     try {
-      const response = await api.get<ApiResponse<User>>(`/v1/users/${id}/`);  // ← Agregado /
+      const response = await api.get<ApiResponse<User>>(`/v1/users/${id}/`);
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching user with ID ${id}:`, error);
@@ -74,7 +70,7 @@ class UserService {
 
   async updateUser(id: number, userData: Partial<User>): Promise<User> {
     try {
-      const response = await api.put<ApiResponse<User>>(`/v1/users/${id}/`, userData);  // ← Agregado /
+      const response = await api.put<ApiResponse<User>>(`/v1/users/${id}/`, userData);
       return response.data.data;
     } catch (error) {
       console.error(`Error updating user with ID ${id}:`, error);
@@ -84,7 +80,7 @@ class UserService {
 
   async deleteUser(id: number): Promise<void> {
     try {
-      await api.delete(`/v1/users/${id}/`);  // ← Agregado /
+      await api.delete(`/v1/users/${id}/`);
     } catch (error) {
       console.error(`Error deleting user with ID ${id}:`, error);
       throw error;

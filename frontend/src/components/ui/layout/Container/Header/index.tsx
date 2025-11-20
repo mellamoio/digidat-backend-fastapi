@@ -5,6 +5,7 @@ import { SettingsButton } from "../../../Buttons/SettingsButton";
 import { ButtonPrimary } from "../../../Buttons/Primary";
 import { UserButton } from "../../../Buttons/UserButton";
 import { useUserMenu } from '../../../../../hooks/useUserMenu';
+import { useAuth } from '../../../../../hooks/useAuth'; // IMPORTAR
 import { UserSwitchOutlined, LogoutOutlined } from '@ant-design/icons';
 import { ModalObra } from '../../../feedback/Modal/ModalObra';
 import {
@@ -20,6 +21,7 @@ import {
 
 const UserMenu = () => {
   const { isOpen, menuRef, toggleMenu, isHovered, setIsHovered, handleLogout } = useUserMenu();
+  const { user } = useAuth(); // OBTENER DATOS DEL USUARIO
 
   return (
     <UserMenuContainer ref={menuRef}>
@@ -33,7 +35,7 @@ const UserMenu = () => {
       <UserMenuDropdown $isOpen={isOpen}>
         <MenuItem>
           <UserSwitchOutlined />
-          <span>Mi Perfil</span>
+          <span>{user?.name || 'Mi Perfil'}</span>
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogout}>
@@ -48,6 +50,7 @@ const UserMenu = () => {
 export const Header = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isAdmin } = useAuth(); // VERIFICAR SI ES ADMIN
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -82,7 +85,8 @@ export const Header = () => {
               handleClick={handleOpenModal}
             />
 
-            <SettingsButton path="/ajustes" />
+            {/* MOSTRAR SOLO SI ES ADMIN */}
+            {isAdmin && <SettingsButton path="/ajustes" />}
             
             <UserMenu />
           </ActionsContainer>

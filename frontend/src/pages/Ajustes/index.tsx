@@ -4,7 +4,7 @@ import type { TabsProps } from 'antd';
 import type { TableColumn } from 'react-data-table-component';
 import { AjustesContainer, ContentContainer } from "./index.styled";
 import Header from "../../components/ui/layout/Container/Header";
-import { userService } from '../../services/getUser.service';
+import { getUsers, createUser, updateUser, deleteUser } from '../../services/getUser.service';
 import type { User } from '../../types/user';
 import ModalEliminar from '../../components/ui/feedback/Modal/ModalEliminar';
 import ModalUsuario from '../../components/ui/feedback/Modal/ModalUsuario';
@@ -26,7 +26,7 @@ const Ajustes = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await userService.getUsers();
+      const response = await getUsers();
       setUsers(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error('Error al cargar usuarios:', error);
@@ -52,11 +52,10 @@ const Ajustes = () => {
       if (editingUser) {
         const updateData = {
           ...values,
-          id_responsable: editingUser.id_responsable,
           estado: values.estado ? 'ACTIVO' : 'INACTIVO',
         };
         
-        await userService.updateUser(editingUser.id_responsable, updateData);
+        await updateUser(editingUser.id_responsable, updateData);
         message.success('Usuario actualizado correctamente');
       } else {
         const createData = {
@@ -65,7 +64,7 @@ const Ajustes = () => {
           password: '12345678',
         };
         
-        await userService.createUser(createData);
+        await createUser(createData);
         message.success('Usuario creado correctamente');
       }
       
@@ -93,7 +92,7 @@ const Ajustes = () => {
     if (!userToDelete) return;
     
     try {
-      await userService.deleteUser(userToDelete);
+      await deleteUser(userToDelete);
       message.success('Usuario eliminado correctamente');
       fetchUsers();
     } catch (error) {

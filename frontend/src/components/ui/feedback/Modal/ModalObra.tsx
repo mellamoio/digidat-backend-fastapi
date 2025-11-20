@@ -217,7 +217,7 @@ export const ModalObra: React.FC<ModalObraProps> = ({
         <HeaderModal>
           <span>{isEditMode ? 'Editar Obra por Impuestos' : 'Nueva Obra por Impuestos'}</span>
           <CloseButton onClick={handleCancel}>
-            <IoClose size={20} />
+            <IoClose size={14} />
           </CloseButton>
         </HeaderModal>
 

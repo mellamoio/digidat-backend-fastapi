@@ -26,11 +26,11 @@ export const filterDateRange = (
 
     return (
         (isSameOrAfter(dateStart, filterStart) &&
-            isSameOrBefore(dateEnd, filterEnd)) || // ambas fecha en el rango
+            isSameOrBefore(dateEnd, filterEnd)) ||
         (isSameOrAfter(dateStart, filterStart) &&
-            isSameOrBefore(dateStart, filterEnd)) || // fecha inicial en el rango
+            isSameOrBefore(dateStart, filterEnd)) ||
         (isSameOrAfter(dateEnd, filterStart) &&
-            isSameOrBefore(dateEnd, filterEnd)) || // fecha final en el rango
-        (dateStart.isBefore(filterStart) && dateEnd.isAfter(filterEnd)) // rango de fechas cubren el rango del filtro
+            isSameOrBefore(dateEnd, filterEnd)) ||
+        (dateStart.isBefore(filterStart) && dateEnd.isAfter(filterEnd))
     )
 }

@@ -1,7 +1,6 @@
 import { MenuIdentifiers } from '../constants/menu';
 
 export const getInfoMenu = (identificador: MenuIdentifiers) => {
-    // In development, log a warning if SESSION_OBJ is not available
     if (process.env.NODE_ENV === 'development' && !window.SESSION_OBJ) {
         console.warn('SESSION_OBJ is not available. Make sure it is set in your HTML template or during app initialization.');
     }

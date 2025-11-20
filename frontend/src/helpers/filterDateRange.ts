@@ -21,7 +21,7 @@ export const filterDateRange = (
     const filterEnd = dayjs(filter_end)
 
     if (!dateEnd) {
-        return true // no ha concluido
+        return true
     }
 
     return (

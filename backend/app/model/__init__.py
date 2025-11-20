@@ -1,4 +1,3 @@
-# app/models/__init__.py
 from .base import Base
 from .obra import Obra
 from .estado_etapa import EstadoEtapa

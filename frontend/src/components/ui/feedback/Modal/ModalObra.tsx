@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { ButtonPrimary } from '../../Buttons/Primary';
 import { ButtonSecondary } from '../../Buttons/Secondary';
 import { createObra, editObra } from '../../../../services/getObra.service';
+import { getTiposObra, type TipoObra } from '../../../../services/getTiposObra.service';
 import { centroOperacionService } from '../../../../services/getCentroOperacion.service';
 import { userService } from '../../../../services/getUser.service';
 import type { ObraResponse } from '../../../../types/obra';
@@ -40,11 +41,6 @@ interface CentroOperacion {
   nombre: string;
 }
 
-interface Tipo {
-  id: number;
-  nombre: string;
-}
-
 export const ModalObra: React.FC<ModalObraProps> = ({
   isOpen,
   onClose,
@@ -55,14 +51,14 @@ export const ModalObra: React.FC<ModalObraProps> = ({
   const [loading, setLoading] = useState(false);
   const [centrosOperacion, setCentrosOperacion] = useState<CentroOperacion[]>([]);
   const [responsables, setResponsables] = useState<User[]>([]);
-  const [tipos, setTipos] = useState<Tipo[]>([]);
+  const [tipos, setTipos] = useState<TipoObra[]>([]);
+  const [loadingTipos, setLoadingTipos] = useState(false);
   const [selectedCentros, setSelectedCentros] = useState<number[]>([]);
   const [selectAllCentros, setSelectAllCentros] = useState(false);
   const [centrosError, setCentrosError] = useState(false);
 
   const isEditMode = !!initialData;
 
-  // Cargar datos iniciales
   useEffect(() => {
     if (isOpen) {
       loadData();
@@ -86,27 +82,25 @@ export const ModalObra: React.FC<ModalObraProps> = ({
     }
   }, [isOpen, initialData, form]);
 
-  const loadData = async () => {
-    try {
-      // Cargar centros de operación
-      const centros = await centroOperacionService.getCentrosOperacion();
-      setCentrosOperacion(centros);
+const loadData = async () => {
+  try {
+    const centros = await centroOperacionService.getCentrosOperacion();
+    setCentrosOperacion(centros);
 
-      // Cargar usuarios (responsables)
-      const users = await userService.getUsers();
-      setResponsables(users);
+    const users = await userService.getUsers();
+    setResponsables(users);
 
-      // Tipos de obra hardcodeados
-      setTipos([
-        { id: 1, nombre: 'Obra por Impuestos' },
-        { id: 2, nombre: 'Obra Directa' },
-        { id: 3, nombre: 'Mantenimiento' },
-      ]);
-    } catch (error) {
-      console.error('Error al cargar datos:', error);
-      message.error('Error al cargar datos del formulario');
-    }
-  };
+    setLoadingTipos(true);
+    const tiposBackend = await getTiposObra();
+    setTipos(tiposBackend);
+    setLoadingTipos(false);
+  } catch (error) {
+    console.error('Error al cargar datos:', error);
+    message.error('Error al cargar datos del formulario');
+    setLoadingTipos(false);
+  }
+};
+
 
   const handleCheckboxChange = (id: number) => {
     setCentrosError(false);
@@ -131,11 +125,8 @@ export const ModalObra: React.FC<ModalObraProps> = ({
 
   const handleSubmit = async () => {
     try {
-      console.log('handleSubmit iniciado');
       const values = await form.validateFields();
-      console.log('Valores del formulario:', values);
 
-      // Validar centros de operación
       if (selectedCentros.length === 0) {
         setCentrosError(true);
         message.error('Debe seleccionar al menos un centro de operación');
@@ -143,7 +134,6 @@ export const ModalObra: React.FC<ModalObraProps> = ({
       }
 
       setCentrosError(false);
-      console.log('Centros seleccionados:', selectedCentros);
       setLoading(true);
 
       const obraData: any = {
@@ -157,21 +147,16 @@ export const ModalObra: React.FC<ModalObraProps> = ({
         centros_operacion: selectedCentros,
       };
 
-      console.log('Datos a enviar:', obraData);
 
       if (isEditMode && initialData) {
-        console.log('Modo edición - Actualizando obra');
         obraData.id = initialData.id_obra;
         await editObra(obraData);
         message.success('Obra actualizada exitosamente');
       } else {
-        console.log('Modo creación - Creando nueva obra');
         const result = await createObra(obraData);
-        console.log('Respuesta de createObra:', result);
         message.success('Obra creada exitosamente');
       }
 
-      console.log('Llamando a onSuccess');
       form.resetFields();
       setSelectedCentros([]);
       setCentrosError(false);
@@ -181,19 +166,14 @@ export const ModalObra: React.FC<ModalObraProps> = ({
       console.error('Error en handleSubmit:', error);
       
       if (error.errorFields) {
-        // Son errores de validación del formulario
-        console.log('Errores de validación:', error.errorFields);
         
-        // Mostrar el primer error
         const firstError = error.errorFields[0];
         if (firstError && firstError.errors && firstError.errors.length > 0) {
           message.error(firstError.errors[0]);
         }
         
-        // Hacer scroll al primer campo con error
         form.scrollToField(firstError.name);
       } else {
-        // Es un error de la API
         console.error('Error de API:', error);
         message.error(error.message || 'Error al guardar la obra');
       }
@@ -308,9 +288,11 @@ export const ModalObra: React.FC<ModalObraProps> = ({
                       }
                       rules={[{ required: true, message: 'El tipo es obligatorio' }]}
                     >
-                      <Select 
+                      <Select
                         placeholder="Seleccionar tipo"
                         showSearch
+                        loading={loadingTipos}
+                        disabled={loadingTipos}
                         optionFilterProp="children"
                         getPopupContainer={() => document.body}
                         dropdownStyle={{ zIndex: 99999 }}

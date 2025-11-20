@@ -19,12 +19,9 @@ interface ApiResponse<T> {
 }
 
 class UserService {
-  /**
-   * Obtener todos los usuarios
-   */
   async getUsers(): Promise<User[]> {
     try {
-      const response = await api.get<ApiResponse<User[]>>('/v1/users/');
+      const response = await api.get<ApiResponse<User[]>>('v1/users/');
       return response.data.data || [];
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
@@ -34,10 +31,10 @@ class UserService {
 
   async getUserById(id: number): Promise<User> {
     try {
-      const response = await api.get<ApiResponse<User>>(`/v1/users/${id}/`);
+      const response = await api.get<ApiResponse<User>>(`/users/${id}`);
       return response.data.data;
     } catch (error) {
-      console.error(`Error fetching user with ID ${id}:`, error);
+      console.error(`Error al obtener usuario con ID ${id}:`, error);
       throw error;
     }
   }
@@ -51,8 +48,7 @@ class UserService {
         estado: userData.estado || 'ACTIVO',
       };
       
-      console.log('Sending user data:', userToCreate);
-      const response = await api.post<ApiResponse<User>>('/v1/users/', userToCreate);  // ← Corregido
+      const response = await api.post<ApiResponse<User>>('v1/users/', userToCreate);
       return response.data.data;
     } catch (error: any) {
       console.error('Error al crear el usuario:', error.response?.data || error.message);
@@ -70,22 +66,30 @@ class UserService {
 
   async updateUser(id: number, userData: Partial<User>): Promise<User> {
     try {
-      const response = await api.put<ApiResponse<User>>(`/v1/users/${id}/`, userData);
+      const response = await api.put<ApiResponse<User>>(`v1/users/${id}`, userData);
       return response.data.data;
     } catch (error) {
-      console.error(`Error updating user with ID ${id}:`, error);
+      console.error(`Error al actualizar usuario con ID ${id}:`, error);
       throw error;
     }
   }
 
   async deleteUser(id: number): Promise<void> {
     try {
-      await api.delete(`/v1/users/${id}/`);
+      await api.delete(`v1/users/${id}`);
     } catch (error) {
-      console.error(`Error deleting user with ID ${id}:`, error);
+      console.error(`Error al eliminar usuario con ID ${id}:`, error);
       throw error;
     }
   }
 }
 
 export const userService = new UserService();
+
+export const getUsers = () => userService.getUsers();
+export const getUserById = (id: number) => userService.getUserById(id);
+export const createUser = (userData: Omit<UserCreate, 'password'> & { password?: string }) => 
+  userService.createUser(userData);
+export const updateUser = (id: number, userData: Partial<User>) => 
+  userService.updateUser(id, userData);
+export const deleteUser = (id: number) => userService.deleteUser(id);

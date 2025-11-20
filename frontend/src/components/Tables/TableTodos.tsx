@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataTableCustom } from '../DataTableCustom';
 import type { TableColumn } from 'react-data-table-component';
@@ -7,59 +7,31 @@ import {
   EstadoField,
 } from './TableTodos.styled';
 import type { Obra } from '../../types/obra';
+import type { EstadoEtapa } from '../../types/estado_etapa';
+import { useObras } from '../../context/ObrasContext';
+import { getEstadosEtapa } from '../../services/getEstadoEtapa.service';
 import dayjs from 'dayjs';
 
-interface EstadoAtencion {
-  id: number;
-  name: string;
-  color?: string;
-}
-
-// Datos estáticos de ejemplo
-const obrasEjemplo: Obra[] = [
-  {
-    id: 1,
-    nombre: 'Proyecto 1',
-    estado_id: 1,
-    monto_pagado: 50000,
-    monto_recuperado: 25000,
-    costo_proyecto: '150000',
-    fecha_reembolso: '2023-01-15',
-    fecha_conclusion: '2023-12-31',
-    centros_operacion: [{ id: 1, nombre: 'Centro Principal' }],
-    tipo_id: 0,
-    responsable: [],
-    unidades_gestion: [],
-    id_empresa: 0,
-  },
-  {
-    id: 2,
-    nombre: 'Proyecto 2',
-    estado_id: 2,
-    monto_pagado: 75000,
-    monto_recuperado: 50000,
-    costo_proyecto: '200000',
-    fecha_reembolso: '2023-02-20',
-    fecha_conclusion: '2023-11-30',
-    centros_operacion: [{ id: 2, nombre: 'Centro Secundario' }],
-    tipo_id: 0,
-    responsable: [],
-    unidades_gestion: [],
-    id_empresa: 0,
-  },
-];
-
-// Estados de atención estáticos
-const estadosAtencionEjemplo: EstadoAtencion[] = [
-  { id: 1, name: 'En Progreso', color: '#722AE9' },
-  { id: 2, name: 'Completado', color: '#28A745' },
-];
-
 export const TableTodos: React.FC = () => {
-  const [rows] = React.useState<Obra[]>(obrasEjemplo);
+  const { obrasFiltradas, obras } = useObras();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [estadosEtapa, setEstadosEtapa] = useState<EstadoEtapa[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchEstados = async () => {
+      try {
+        const estados = await getEstadosEtapa();
+        setEstadosEtapa(estados);
+      } catch (error) {
+        console.error('Error al cargar estados:', error);
+      }
+    };
+    fetchEstados();
+  }, []);
+
+  const rows = obrasFiltradas || obras || [];
 
   const formatCurrency = (value: number | string | undefined): string => {
     if (value === undefined || value === null || value === '') {
@@ -82,10 +54,10 @@ export const TableTodos: React.FC = () => {
   };
 
   const getEstadoInfo = (estadoId?: number) => {
-    const estado = estadosAtencionEjemplo.find((e) => e.id === estadoId);
+    const estado = estadosEtapa.find((e) => e.id === estadoId);
     return {
-      name: estado?.name ?? 'N/A',
-      color: estado?.color ?? '#000000',
+      name: estado?.nombre ?? 'N/A',
+      color: estado?.color ?? '#6C757D',
     };
   };
 
@@ -115,14 +87,35 @@ export const TableTodos: React.FC = () => {
       sortable: true,
     },
     {
+      name: 'Responsables',
+      center: true,
+      grow: 1.5,
+      cell: (row: Obra) => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+          {Array.isArray(row.usuarios) && row.usuarios.length > 0 ? (
+            row.usuarios.map((usuario, index) => (
+              <span key={index} style={{ fontSize: '13px' }}>
+                {usuario.nombre || 'N/A'}
+              </span>
+            ))
+          ) : (
+            <span style={{ color: '#999' }}>Sin asignar</span>
+          )}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
       name: 'Centro de Operación',
       center: true,
       grow: 1.5,
       cell: (row: Obra) => (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
           {Array.isArray(row.centros_operacion) && row.centros_operacion.length > 0 ? (
             row.centros_operacion.map((centro, index) => (
-              <span key={index}>{centro.nombre || 'N/A'}</span>
+              <span key={index} style={{ fontSize: '13px' }}>
+                {centro.nombre || 'N/A'}
+              </span>
             ))
           ) : (
             <span>N/A</span>
@@ -202,7 +195,7 @@ export const TableTodos: React.FC = () => {
       <DataTableCustom
         title=""
         columns={columns}
-        data={rows || []}
+        data={rows}
         totalRows={rows.length}
         currentPage={currentPage}
         rowsPerPage={rowsPerPage}

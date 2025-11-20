@@ -16,11 +16,10 @@ def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
     Crear una nueva obra
     """
     try:
-        # Crear la obra con los nuevos campos (SIN descripcion ni presupuesto)
         new_obra = model_obra.Obra(
             nombre=obra.nombre,
             tipo_id=obra.tipo_id,
-            estado_id=1,  # Estado inicial
+            estado_id=1,
             fecha_inicio=obra.fecha_inicio,
             fecha_fin=obra.fecha_fin,
             costo_proyecto=obra.costo_proyecto,
@@ -28,7 +27,6 @@ def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
             id_empresa=obra.id_empresa
         )
         
-        # Agregar centros de operación si existen
         if obra.centros_operacion:
             centros = db.query(CentroOperacion).filter(
                 CentroOperacion.id.in_(obra.centros_operacion)
@@ -87,16 +85,13 @@ def update_obra(obra_id: int, obra: schema_obra.ObraUpdate, db: Session = Depend
         if db_obra is None:
             raise HTTPException(status_code=404, detail="Obra no encontrada")
         
-        # Actualizar campos básicos
-        update_data = obra.dict(exclude_unset=True)
+        update_data = obra.model_dump(exclude_unset=True)
         
-        # Manejar centros de operación por separado
         centros_ids = update_data.pop('centros_operacion', None)
         
         for key, value in update_data.items():
             setattr(db_obra, key, value)
         
-        # Actualizar centros de operación si se proporcionaron
         if centros_ids is not None:
             centros = db.query(CentroOperacion).filter(
                 CentroOperacion.id.in_(centros_ids)

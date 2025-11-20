@@ -2,13 +2,6 @@ import { useState, useEffect } from 'react';
 import { message } from 'antd';
 import api from '../api/axiosConfig';
 
-// Interface para los KPIs
-type KPI = {
-  totalObras: number;
-  montoProyectos: number;
-  [key: string]: any;
-};
-
 export const useSateliteActores = () => {
   const [kpis, setKpis] = useState<any | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
@@ -22,15 +15,12 @@ export const useSateliteActores = () => {
       try {
         setLoading(true);
         
-        // Fetch KPIs
         const kpisResponse = await api.get('/kpis');
         setKpis(kpisResponse.data.data);
         
-        // Fetch obras
         const obrasResponse = await api.get('/obras');
         setObrasFiltradas(obrasResponse.data.data || []);
         
-        // Get empresaId from user profile or local storage
         const profile = await api.get('/users/me');
         const userEmpresaId = profile.data.empresa_id || localStorage.getItem('empresa_id');
         setEmpresaId(userEmpresaId);

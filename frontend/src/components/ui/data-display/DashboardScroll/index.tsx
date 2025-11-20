@@ -34,18 +34,14 @@ export const DashboardScroll = ({ children }: Props) => {
             behavior: 'smooth'
         });
 
-        // Verificar posición después de completar el desplazamiento
         setTimeout(checkScroll, 300);
     };
 
-    // Verificar posición al montar y al cambiar el tamaño
     useEffect(() => {
         const currentRef = scrollRef.current;
         if (currentRef) {
-            // Verificación inicial con retraso para asegurar que el DOM esté listo
             const timer = setTimeout(checkScroll, 100);
             
-            // Event listeners
             currentRef.addEventListener('scroll', checkScroll);
             const resizeObserver = new ResizeObserver(checkScroll);
             resizeObserver.observe(currentRef);

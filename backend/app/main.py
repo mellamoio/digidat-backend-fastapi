@@ -34,7 +34,8 @@ from app.router import (
     auth_router,
     document_router,
     role_permission_router,
-    centro_operacion_router
+    centro_operacion_router,
+    tipos_obra
 )
 
 @asynccontextmanager
@@ -49,7 +50,6 @@ async def lifespan(app: FastAPI):
         raise
     
     yield
-    
     logger.info("Deteniendo la aplicación...")
 
 app = FastAPI(
@@ -62,7 +62,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -94,14 +93,13 @@ api_router.include_router(etapa_ejecucion_router, prefix="/etapas-ejecucion", ta
 api_router.include_router(beneficiario_router, prefix="/beneficiarios", tags=["Beneficiarios"])
 api_router.include_router(informacion_financista_router, prefix="/informacion-financistas", tags=["Información Financistas"])
 api_router.include_router(informacion_contratista_router, prefix="/informacion-contratistas", tags=["Información Contratistas"])
+api_router.include_router(tipos_obra.router, tags=["Tipos de Obra"])
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get(f"{settings.API_V1_STR}/health")
 async def health_check():
-    """
-    Verifica el estado de salud de la API.
-    """
+    """Verifica el estado de salud de la API."""
     return {
         "status": "ok",
         "version": "1.0.0",
@@ -110,9 +108,7 @@ async def health_check():
 
 @app.get("/")
 async def root():
-    """
-    Ruta de bienvenida de la API.
-    """
+    """Ruta de bienvenida de la API."""
     return {
         "message": f"Bienvenido a {settings.PROJECT_NAME} API",
         "documentation": "/docs" if settings.DEBUG else None,

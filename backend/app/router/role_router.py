@@ -30,7 +30,6 @@ def get_roles(db: Session = Depends(get_db)):
 @router.post('/', status_code=HTTP_201_CREATED, response_model=RoleSchema)
 def create_roles(role_data: RoleCreateSchema, db: Session = Depends(get_db)):
     """Crear un nuevo rol"""
-    # Verificar si el rol ya existe
     existing_role = db.query(Role).filter(Role.name == role_data.name).first()
     if existing_role:
         raise HTTPException(
@@ -38,8 +37,7 @@ def create_roles(role_data: RoleCreateSchema, db: Session = Depends(get_db)):
             detail="Ya existe un rol con este nombre"
         )
     
-    # Crear el nuevo rol
-    new_role = Role(**role_data.dict())
+    new_role = Role(**role_data.model_dump())
     db.add(new_role)
     db.commit()
     db.refresh(new_role)
@@ -79,7 +77,6 @@ def update_role(
     db: Session = Depends(get_db)
 ):
     """Actualizar un rol existente"""
-    # Buscar el rol
     role = db.query(Role).filter(
         Role.id_role == role_id,
         Role.delete_date.is_(None)
@@ -91,7 +88,6 @@ def update_role(
             detail="Rol no encontrado"
         )
     
-    # Verificar si el nuevo nombre ya existe (si se está actualizando el nombre)
     if role_data.name != role.name:
         existing_role = db.query(Role).filter(
             Role.name == role_data.name,
@@ -103,7 +99,6 @@ def update_role(
                 detail="Ya existe otro rol con este nombre"
             )
     
-    # Actualizar los campos
     for key, value in role_data.dict(exclude_unset=True).items():
         setattr(role, key, value)
     
@@ -131,7 +126,6 @@ def delete_role(role_id: int, db: Session = Depends(get_db)):
             detail="Rol no encontrado"
         )
     
-    # Realizar borrado lógico
     role.delete_date = datetime.now()
     db.commit()
     

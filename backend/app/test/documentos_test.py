@@ -23,7 +23,6 @@ documento_base = {
     "id_pago": None,
 }
 
-# Fixture para obtener una sesión de base de datos para los tests
 @pytest.fixture
 def db_session():
     db = next(get_db())

@@ -1,55 +1,55 @@
-// src/satelite/contexts/SateliteContext.tsx
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { getResponsables } from "../services/getResponsables.service";
+import { getUsers } from "../services/getUser.service";
+import type { User } from "../types/user";
 import type { Obra } from "../types/obra";
 import { message } from "antd";
 
-interface SateliteContextType {
-  responsables: { id: string; nombres: string }[];
-  fetchResponsables: () => Promise<void>;
+interface DigidatContextType {
+  usuarios: User[];
+  fetchUsuarios: () => Promise<void>;
   empresaId: string | null;
   setEmpresaId: (empresaId: string | null) => void;
   filteredObras: Obra[];
   setFilteredObras: (obras: Obra[]) => void;
 }
 
-const SateliteContext = createContext<SateliteContextType | undefined>(undefined);
+const DigidatContext = createContext<DigidatContextType | undefined>(undefined);
 
 export const SateliteProvider = ({ children }: { children: ReactNode }) => {
-  const [responsables, setResponsables] = useState<{ id: string; nombres: string }[]>([]);
+  const [usuarios, setUsuarios] = useState<User[]>([]);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const [filteredObras, setFilteredObras] = useState<Obra[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchResponsablesData = async () => {
+  const fetchUsuariosData = async () => {
     if (isLoading) return;
     setIsLoading(true);
     try {
-      const response = await getResponsables();
+      const response = await getUsers();
       if (Array.isArray(response)) {
-        setResponsables(response);
+        setUsuarios(response);
       } else {
         console.warn("La respuesta no es un array:", response);
-        setResponsables([]);
+        setUsuarios([]);
       }
     } catch (error) {
-      console.error("Error al cargar responsables:", error);
-      message.error("No se pudieron cargar los responsables.");
-      setResponsables([]);
+      console.error("Error al cargar usuarios:", error);
+      message.error("No se pudieron cargar los usuarios.");
+      setUsuarios([]);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchResponsablesData();
+    fetchUsuariosData();
   }, []);
 
   return (
-    <SateliteContext.Provider
+    <DigidatContext.Provider
       value={{
-        responsables,
-        fetchResponsables: fetchResponsablesData,
+        usuarios,
+        fetchUsuarios: fetchUsuariosData,
         empresaId,
         setEmpresaId,
         filteredObras,
@@ -57,12 +57,12 @@ export const SateliteProvider = ({ children }: { children: ReactNode }) => {
       }}
     >
       {children}
-    </SateliteContext.Provider>
+    </DigidatContext.Provider>
   );
 };
 
 export const useSatelite = () => {
-  const context = useContext(SateliteContext);
+  const context = useContext(DigidatContext);
   if (context === undefined) {
     throw new Error("useSatelite debe usarse dentro de un SateliteProvider");
   }

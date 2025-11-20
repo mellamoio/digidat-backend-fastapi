@@ -1,4 +1,3 @@
-# app/router/role_permission_router.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.config.db import SessionLocal

@@ -5,7 +5,7 @@ from app.config.db import Base
 
 
 class InformacionFinancista(Base):
-    __tablename__ = "informacionfinancista"  # ← Corregido: sin guion bajo
+    __tablename__ = "informacionfinancista"
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     id_responsable = Column(Integer, ForeignKey("usuarios.id_responsable"), nullable=False)

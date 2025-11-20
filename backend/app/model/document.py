@@ -14,8 +14,8 @@ class Documento(Base):
     uploaded_by = Column(Integer, ForeignKey("usuarios.id_responsable", ondelete="SET NULL"))
     id_obra = Column(Integer, ForeignKey("obras.id_obra", ondelete="SET NULL"))
     id_etapa = Column(Integer, ForeignKey("etapas_ejecucion.id_etapa", ondelete="SET NULL"))
-    id_informacionfinancista = Column(Integer, ForeignKey("informacionfinancista.id", ondelete="SET NULL"))  # ← Corregido
-    id_informacioncontratista = Column(Integer, ForeignKey("informacioncontratista.id", ondelete="SET NULL"))  # ← Corregido
+    id_informacionfinancista = Column(Integer, ForeignKey("informacionfinancista.id", ondelete="SET NULL"))
+    id_informacioncontratista = Column(Integer, ForeignKey("informacioncontratista.id", ondelete="SET NULL"))
     id_pago = Column(Integer, ForeignKey("pagos.id_pago", ondelete="SET NULL"))
     create_date = Column(TIMESTAMP, server_default=func.now())
     delete_date = Column(TIMESTAMP, nullable=True)

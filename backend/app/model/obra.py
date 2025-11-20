@@ -2,8 +2,6 @@ from sqlalchemy import Column, Integer, String, Date, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from app.config.db import Base
 
-
-# Tabla intermedia para la relación muchos a muchos entre Obra y Centro de Operación
 obra_centro_operacion = Table(
     'obra_centro_operacion',
     Base.metadata,

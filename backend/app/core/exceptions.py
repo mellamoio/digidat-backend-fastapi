@@ -73,7 +73,7 @@ async def validation_exception_handler(
     """Maneja errores de validación de Pydantic."""
     errors = []
     for error in exc.errors():
-        field = ".".join(str(loc) for loc in error["loc"][1:])  # Ignorar el prefijo del modelo
+        field = ".".join(str(loc) for loc in error["loc"][1:])
         errors.append({
             "field": field,
             "message": error["msg"],

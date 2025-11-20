@@ -11,6 +11,7 @@ class StatusEnum(str, enum.Enum):
 
 class User(Base):
     __tablename__ = "usuarios"
+    
     id_responsable = Column(Integer, primary_key=True, index=True, autoincrement=True)
     nombre = Column(String(255), nullable=False)
     cargo = Column(String(255), nullable=True)
@@ -19,24 +20,12 @@ class User(Base):
     id_role = Column(Integer, ForeignKey("roles.id_role"), nullable=False)
     estado = Column(Enum(StatusEnum), nullable=False, default=StatusEnum.ACTIVO)
     
-<<<<<<< HEAD
-    # Relaciones existentes
-=======
->>>>>>> fd98077156a3a68778da09b098a82ff54cd639f5
+    # Relaciones
     rol = relationship("Role", back_populates="usuarios", lazy="select")
-    
-    # Nueva relación con obras
     obras = relationship("Obra", back_populates="responsable", foreign_keys="[Obra.id_responsable]")
-
-    """ documentos = relationship("Documento", back_populates="responsable") """
-
-    obras = relationship("Obra", back_populates="responsable")
-
-
+    documentos = relationship("Documento", back_populates="responsable")
     informaciones_financistas = relationship("InformacionFinancista", back_populates="responsable")
     informaciones_contratista = relationship("InformacionContratista", back_populates="responsable")
-
-    documentos = relationship("Documento", back_populates="responsable")
 
     def __repr__(self):
         return (

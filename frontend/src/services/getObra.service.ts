@@ -39,7 +39,7 @@ export const getObra = async ({
             id_empresa: id_empresa.toString()
         }
 
-        const url = setQueryParams(params, '/obras/')  // ← Barra final agregada
+        const url = setQueryParams(params, 'v1/obras/')  // ← Barra final agregada
 
         const { data } = await apiClient.get<ObraResponse[]>(url)
 
@@ -52,7 +52,7 @@ export const getObra = async ({
 // GET - Obtener una obra por ID
 export const getObraById = async (id: number): Promise<ObraResponse> => {
     try {
-        const { data } = await apiClient.get<ObraResponse>(`/obras/${id}`)
+        const { data } = await apiClient.get<ObraResponse>(`v1/obras/${id}`)
         return data
     } catch (e) {
         throw handleErrorRequest(e)
@@ -65,7 +65,7 @@ export const createObra = async (
 ): Promise<ObraResponse> => {
     try {
         const response = await apiClient.post<ObraResponse>(
-            '/obras/',  // ← Barra final agregada
+            'v1/obras/',  // ← Barra final agregada
             obraData
         )
         return response.data
@@ -86,7 +86,7 @@ export const editObra = async (
     try {
         const { id, ...data } = obraData
         const response = await apiClient.put<ObraResponse>(
-            `/obras/${id}/`,  // ← Barra final agregada
+            `v1/obras/${id}/`,  // ← Barra final agregada
             data
         )
         return response.data
@@ -103,7 +103,7 @@ export const editObra = async (
 // DELETE - Eliminar una obra
 export const deleteObra = async (id: number): Promise<void> => {
     try {
-        await apiClient.delete(`/obras/${id}/`)  // ← Barra final agregada
+        await apiClient.delete(`v1/obras/${id}/`)  // ← Barra final agregada
     } catch (error: any) {
         console.error('Error al eliminar la obra:', error)
         throw new Error(

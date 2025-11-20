@@ -4,6 +4,8 @@ import type {
     PaginationChangePage,
     PaginationChangeRowsPerPage
 } from 'react-data-table-component/dist/DataTable/types'
+import { FaEdit, FaTrashAlt, FaEye, FaUpload, FaArrowRight } from 'react-icons/fa'
+import './DataTableCustom.css'
 
 export interface DataRow {
     [key: string]: any
@@ -21,6 +23,7 @@ interface DataTableCustomProps<T extends DataRow> {
     onEdit?: (row: T) => void
     onDelete?: (row: T) => void
     onView?: (row: T) => void
+    onUpload?: (row: T) => void
     onViewComponent?: (row: T) => void
     emptyText: string
     stickyColumns?: boolean
@@ -46,6 +49,7 @@ export const DataTableCustom = <T extends DataRow>({
     onEdit,
     onDelete,
     onView,
+    onUpload,
     onViewComponent,
     emptyText,
     stickyColumns,
@@ -58,128 +62,213 @@ export const DataTableCustom = <T extends DataRow>({
         name: 'Detalles',
         center: true,
         grow: 0,
-        minWidth: '130px',
-        style: stickyColumns
-            ? {
-                  position: 'sticky',
-                  right: 0,
-                  zIndex: 400,
-                  minWidth: '130px',
-                  backgroundColor: '#fff',
-                  borderLeft: '1px solid #D9D9D9'
-              }
-            : undefined,
+        width: '130px',
         cell: (row: T) => (
-            <div style={{ display: 'flex', gap: '4px' }}>
+            <div style={{ 
+                display: 'flex', 
+                gap: '8px', 
+                justifyContent: 'center',
+                alignItems: 'center' 
+            }}>
                 {customAction && customAction(row)}
+                
                 {onView && (
-                    <a
-                        className="md-button md-button--icon"
-                        data-toggle="tooltip"
-                        data-placement="left"
-                        data-original-title="Ver"
-                        data-action={row?.actionView ?? 'verPago'}
-                        data-id={row.id}
+                    <button
                         onClick={() => onView(row)}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px 6px',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'all 0.2s',
+                            color: '#595959'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f0f0f0';
+                            e.currentTarget.style.color = '#722AE9';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#595959';
+                        }}
+                        title="Ver"
                     >
-                        <i className="mdi mdi-eye"></i>
-                    </a>
+                        <FaEye size={14} />
+                    </button>
                 )}
+                
                 {onEdit && (
-                    <a
-                        className="md-button md-button--icon"
-                        data-toggle="tooltip"
-                        data-placement="left"
-                        data-original-title="Editar"
-                        data-action={row?.actionEdit ?? 'agregarEditarPago'}
-                        action-after="reloadPagos"
-                        data-id={row.id}
+                    <button
                         onClick={() => onEdit(row)}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px 6px',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'all 0.2s',
+                            color: '#595959'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f0f0f0';
+                            e.currentTarget.style.color = '#1890ff';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#595959';
+                        }}
+                        title="Editar"
                     >
-                        <i className="mdi mdi-pencil"></i>
-                    </a>
+                        <FaEdit size={14} />
+                    </button>
                 )}
+                
+                {onUpload && (
+                    <button
+                        onClick={() => onUpload(row)}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px 6px',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'all 0.2s',
+                            color: '#595959'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f0f0f0';
+                            e.currentTarget.style.color = '#52c41a';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#595959';
+                        }}
+                        title="Subir"
+                    >
+                        <FaUpload size={14} />
+                    </button>
+                )}
+                
                 {onDelete && (
-                    <a
-                        className="md-button md-button--icon hidden-xs"
-                        data-toggle="tooltip"
-                        data-placement="left"
-                        data-original-title="Eliminar"
-                        data-action={row?.actionDelete ?? 'eliminarPago'}
-                        action-after="reloadPagos"
-                        data-id={row.id}
+                    <button
                         onClick={() => onDelete(row)}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px 6px',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'all 0.2s',
+                            color: '#595959'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#fff1f0';
+                            e.currentTarget.style.color = '#ff4d4f';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#595959';
+                        }}
+                        title="Eliminar"
                     >
-                        <i className="mdi mdi-delete"></i>
-                    </a>
+                        <FaTrashAlt size={14} />
+                    </button>
                 )}
+                
                 {onViewComponent && (
-                    <a
-                        className="md-button md-button--icon hidden-xs"
-                        data-toggle="tooltip"
-                        data-placement="left"
-                        data-original-title="Ver"
-                        data-id={row.id}
+                    <button
                         onClick={() => onViewComponent(row)}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px 6px',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'all 0.2s',
+                            color: '#722AE9'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f0e6ff';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                        title="Ver detalles"
                     >
-                        <i
-                            className="mdi mdi-arrow-right"
-                            style={{ color: '#2e2eda' }}
-                        ></i>
-                    </a>
+                        <FaArrowRight size={14} />
+                    </button>
                 )}
             </div>
         )
     }
 
-    const firstColumn: TableColumn<T> = {
-        ...columns[0],
-        style: stickyColumns
-            ? {
-                  position: 'sticky',
-                  left: 0,
-                  zIndex: 400,
-                  minWidth: '200px',
-                  padding: '0px 16px',
-                  backgroundColor: '#fff',
-                  borderRight: '1px solid #D9D9D9'
-              }
-            : undefined
-    }
-
     const newColumns =
-        onDelete || onView || onEdit || onViewComponent
-            ? [firstColumn, ...columns.slice(1), actionColumn]
+        onDelete || onView || onEdit || onViewComponent || onUpload
+            ? [...columns, actionColumn]
             : columns
 
     return (
-        <DataTable
-            title={title}
-            customStyles={{
-                headRow: { style: { backgroundColor: '#F1F1F1' } },
-                headCells: { style: { backgroundColor: '#F1F1F1' } }
-            }}
-            columns={newColumns}
-            data={data}
-            pagination
-            paginationServer
-            paginationTotalRows={totalRows}
-            paginationRowsPerPageOptions={[5, 10, 15, 20]}
-            paginationPerPage={rowsPerPage}
-            paginationDefaultPage={currentPage}
-            paginationComponentOptions={{
-                rowsPerPageText: 'Filas por página',
-                rangeSeparatorText: 'de',
-                noRowsPerPage: false,
-                selectAllRowsItemText: 'Todos'
-            }}
-            onChangePage={onPageChange}
-            onChangeRowsPerPage={onRowsPerPageChange}
-            noDataComponent={<div>{emptyText}</div>}
-            selectableRows={selectable}
-            selectableRowSelected={customSelect}
-            onSelectedRowsChange={onChangeCheckbox}
-            className={`table table-bordered table-hover ${stickyColumns ? 'sticky-table' : ''}`}
-        />
+        <div className={stickyColumns ? 'data-table-responsive' : ''}>
+            <DataTable
+                title={title}
+                customStyles={{
+                    headRow: { 
+                        style: { 
+                            backgroundColor: '#F1F1F1',
+                            minHeight: '52px'
+                        } 
+                    },
+                    headCells: { 
+                        style: { 
+                            backgroundColor: '#F1F1F1',
+                            fontWeight: '600',
+                            fontSize: '14px'
+                        } 
+                    },
+                    rows: {
+                        style: {
+                            minHeight: '48px'
+                        }
+                    },
+                    cells: {
+                        style: {
+                            fontSize: '14px'
+                        }
+                    }
+                }}
+                columns={newColumns}
+                data={data}
+                pagination
+                paginationServer
+                paginationTotalRows={totalRows}
+                paginationRowsPerPageOptions={[5, 10, 15, 20]}
+                paginationPerPage={rowsPerPage}
+                paginationDefaultPage={currentPage}
+                paginationComponentOptions={{
+                    rowsPerPageText: 'Filas por página',
+                    rangeSeparatorText: 'de',
+                    noRowsPerPage: false,
+                    selectAllRowsItemText: 'Todos'
+                }}
+                onChangePage={onPageChange}
+                onChangeRowsPerPage={onRowsPerPageChange}
+                noDataComponent={<div style={{ padding: '24px' }}>{emptyText}</div>}
+                selectableRows={selectable}
+                selectableRowSelected={customSelect}
+                onSelectedRowsChange={onChangeCheckbox}
+                className="table-bordered table-hover"
+            />
+        </div>
     )
 }

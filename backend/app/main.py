@@ -25,7 +25,7 @@ from app.core.exceptions import register_exception_handlers
 from app.router import (
     obra_router,
     estado_etapa_router,
-    etapa_ejecucion_router,
+    actividad_etapa_router,
     beneficiario_router,
     informacion_financista_router,
     informacion_contratista_router,
@@ -64,7 +64,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -89,7 +89,7 @@ api_router.include_router(document_router, prefix="/documents", tags=["Documento
 api_router.include_router(obra_router, prefix="/obras", tags=["Obras"])
 api_router.include_router(centro_operacion_router, prefix="/centros-operacion", tags=["Centros de Operación"])
 api_router.include_router(estado_etapa_router, prefix="/estados-etapa", tags=["Estados de Etapa"])
-api_router.include_router(etapa_ejecucion_router, prefix="/etapas-ejecucion", tags=["Etapas de Ejecución"])
+api_router.include_router(actividad_etapa_router, prefix="/actividad-etapa", tags=["Actividades de Etapas"])
 api_router.include_router(beneficiario_router, prefix="/beneficiarios", tags=["Beneficiarios"])
 api_router.include_router(informacion_financista_router, prefix="/informacion-financistas", tags=["Información Financistas"])
 api_router.include_router(informacion_contratista_router, prefix="/informacion-contratistas", tags=["Información Contratistas"])

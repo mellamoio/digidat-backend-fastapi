@@ -4,7 +4,7 @@ export const ReturnButton = styled.span`
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  color: #2e2eda;
+  color: #722AE9;
   font-size: 16px;
   font-weight: 500;
   text-decoration: none;
@@ -16,7 +16,7 @@ export const ReturnButton = styled.span`
     position: absolute;
     width: 100%;
     height: 1px;
-    background-color: #2e2eda;
+    background-color: #722AE9;
     bottom: 0;
     left: 0;
   }

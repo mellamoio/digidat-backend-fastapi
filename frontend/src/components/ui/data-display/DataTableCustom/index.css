@@ -89,7 +89,7 @@
     
     .data-table-responsive .rdt_TableHeadRow > div:last-child,
     .data-table-responsive .rdt_TableRow > div:last-child {
-        min-width: 130px;
+        min-width: 100px;
     }
 }
 

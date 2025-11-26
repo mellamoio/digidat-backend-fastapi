@@ -4,6 +4,7 @@ import { ConfigProvider } from 'antd';
 import { Login } from './pages/Login/index';
 import { Dashboard } from './pages/Dashboard/components/index';
 import Ajustes from './pages/Ajustes';
+import Detalles from './pages/Dashboard/components/detalles';
 import { SateliteProvider } from './context/DigidatContext';
 import { ObrasProvider } from './context/ObrasContext';
 import { useAuth } from './hooks/useAuth';
@@ -16,19 +17,19 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const { isAdmin, isLoading, isAuthenticated } = useAuth();
-  
+
   if (isLoading) {
     return <div>Cargando...</div>;
   }
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   if (requireAdmin && !isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
-  
+
   return children;
 };
 
@@ -54,6 +55,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/obras/:id"
+                  element={
+                    <ProtectedRoute>
+                      <Detalles />
                     </ProtectedRoute>
                   }
                 />

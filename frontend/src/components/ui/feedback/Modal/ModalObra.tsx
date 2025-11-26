@@ -11,6 +11,7 @@ import { centroOperacionService } from '../../../../services/getCentroOperacion.
 import { userService } from '../../../../services/getUser.service';
 import type { ObraResponse } from '../../../../types/obra';
 import type { User } from '../../../../types/user';
+import { useObras } from '../../../../context/ObrasContext';
 import {
   Overlay,
   ModalContainer,
@@ -56,6 +57,7 @@ export const ModalObra: React.FC<ModalObraProps> = ({
   const [selectedCentros, setSelectedCentros] = useState<number[]>([]);
   const [selectAllCentros, setSelectAllCentros] = useState(false);
   const [centrosError, setCentrosError] = useState(false);
+  const { mutateObras } = useObras();
 
   const isEditMode = !!initialData;
 
@@ -124,62 +126,61 @@ const loadData = async () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
+    try {
+      const values = await form.validateFields();
 
-      if (selectedCentros.length === 0) {
-        setCentrosError(true);
-        message.error('Debe seleccionar al menos un centro de operación');
-        return;
-      }
+    if (selectedCentros.length === 0) {
+        setCentrosError(true);
+        message.error('Debe seleccionar al menos un centro de operación');
+        return;
+      }
 
-      setCentrosError(false);
-      setLoading(true);
+      setCentrosError(false);
+      setLoading(true);
 
-      const obraData: any = {
-        nombre: values.nombre,
-        tipo_id: values.tipo_id,
-        id_responsable: values.id_responsable,
-        fecha_inicio: values.fecha_inicio ? values.fecha_inicio.format('YYYY-MM-DD') : null,
-        fecha_fin: values.fecha_fin ? values.fecha_fin.format('YYYY-MM-DD') : null,
-        costo_proyecto: values.costo_proyecto || 0,
-        id_empresa: 1,
-        centros_operacion: selectedCentros,
-      };
+      const obraData: any = {
+        nombre: values.nombre,
+        tipo_id: values.tipo_id,
+        id_responsable: values.id_responsable,
+        fecha_inicio: values.fecha_inicio ? values.fecha_inicio.format('YYYY-MM-DD') : null,
+        fecha_fin: values.fecha_fin ? values.fecha_fin.format('YYYY-MM-DD') : null,
+        costo_proyecto: values.costo_proyecto || 0,
+        id_empresa: 1,
+        centros_operacion: selectedCentros,
+      };
 
+      if (isEditMode && initialData) {
+        obraData.id = initialData.id_obra;
+        await editObra(obraData);
+        message.success('Obra actualizada exitosamente');
+        mutateObras();
+      } else {
+        await createObra(obraData);
+        message.success('Obra creada exitosamente');
+        mutateObras();
+      }
 
-      if (isEditMode && initialData) {
-        obraData.id = initialData.id_obra;
-        await editObra(obraData);
-        message.success('Obra actualizada exitosamente');
-      } else {
-        const result = await createObra(obraData);
-        message.success('Obra creada exitosamente');
-      }
+      form.resetFields();
+      setSelectedCentros([]);
+      setCentrosError(false);
+      onSuccess?.();
+      onClose();
+    } catch (error: any) {
+      console.error('Error en handleSubmit:', error);
 
-      form.resetFields();
-      setSelectedCentros([]);
-      setCentrosError(false);
-      onSuccess?.();
-      onClose();
-    } catch (error: any) {
-      console.error('Error en handleSubmit:', error);
-      
-      if (error.errorFields) {
-        
-        const firstError = error.errorFields[0];
-        if (firstError && firstError.errors && firstError.errors.length > 0) {
-          message.error(firstError.errors[0]);
-        }
-        
-        form.scrollToField(firstError.name);
-      } else {
-        console.error('Error de API:', error);
-        message.error(error.message || 'Error al guardar la obra');
-      }
-    } finally {
-      setLoading(false);
-    }
+      if (error.errorFields) {
+        const firstError = error.errorFields[0];
+        if (firstError && firstError.errors && firstError.errors.length > 0) {
+          message.error(firstError.errors[0]);
+        }
+        form.scrollToField(firstError.name);
+      } else {
+        console.error('Error de API:', error);
+        message.error(error.message || 'Error al guardar la obra');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {

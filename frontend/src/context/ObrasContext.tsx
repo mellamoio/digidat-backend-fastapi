@@ -30,29 +30,30 @@ interface KpisObras {
 }
 
 interface ObrasContextType {
-    empresaId: string
-    obras: Obra[] | null
-    obrasOriginales: Obra[] | null
-    obrasFiltradas: Obra[] | null
-    kpis: KpisObras | null
-    setKpis: (kpis: KpisObras) => void
-    params: {
-        usuarios?: string[]
-        centros_operacion?: string[]
-        tipo?: string
-        anio?: string
-        obra_id?: number
-        fecha_reembolso?: string
-        fecha_conclusion?: string
-        concepto?: string
-    }
-    setParams: (newParams: Partial<ObrasContextType['params']>) => void
-    resetFilters: () => void
-    setObrasFiltradas: React.Dispatch<React.SetStateAction<Obra[] | null>>
-    agregarObra: (nuevaObra: Obra) => void
-    selectedId: number | null
-    setSelectedId: (id: number | null) => void
-    tiposGastoData: TipoGasto[] | null
+  empresaId: string
+  obras: Obra[] | null
+  obrasOriginales: Obra[] | null
+  obrasFiltradas: Obra[] | null
+  kpis: KpisObras | null
+  setKpis: (kpis: KpisObras) => void
+  params: {
+    usuarios?: string[]
+    centros_operacion?: string[]
+    tipo?: string
+    anio?: string
+    obra_id?: number
+    fecha_reembolso?: string
+    fecha_conclusion?: string
+    concepto?: string
+  }
+  setParams: (newParams: Partial<ObrasContextType['params']>) => void
+  resetFilters: () => void
+  setObrasFiltradas: React.Dispatch<React.SetStateAction<Obra[] | null>>
+  agregarObra: (nuevaObra: Obra) => void
+  selectedId: number | null
+  setSelectedId: (id: number | null) => void
+  tiposGastoData: TipoGasto[] | null
+  mutateObras: () => void
 }
 
 const ObrasContext = createContext<ObrasContextType | undefined>(undefined)
@@ -297,11 +298,12 @@ export const ObrasProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 agregarObra,
                 selectedId,
                 setSelectedId,
-                tiposGastoData
+                tiposGastoData,
+                mutateObras
             }}
-        >
+            >
             {children}
-        </ObrasContext.Provider>
+            </ObrasContext.Provider>
     )
 }
 

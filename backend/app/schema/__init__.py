@@ -4,7 +4,7 @@ from .obra import *
 from .role_schema import *
 from .user_schema import *
 from .estado_etapa import *
-from .etapa_ejecucion import *
+from .actividad_etapa import *
 from .beneficiario import *
 from .informacion_financista import *
 from .informacion_contratista import *

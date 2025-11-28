@@ -157,7 +157,7 @@ const FiltroVerticalDigidat: React.FC = () => {
   };
 
   const handleUsuariosChange = (value: string[]) => {
-    setParams({ ...params, usuarios: value.length > 0 ? value : undefined });
+    setParams({ ...params, responsables: value.length > 0 ? value : undefined });
   };
 
   return (
@@ -169,7 +169,10 @@ const FiltroVerticalDigidat: React.FC = () => {
           placeholder="Buscar obra..."
           options={
             obras
-              ? obras.map((obra) => ({ label: obra.nombre, value: obra.id.toString() }))
+              ? obras.map((obra) => ({ 
+                  label: obra.nombre, 
+                  value: obra.id_obra.toString()
+                }))
               : []
           }
           value={obraSeleccionada}
@@ -224,7 +227,7 @@ const FiltroVerticalDigidat: React.FC = () => {
           label="Responsables"
           placeholder="Buscar responsables..."
           mode="multiple"
-          value={params.usuarios || []}
+          value={params.responsables || []}
           options={usuarios.map((usuario) => ({
             label: usuario.nombre,
             value: usuario.id_responsable.toString(),

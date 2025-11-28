@@ -12,7 +12,7 @@ export const TabButtonStyled = styled.button<ButtonProps>`
     text-align: center;
     line-height: 18px;
     transition: background-color 0.2s;
-    background-color: ${props => props.active ? '#2E2EDA' : 'white'};
+    background-color: ${props => props.active ? '#722AE9' : 'white'};
     color: ${props => props.active ? '#fff' : '#2D2B2B'};
     &:hover {
         ${props => !props.active && 'background-color: rgba(158, 158, 158, .2);;'}

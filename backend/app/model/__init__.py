@@ -1,7 +1,7 @@
 from .base import Base
 from .obra import Obra
 from .estado_etapa import EstadoEtapa
-from .etapa_ejecucion import EtapaEjecucion
+from .actividad_etapa import ActividadEtapa
 from .beneficiario import Beneficiario
 from .informacion_financista import InformacionFinancista
 from .informacion_contratista import InformacionContratista
@@ -17,7 +17,7 @@ __all__ = [
     "Base",
     "Obra",
     "EstadoEtapa",
-    "EtapaEjecucion",
+    "ActividadEtapa",
     "Beneficiario",
     "InformacionFinancista",
     "InformacionContratista",

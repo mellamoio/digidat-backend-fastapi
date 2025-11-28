@@ -31,7 +31,6 @@ const ModalUsuario: React.FC<ModalUsuarioProps> = ({
   onClose,
   onSubmit,
   initialData,
-  loading = false,
 }) => {
   const [form] = Form.useForm();
 

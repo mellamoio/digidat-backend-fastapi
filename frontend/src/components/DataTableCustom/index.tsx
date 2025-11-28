@@ -62,7 +62,7 @@ export const DataTableCustom = <T extends DataRow>({
         name: 'Detalles',
         center: true,
         grow: 0,
-        width: '130px',
+        width: '90px',
         cell: (row: T) => (
             <div style={{ 
                 display: 'flex', 

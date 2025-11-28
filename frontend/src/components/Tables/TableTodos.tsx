@@ -2,22 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataTableCustom } from '../DataTableCustom';
 import type { TableColumn } from 'react-data-table-component';
+import type { Obra } from '../../types/obra';
+import type { EstadoEtapa } from '../../types/estado_etapa';
+import { getEstadosEtapa } from '../../services/getEstadoEtapa.service';
+import { useObras } from '../../context/ObrasContext';
+import dayjs from 'dayjs';
 import {
   ContainerLabel,
   EstadoField,
 } from './TableTodos.styled';
-import type { Obra } from '../../types/obra';
-import type { EstadoEtapa } from '../../types/estado_etapa';
-import { useObras } from '../../context/ObrasContext';
-import { getEstadosEtapa } from '../../services/getEstadoEtapa.service';
-import dayjs from 'dayjs';
 
 export const TableTodos: React.FC = () => {
   const { obrasFiltradas, obras } = useObras();
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [estadosEtapa, setEstadosEtapa] = useState<EstadoEtapa[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const navigate = useNavigate();
+  const rows = obrasFiltradas || obras || [];
+
 
   useEffect(() => {
     const fetchEstados = async () => {
@@ -30,8 +32,6 @@ export const TableTodos: React.FC = () => {
     };
     fetchEstados();
   }, []);
-
-  const rows = obrasFiltradas || obras || [];
 
   const formatCurrency = (value: number | string | undefined): string => {
     if (value === undefined || value === null || value === '') {
@@ -57,12 +57,12 @@ export const TableTodos: React.FC = () => {
     const estado = estadosEtapa.find((e) => e.id === estadoId);
     return {
       name: estado?.nombre ?? 'N/A',
-      color: estado?.color ?? '#6C757D',
+      color: estado?.color ?? '#999999',
     };
   };
 
   const handleOnViewComponent = (row: Obra) => {
-    navigate(`/detalles/${row.id}`);
+    navigate(`/obras/${row.id_obra}`);
   };
 
   const handlePageChange = (page: number) => {
@@ -85,25 +85,19 @@ export const TableTodos: React.FC = () => {
         </ContainerLabel>
       ),
       sortable: true,
+      selector: (row: Obra) => row.nombre,
     },
     {
-      name: 'Responsables',
+      name: 'Responsable',
       center: true,
       grow: 1.5,
       cell: (row: Obra) => (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-          {Array.isArray(row.usuarios) && row.usuarios.length > 0 ? (
-            row.usuarios.map((usuario, index) => (
-              <span key={index} style={{ fontSize: '13px' }}>
-                {usuario.nombre || 'N/A'}
-              </span>
-            ))
-          ) : (
-            <span style={{ color: '#999' }}>Sin asignar</span>
-          )}
-        </div>
+        <span style={{ fontSize: '13px' }}>
+          {row.responsable?.nombre ?? 'Sin asignar'}
+        </span>
       ),
       sortable: true,
+      selector: (row: Obra) => row.responsable?.nombre ?? '',
     },
     {
       name: 'Centro de Operación',
@@ -128,20 +122,22 @@ export const TableTodos: React.FC = () => {
       name: 'Fecha de Inicio',
       center: true,
       grow: 1,
-      cell: (row: Obra) => <span>{formatDate(row.fecha_reembolso)}</span>,
+      cell: (row: Obra) => <span>{formatDate(row.fecha_inicio)}</span>,
       sortable: true,
+      selector: (row: Obra) => row.fecha_inicio || '',
     },
     {
       name: 'Fecha de Culminación',
       center: true,
       grow: 1,
-      cell: (row: Obra) => <span>{formatDate(row.fecha_conclusion)}</span>,
+      cell: (row: Obra) => <span>{formatDate(row.fecha_fin)}</span>,
       sortable: true,
+      selector: (row: Obra) => row.fecha_fin || '',
     },
     {
       name: 'Estado',
       center: true,
-      grow: 1,
+      grow: 1.2,
       cell: (row: Obra) => {
         const { name, color } = getEstadoInfo(row.estado_id);
         return (
@@ -166,6 +162,7 @@ export const TableTodos: React.FC = () => {
         );
       },
       sortable: true,
+      selector: (row: Obra) => row.estado_id,
     },
     {
       name: 'Costo del Proyecto',
@@ -173,6 +170,7 @@ export const TableTodos: React.FC = () => {
       grow: 1,
       cell: (row: Obra) => <span>{formatCurrency(row.costo_proyecto)}</span>,
       sortable: true,
+      selector: (row: Obra) => row.costo_proyecto ?? 0,
     },
     {
       name: 'Monto Pagado',
@@ -180,6 +178,7 @@ export const TableTodos: React.FC = () => {
       grow: 1,
       cell: (row: Obra) => <span>{formatCurrency(row.monto_pagado)}</span>,
       sortable: true,
+      selector: (row: Obra) => row.monto_pagado ?? 0,
     },
     {
       name: 'Monto Recuperado',
@@ -187,6 +186,7 @@ export const TableTodos: React.FC = () => {
       grow: 1,
       cell: (row: Obra) => <span>{formatCurrency(row.monto_recuperado)}</span>,
       sortable: true,
+      selector: (row: Obra) => row.monto_recuperado ?? 0,
     },
   ];
 

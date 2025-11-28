@@ -13,7 +13,7 @@ interface DigidatContextType {
   setFilteredObras: (obras: Obra[]) => void;
 }
 
-const DigidatContext = createContext<DigidatContextType | undefined>(undefined);
+export const DigidatContext = createContext<DigidatContextType | undefined>(undefined);
 
 export const SateliteProvider = ({ children }: { children: ReactNode }) => {
   const [usuarios, setUsuarios] = useState<User[]>([]);

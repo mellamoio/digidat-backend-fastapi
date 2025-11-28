@@ -1,7 +1,7 @@
 from .base import Base
-from .obra import Obra
 from .estado_etapa import EstadoEtapa
 from .actividad_etapa import ActividadEtapa
+from .obra import Obra
 from .beneficiario import Beneficiario
 from .informacion_financista import InformacionFinancista
 from .informacion_contratista import InformacionContratista
@@ -13,11 +13,12 @@ from .document import Documento
 from .roles import Role, Permission
 from .users import User
 
+
 __all__ = [
     "Base",
-    "Obra",
     "EstadoEtapa",
     "ActividadEtapa",
+    "Obra",
     "Beneficiario",
     "InformacionFinancista",
     "InformacionContratista",
@@ -25,7 +26,7 @@ __all__ = [
     "EstadoReembolso",
     "Pago",
     "Auditoria",
-    "Document",
+    "Documento",
     "Role",
     "Permission",
     "User",

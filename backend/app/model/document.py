@@ -2,6 +2,7 @@ from app.config.db import Base
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, TIMESTAMP, func
 from sqlalchemy.orm import relationship
 
+
 class Documento(Base):
     __tablename__ = "documentos"
 
@@ -12,16 +13,15 @@ class Documento(Base):
     tamano_bytes = Column(Integer)
     uploaded_by = Column(Integer, ForeignKey("usuarios.id_responsable", ondelete="SET NULL"))
     id_obra = Column(Integer, ForeignKey("obras.id_obra", ondelete="SET NULL"))
-    id_actividad = Column(Integer, ForeignKey("actividades_etapa.id_actividad", ondelete="SET NULL"))  # <- nombre y referencia corregida
+    id_etapa = Column(Integer, ForeignKey("actividades_etapa.id_etapa", ondelete="SET NULL"))  # Corregido: id_actividad -> id_etapa
     id_informacionfinancista = Column(Integer, ForeignKey("informacionfinancista.id", ondelete="SET NULL"))
     id_informacioncontratista = Column(Integer, ForeignKey("informacioncontratista.id", ondelete="SET NULL"))
     id_pago = Column(Integer, ForeignKey("pagos.id_pago", ondelete="SET NULL"))
     create_date = Column(TIMESTAMP, server_default=func.now())
     delete_date = Column(TIMESTAMP, nullable=True)
 
-    # Relaciones
+    # Relaciones - SIN back_populates para ActividadEtapa para evitar ciclos
     obra = relationship("Obra", back_populates="documentos", foreign_keys=[id_obra])
-    actividad = relationship("ActividadEtapa", back_populates="documentos", foreign_keys=[id_actividad])
     informacion_financista = relationship("InformacionFinancista", back_populates="documentos", foreign_keys=[id_informacionfinancista])
     informacion_contratista = relationship("InformacionContratista", back_populates="documentos", foreign_keys=[id_informacioncontratista])
     pago = relationship("Pago", back_populates="documentos", foreign_keys=[id_pago])

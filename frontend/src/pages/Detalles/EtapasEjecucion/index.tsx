@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { TableColumn } from "react-data-table-component";
-import { DataTableCustom, type DataRow as TableDataRow } from "../../../../../components/DataTableCustom/index";
+import { DataTableCustom, type DataRow as TableDataRow } from "../../../components/DataTableCustom/index";
 
 interface ExtendedDataRow extends TableDataRow {
   id: number;

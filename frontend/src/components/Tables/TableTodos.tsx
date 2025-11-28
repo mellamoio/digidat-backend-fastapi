@@ -20,6 +20,7 @@ export const TableTodos: React.FC = () => {
   const navigate = useNavigate();
   const rows = obrasFiltradas || obras || [];
 
+
   useEffect(() => {
     const fetchEstados = async () => {
       try {

@@ -179,7 +179,6 @@ const FiltroVerticalDigidat: React.FC = () => {
           handleChange={handleObraChange}
         />
 
-
         <label>Rango de tiempo</label>
         <FiltroFechas
           params={params}

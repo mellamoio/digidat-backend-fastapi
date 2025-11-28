@@ -26,7 +26,6 @@ export const Detalles: React.FC = () => {
   const obraId = Number(id);
   const navigate = useNavigate();
 
-  // ------ MOCK DATA (HARDCODED) ------
   const mockPestanas: Pestaña[] = [
     { id: 1, name: "Etapas y Ejecución", habilitardeshabilitar: 1 },
     { id: 2, name: "Otra Pestaña", habilitardeshabilitar: 0 },
@@ -51,7 +50,6 @@ export const Detalles: React.FC = () => {
     monto_recuperado: 400000,
     monto_pagado: 300000,
   };
-  // ------ END MOCK DATA ------
 
   const [selectedMenu, setSelectedMenu] = useState<string>("Etapas y Ejecución");
   const [pestañas] = useState<Pestaña[]>(mockPestanas);

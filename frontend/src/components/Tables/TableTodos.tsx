@@ -61,7 +61,7 @@ export const TableTodos: React.FC = () => {
   };
 
   const handleOnViewComponent = (row: Obra) => {
-    navigate(`/obras/${row.id}`);
+    navigate(`/obras/${row.id_obra}`);
   };
 
   const handlePageChange = (page: number) => {
@@ -87,23 +87,16 @@ export const TableTodos: React.FC = () => {
       selector: (row: Obra) => row.nombre,
     },
     {
-      name: 'Responsable(s)',
+      name: 'Responsable',
       center: true,
       grow: 1.5,
       cell: (row: Obra) => (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-          {Array.isArray(row.usuarios) && row.usuarios.length > 0 ? (
-            row.usuarios.map((usuario, index) => (
-              <span key={index} style={{ fontSize: '13px' }}>
-                {usuario.nombre || 'N/A'}
-              </span>
-            ))
-          ) : (
-            <span style={{ color: '#999' }}>Sin asignar</span>
-          )}
-        </div>
+        <span style={{ fontSize: '13px' }}>
+          {row.responsable?.nombre ?? 'Sin asignar'}
+        </span>
       ),
       sortable: true,
+      selector: (row: Obra) => row.responsable?.nombre ?? '',
     },
     {
       name: 'Centro de Operación',
@@ -128,17 +121,17 @@ export const TableTodos: React.FC = () => {
       name: 'Fecha de Inicio',
       center: true,
       grow: 1,
-      cell: (row: Obra) => <span>{formatDate(row.fecha_reembolso)}</span>,
+      cell: (row: Obra) => <span>{formatDate(row.fecha_inicio)}</span>,
       sortable: true,
-      selector: (row: Obra) => row.fecha_reembolso || '',
+      selector: (row: Obra) => row.fecha_inicio || '',
     },
     {
       name: 'Fecha de Culminación',
       center: true,
       grow: 1,
-      cell: (row: Obra) => <span>{formatDate(row.fecha_conclusion)}</span>,
+      cell: (row: Obra) => <span>{formatDate(row.fecha_fin)}</span>,
       sortable: true,
-      selector: (row: Obra) => row.fecha_conclusion || '',
+      selector: (row: Obra) => row.fecha_fin || '',
     },
     {
       name: 'Estado',

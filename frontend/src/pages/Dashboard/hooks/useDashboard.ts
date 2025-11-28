@@ -3,7 +3,7 @@ import { useSateliteActores } from '../../../hooks/useUsuarios';
 import type { DashboardState } from '../types/dashboard';
 
 export const useDashboard = () => {
-  const { kpis, obrasFiltradas } = useSateliteActores();
+  const { obrasFiltradas } = useSateliteActores();
   const [state, setState] = useState<DashboardState>({
     page: 'index',
     idObra: 0,
@@ -40,7 +40,6 @@ export const useDashboard = () => {
   return {
     state,
     setState,
-    kpis,
     obrasFiltradas: obrasFiltradas || []
   };
 };

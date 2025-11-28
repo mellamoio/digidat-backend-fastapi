@@ -9,7 +9,6 @@ import { createObra, editObra } from '../../../../services/getObra.service';
 import { getTiposObra, type TipoObra } from '../../../../services/getTiposObra.service';
 import { centroOperacionService } from '../../../../services/getCentroOperacion.service';
 import { userService } from '../../../../services/getUser.service';
-import type { ObraResponse } from '../../../../types/obra';
 import type { User } from '../../../../types/user';
 import { useObras } from '../../../../context/ObrasContext';
 import {
@@ -27,14 +26,15 @@ import {
   Container,
   FormSection
 } from './ModalObra.styled';
+import type { Obra } from '../../../../types/obra';
 
 const { Option } = Select;
 
 interface ModalObraProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
-  initialData: ObraResponse | null;
+  onSuccess?: (obra?: Obra) => void;
+  initialData: Obra | null;
 }
 
 interface CentroOperacion {
@@ -67,11 +67,11 @@ export const ModalObra: React.FC<ModalObraProps> = ({
       if (initialData) {
         const centrosIds = initialData.centros_operacion.map(c => c.id);
         setSelectedCentros(centrosIds);
-        
+
         form.setFieldsValue({
           nombre: initialData.nombre,
           tipo_id: initialData.tipo_id,
-          id_responsable: initialData.responsable?.id_responsable || null,
+          id_responsable: initialData.responsable ? initialData.responsable.id_responsable : undefined,
           fecha_inicio: initialData.fecha_inicio ? dayjs(initialData.fecha_inicio) : null,
           fecha_fin: initialData.fecha_fin ? dayjs(initialData.fecha_fin) : null,
           costo_proyecto: initialData.costo_proyecto || 0,
@@ -84,25 +84,24 @@ export const ModalObra: React.FC<ModalObraProps> = ({
     }
   }, [isOpen, initialData, form]);
 
-const loadData = async () => {
-  try {
-    const centros = await centroOperacionService.getCentrosOperacion();
-    setCentrosOperacion(centros);
+  const loadData = async () => {
+    try {
+      const centros = await centroOperacionService.getCentrosOperacion();
+      setCentrosOperacion(centros);
 
-    const users = await userService.getUsers();
-    setResponsables(users);
+      const users = await userService.getUsers();
+      setResponsables(users);
 
-    setLoadingTipos(true);
-    const tiposBackend = await getTiposObra();
-    setTipos(tiposBackend);
-    setLoadingTipos(false);
-  } catch (error) {
-    console.error('Error al cargar datos:', error);
-    message.error('Error al cargar datos del formulario');
-    setLoadingTipos(false);
-  }
-};
-
+      setLoadingTipos(true);
+      const tiposBackend = await getTiposObra();
+      setTipos(tiposBackend);
+      setLoadingTipos(false);
+    } catch (error) {
+      console.error('Error al cargar datos:', error);
+      message.error('Error al cargar datos del formulario');
+      setLoadingTipos(false);
+    }
+  };
 
   const handleCheckboxChange = (id: number) => {
     setCentrosError(false);
@@ -126,61 +125,61 @@ const loadData = async () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
+    try {
+      const values = await form.validateFields();
 
-    if (selectedCentros.length === 0) {
-        setCentrosError(true);
-        message.error('Debe seleccionar al menos un centro de operación');
-        return;
-      }
+      if (selectedCentros.length === 0) {
+        setCentrosError(true);
+        message.error('Debe seleccionar al menos un centro de operación');
+        return;
+      }
 
-      setCentrosError(false);
-      setLoading(true);
+      setCentrosError(false);
+      setLoading(true);
 
-      const obraData: any = {
-        nombre: values.nombre,
-        tipo_id: values.tipo_id,
-        id_responsable: values.id_responsable,
-        fecha_inicio: values.fecha_inicio ? values.fecha_inicio.format('YYYY-MM-DD') : null,
-        fecha_fin: values.fecha_fin ? values.fecha_fin.format('YYYY-MM-DD') : null,
-        costo_proyecto: values.costo_proyecto || 0,
-        id_empresa: 1,
-        centros_operacion: selectedCentros,
-      };
+      const obraData: any = {
+        nombre: values.nombre,
+        tipo_id: values.tipo_id,
+        id_responsable: values.id_responsable,
+        fecha_inicio: values.fecha_inicio ? values.fecha_inicio.format('YYYY-MM-DD') : null,
+        fecha_fin: values.fecha_fin ? values.fecha_fin.format('YYYY-MM-DD') : null,
+        costo_proyecto: values.costo_proyecto || 0,
+        id_empresa: 1,
+        centros_operacion: selectedCentros,
+      };
 
-      if (isEditMode && initialData) {
-        obraData.id = initialData.id_obra;
-        await editObra(obraData);
-        message.success('Obra actualizada exitosamente');
-        mutateObras();
-      } else {
-        await createObra(obraData);
-        message.success('Obra creada exitosamente');
-        mutateObras();
-      }
+      if (isEditMode && initialData) {
+        obraData.id_obra = initialData.id_obra;
+        await editObra(obraData);
+        message.success('Obra actualizada exitosamente');
+        mutateObras();
+      } else {
+        await createObra(obraData);
+        message.success('Obra creada exitosamente');
+        mutateObras();
+      }
 
-      form.resetFields();
-      setSelectedCentros([]);
-      setCentrosError(false);
-      onSuccess?.();
-      onClose();
-    } catch (error: any) {
-      console.error('Error en handleSubmit:', error);
+      form.resetFields();
+      setSelectedCentros([]);
+      setCentrosError(false);
+      onSuccess?.();
+      onClose();
+    } catch (error: any) {
+      console.error('Error en handleSubmit:', error);
 
-      if (error.errorFields) {
-        const firstError = error.errorFields[0];
-        if (firstError && firstError.errors && firstError.errors.length > 0) {
-          message.error(firstError.errors[0]);
-        }
-        form.scrollToField(firstError.name);
-      } else {
-        console.error('Error de API:', error);
-        message.error(error.message || 'Error al guardar la obra');
-      }
-    } finally {
-      setLoading(false);
-    }
+      if (error.errorFields) {
+        const firstError = error.errorFields[0];
+        if (firstError && firstError.errors && firstError.errors.length > 0) {
+          message.error(firstError.errors[0]);
+        }
+        form.scrollToField(firstError.name);
+      } else {
+        console.error('Error de API:', error);
+        message.error(error.message || 'Error al guardar la obra');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -194,7 +193,7 @@ const loadData = async () => {
 
   return (
     <Overlay onClick={handleCancel}>
-      <ModalContainer onClick={(e) => e.stopPropagation()}>
+      <ModalContainer onClick={e => e.stopPropagation()}>
         <HeaderModal>
           <span>{isEditMode ? 'Editar Obra por Impuestos' : 'Nueva Obra por Impuestos'}</span>
           <CloseButton onClick={handleCancel}>
@@ -209,10 +208,10 @@ const loadData = async () => {
                 Centro de Operación<Required>*</Required>
               </Label>
               {centrosError && (
-                <div style={{ 
-                  color: '#ff4d4f', 
-                  fontSize: '12px', 
-                  marginTop: '4px', 
+                <div style={{
+                  color: '#ff4d4f',
+                  fontSize: '12px',
+                  marginTop: '4px',
                   marginBottom: '8px',
                   fontFamily: 'Montserrat, sans-serif'
                 }}>
@@ -226,7 +225,7 @@ const loadData = async () => {
                       <input
                         type="checkbox"
                         checked={selectAllCentros}
-                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        onChange={e => handleSelectAll(e.target.checked)}
                       />
                       Todos
                     </label>
@@ -263,7 +262,6 @@ const loadData = async () => {
                 }}
               >
                 <FormGrid>
-                  {/* Nombre - Ocupa toda la fila */}
                   <div className="full-width">
                     <Form.Item
                       name="nombre"
@@ -278,7 +276,6 @@ const loadData = async () => {
                     </Form.Item>
                   </div>
 
-                  {/* Tipo - Columna izquierda */}
                   <div>
                     <Form.Item
                       name="tipo_id"
@@ -307,7 +304,6 @@ const loadData = async () => {
                     </Form.Item>
                   </div>
 
-                  {/* Responsable - Columna derecha */}
                   <div>
                     <Form.Item
                       name="id_responsable"
@@ -318,7 +314,7 @@ const loadData = async () => {
                       }
                       rules={[{ required: true, message: 'El responsable es obligatorio' }]}
                     >
-                      <Select 
+                      <Select
                         placeholder="Seleccionar responsable"
                         showSearch
                         optionFilterProp="children"
@@ -334,7 +330,6 @@ const loadData = async () => {
                     </Form.Item>
                   </div>
 
-                  {/* Fecha Inicio - Columna izquierda */}
                   <div>
                     <Form.Item
                       name="fecha_inicio"
@@ -352,7 +347,6 @@ const loadData = async () => {
                     </Form.Item>
                   </div>
 
-                  {/* Fecha Fin - Columna derecha */}
                   <div>
                     <Form.Item
                       name="fecha_fin"
@@ -370,7 +364,6 @@ const loadData = async () => {
                     </Form.Item>
                   </div>
 
-                  {/* Costo Proyecto - Ocupa toda la fila */}
                   <div className="full-width">
                     <Form.Item
                       name="costo_proyecto"
@@ -391,6 +384,7 @@ const loadData = async () => {
                   <ButtonPrimary
                     label={isEditMode ? 'Actualizar' : 'Guardar'}
                     handleClick={handleSubmit}
+                    loading={loading}
                   />
                 </ButtonGroup>
               </Form>

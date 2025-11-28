@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import {
     ArrowScroll,
     IconWrapper,
@@ -98,7 +97,7 @@ const StatusBar = <T extends EstadoItem>({
                     </ArrowScroll>
                 )}
                 <ScrollArea ref={scrollRef}>
-                    {estados.slice(1).map((estado, index) => (
+                    {estados.slice(1).map((estado) => (
                         <ProgressItemWrapper key={estado.id}>
                             <ProgressItem
                                 isSelected={estado.id === selectedId}

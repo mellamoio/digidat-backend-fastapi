@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import type { Obra } from "../../../../types/obra";
@@ -27,35 +27,32 @@ export const Detalles: React.FC = () => {
   const navigate = useNavigate();
 
   // ------ MOCK DATA (HARDCODED) ------
-  // Pestañas simuladas
   const mockPestanas: Pestaña[] = [
     { id: 1, name: "Etapas y Ejecución", habilitardeshabilitar: 1 },
     { id: 2, name: "Otra Pestaña", habilitardeshabilitar: 0 },
   ];
 
-  // Estado/Estatus simulados
   const mockEstados: EstadoEtapa[] = [
     { id: 1, nombre: "En progreso", orden: 1, color: "#E3BD16" },
     { id: 2, nombre: "Finalizado", orden: 2, color: "#4CAF50" },
   ];
 
-  // Obra simulada
   const mockObra: Obra = {
-    id: obraId,
+    id_obra: obraId,
     nombre: "Obra de prueba",
     tipo_id: 1,
     estado_id: 1,
     costo_proyecto: 1200000,
-    fecha_reembolso: "2025-12-01",
-    fecha_conclusion: "2025-12-31",
-    usuarios: [{ id: 1, nombre: "Ingeniero Jefe" }],
+    fecha_inicio: "2025-12-01",
+    fecha_fin: "2025-12-31",
+    id_responsable: 1,
+    id_empresa: 1,
     centros_operacion: [{ id: 1, nombre: "Centro Lima" }],
     monto_recuperado: 400000,
     monto_pagado: 300000,
   };
   // ------ END MOCK DATA ------
 
-  // Usa los mocks en vez de estados y fetch
   const [selectedMenu, setSelectedMenu] = useState<string>("Etapas y Ejecución");
   const [pestañas] = useState<Pestaña[]>(mockPestanas);
   const [obra, setObra] = useState<Obra | null>(mockObra);
@@ -77,10 +74,7 @@ export const Detalles: React.FC = () => {
   };
 
   const normalizeString = (str: string) =>
-    str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
+    str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   const menuItems = ["Etapas y Ejecución"].concat(
     pestañas
@@ -102,12 +96,11 @@ export const Detalles: React.FC = () => {
   const handleDeleteClick = () => setShowDeleteModal(true);
 
   const handleDeleteObra = async () => {
-    if (!obra?.id) {
+    if (!obra?.id_obra) {
       message.error("No se puede eliminar: ID no encontrado");
       return;
     }
     try {
-      // Aquí solo navega atrás, simulado
       setShowDeleteModal(false);
       navigate("/dashboard");
     } catch (error) {
@@ -129,8 +122,8 @@ export const Detalles: React.FC = () => {
     );
   }
 
-  const fechaEntregaFormateada = obra.fecha_conclusion
-    ? dayjs(obra.fecha_conclusion).format("DD/MM/YYYY")
+  const fechaEntregaFormateada = obra.fecha_fin
+    ? dayjs(obra.fecha_fin).format("DD/MM/YYYY")
     : "N/A";
 
   const nombreEtapa =
@@ -168,8 +161,8 @@ export const Detalles: React.FC = () => {
         ))}
       </Menu>
       <ContentPlaceholder>
-        {selectedMenu === "Etapas y Ejecución" && obra?.id ? (
-          <EtapasEjecucion selectedId={selectedId} idObraImpuesto={obra.id} />
+        {selectedMenu === "Etapas y Ejecución" && obra?.id_obra ? (
+          <EtapasEjecucion />
         ) : (
           <p>{selectedMenu || "Selecciona una pestaña"}</p>
         )}

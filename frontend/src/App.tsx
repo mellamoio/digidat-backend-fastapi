@@ -4,7 +4,8 @@ import { ConfigProvider } from 'antd';
 import { Login } from './pages/Login/index';
 import { Dashboard } from './pages/Dashboard/components/index';
 import Ajustes from './pages/Ajustes';
-import Detalles from './pages/Dashboard/components/detalles';
+// IMPORTA EL COMPONENTE DE DETALLE QUE RENDERIZA TODOS LOS TABS/INFO DE OBRA
+import Detalles from './pages/Dashboard/components/detalles'; // <-- AJUSTA SI ES NECESARIO
 import { SateliteProvider } from './context/DigidatContext';
 import { ObrasProvider } from './context/ObrasContext';
 import { useAuth } from './hooks/useAuth';

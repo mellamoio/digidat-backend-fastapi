@@ -12,6 +12,12 @@ class EstadoEtapaCreate(EstadoEtapaBase):
     pass
 
 
+class EstadoEtapaUpdate(BaseModel):
+    nombre: Optional[str] = None
+    orden: Optional[int] = None
+    color: Optional[str] = None
+
+
 class EstadoEtapaResponse(EstadoEtapaBase):
     id: int
 

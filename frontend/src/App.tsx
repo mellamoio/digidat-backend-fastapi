@@ -4,7 +4,7 @@ import { ConfigProvider } from 'antd';
 import { Login } from './pages/Login/index';
 import { Dashboard } from './pages/Dashboard/components/index';
 import Ajustes from './pages/Ajustes';
-import Detalles from './pages/Dashboard/components/detalles';
+import Detalles from './pages/Detalles';
 import { SateliteProvider } from './context/DigidatContext';
 import { ObrasProvider } from './context/ObrasContext';
 import { useAuth } from './hooks/useAuth';

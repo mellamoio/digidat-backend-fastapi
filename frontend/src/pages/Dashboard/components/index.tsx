@@ -4,7 +4,7 @@ import { Row } from '../../../components/ui/layout/Grid/Row';
 import { Kpis } from '../../../components/ui/data-display/Kpis';
 import { TableTodos } from '../../../components/Tables/TableTodos';
 import FiltroVerticalDigidat from '../../../components/ui/data-display/Filtros/FiltroDigidat';
-import { DashboardLayout, MainContent } from './index.styled';
+import { DashboardLayout, MainContent } from '../../Dashboard/components/index.styled';
 import { ObrasProvider } from '../../../context/ObrasContext'
 
 export const Dashboard: React.FC = () => {

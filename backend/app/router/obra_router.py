@@ -5,16 +5,62 @@ from app.config.db import get_db
 from app.schema import obra as schema_obra
 from app.model import obra as model_obra
 from app.model.centro_operacion import CentroOperacion
-
+from app.model.estado_etapa import EstadoEtapa
+from app.model.actividad_etapa import ActividadEtapa
 
 router = APIRouter()
 
+ACTIVIDADES_DEFAULT = {
+    "Priorización": [
+        "Aprobar la Capacidad Presupuestal",
+        "Aprobar la Ejecución Conjunta de Proyectos",
+        "Evaluar la Propuesta de Proyectos del Sector Privado",
+        "Aprobar la Lista de Proyectos Priorizados por Entidad Pública"
+    ],
+    "Actos Previos": [
+        "Designar al Comité Especial",
+        "Otorgar la Certificación Presupuestaria y/o compromiso de Priorización de Recursos para Entidades Públicas de Gobierno Nacional",
+        "Aprobar las bases para el proceso de selección"
+    ],
+    "Selección": [
+        "Realizar el Proceso de Selección",
+        "Realizar la suscripción de Convenio",
+        "Realizar la suscripción de contrato de la Supervisión del Proyecto",
+        "Realizar modificación de Estudios",
+        "Aprobar el Estudio definitivo, expediente de operación y/o mantenimiento",
+        "Aprobar la Sustitución del Ejecutor de Proyecto",
+        "Aprobar la ampliación de plazos",
+        "Realizar la culminación y recepción del proyecto",
+        "Aprobar la liquidación del proyecto"
+    ],
+    "Ejecución": [
+        "Emitir conformidad de Mantenimiento u Operación"
+    ],
+    "Emisión de CIPRL o CIPGN": [
+        "Emitir el CIPRL o CIPGN",
+        "Emitir el CIPRA por el CIPGN por Avance de Obra"
+    ]
+}
+
+def crear_actividades_para_obra(db: Session, id_obra: int):
+    estados = db.query(EstadoEtapa).order_by(EstadoEtapa.orden).all()
+    
+    for estado in estados:
+        actividades_nombres = ACTIVIDADES_DEFAULT.get(estado.nombre, [])
+        
+        for index, nombre_actividad in enumerate(actividades_nombres, start=1):
+            nueva_actividad = ActividadEtapa(
+                nombre_etapa=nombre_actividad,
+                id_obra=id_obra,
+                id_estado_etapa=estado.id,
+                orden=index
+            )
+            db.add(nueva_actividad)
+    
+    db.commit()
 
 @router.post("/", response_model=schema_obra.ObraResponse, status_code=201)
 def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
-    """
-    Crear una nueva obra
-    """
     try:
         new_obra = model_obra.Obra(
             nombre=obra.nombre,
@@ -37,11 +83,12 @@ def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_obra)
         
+        crear_actividades_para_obra(db, new_obra.id_obra)
+        
         return new_obra
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al crear la obra: {str(e)}")
-
 
 @router.get("/", response_model=List[schema_obra.ObraResponse])
 def read_obras(
@@ -50,21 +97,14 @@ def read_obras(
     limit: int = 100,
     db: Session = Depends(get_db)
 ):
-    """
-    Obtener todas las obras de una empresa
-    """
     obras = db.query(model_obra.Obra).filter(
         model_obra.Obra.id_empresa == id_empresa
     ).offset(skip).limit(limit).all()
     
     return obras
 
-
 @router.get("/{obra_id}", response_model=schema_obra.ObraResponse)
 def read_obra(obra_id: int, db: Session = Depends(get_db)):
-    """
-    Obtener una obra por ID
-    """
     db_obra = db.query(model_obra.Obra).filter(
         model_obra.Obra.id_obra == obra_id
     ).first()
@@ -74,12 +114,8 @@ def read_obra(obra_id: int, db: Session = Depends(get_db)):
     
     return db_obra
 
-
 @router.put("/{obra_id}", response_model=schema_obra.ObraResponse)
 def update_obra(obra_id: int, obra: schema_obra.ObraUpdate, db: Session = Depends(get_db)):
-    """
-    Actualizar una obra existente
-    """
     try:
         db_obra = db.query(model_obra.Obra).filter(model_obra.Obra.id_obra == obra_id).first()
         if db_obra is None:
@@ -106,12 +142,8 @@ def update_obra(obra_id: int, obra: schema_obra.ObraUpdate, db: Session = Depend
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al actualizar la obra: {str(e)}")
 
-
 @router.delete("/{obra_id}")
 def delete_obra(obra_id: int, db: Session = Depends(get_db)):
-    """
-    Eliminar una obra
-    """
     db_obra = db.query(model_obra.Obra).filter(model_obra.Obra.id_obra == obra_id).first()
     if db_obra is None:
         raise HTTPException(status_code=404, detail="Obra no encontrada")

@@ -2,12 +2,14 @@ from sqlalchemy import Column, Integer, String, Date, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from app.config.db import Base
 
+
 obra_centro_operacion = Table(
     'obra_centro_operacion',
     Base.metadata,
     Column('id_obra', Integer, ForeignKey('obras.id_obra'), primary_key=True),
     Column('id_centro_operacion', Integer, ForeignKey('centros_operacion.id'), primary_key=True)
 )
+
 
 class Obra(Base):
     __tablename__ = "obras"
@@ -23,12 +25,37 @@ class Obra(Base):
     id_empresa = Column(Integer, nullable=False, default=1)
 
     # Relaciones
-    actividades = relationship("ActividadEtapa", back_populates="obra", cascade="all, delete-orphan", passive_deletes=True)
-    info_financista = relationship("InformacionFinancista", back_populates="obra", passive_deletes=True)
-    info_contratista = relationship("InformacionContratista", back_populates="obra", passive_deletes=True)
-    pagos = relationship("Pago", back_populates="obra", passive_deletes=True)
-    documentos = relationship("Documento", back_populates="obra", passive_deletes=True)
-    responsable = relationship("User", back_populates="obras", foreign_keys=[id_responsable])
+    actividades_etapa = relationship(
+        "ActividadEtapa", 
+        foreign_keys="ActividadEtapa.id_obra",
+        cascade="all, delete-orphan", 
+        passive_deletes=True
+    )
+    info_financista = relationship(
+        "InformacionFinancista", 
+        back_populates="obra", 
+        passive_deletes=True
+    )
+    info_contratista = relationship(
+        "InformacionContratista", 
+        back_populates="obra", 
+        passive_deletes=True
+    )
+    pagos = relationship(
+        "Pago", 
+        back_populates="obra", 
+        passive_deletes=True
+    )
+    documentos = relationship(
+        "Documento", 
+        back_populates="obra", 
+        passive_deletes=True
+    )
+    responsable = relationship(
+        "User", 
+        back_populates="obras", 
+        foreign_keys=[id_responsable]
+    )
     centros_operacion = relationship(
         "CentroOperacion",
         secondary=obra_centro_operacion,

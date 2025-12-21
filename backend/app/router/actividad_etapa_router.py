@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.config.db import get_db
-from app.schema.actividad_etapa import ActividadEtapaResponse, ActividadEtapaCreate
+from app.schema.actividad_etapa import ActividadEtapaResponse, ActividadEtapaCreate, ActividadEtapaEdit
 from app.model.actividad_etapa import ActividadEtapa
 from app.model.estado_etapa import EstadoEtapa
 
@@ -125,7 +125,10 @@ def get_actividad_etapa(actividad_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=ActividadEtapaResponse)
-def create_actividad_etapa(actividad: ActividadEtapaCreate, db: Session = Depends(get_db)):
+def create_actividad_etapa(
+    actividad: ActividadEtapaCreate, 
+    db: Session = Depends(get_db)
+    ):
     """
     Crear una nueva actividad de etapa
     """
@@ -134,6 +137,31 @@ def create_actividad_etapa(actividad: ActividadEtapaCreate, db: Session = Depend
     db.commit()
     db.refresh(nueva_actividad)
     return nueva_actividad
+
+@router.put("/{actividad_id}", response_model=ActividadEtapaResponse)
+def update_actividad_etapa(
+    actividad_id: int,
+    actividad_update: ActividadEtapaEdit,
+    db: Session = Depends(get_db)
+):
+    
+    """
+    Editar una actividad de etapa (solo nombre y comentario)
+    """
+    actividad = db.query(ActividadEtapa)\
+        .filter(ActividadEtapa.id_etapa == actividad_id)\
+        .first()
+
+    if not actividad:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+    
+    for key, value in actividad_update.model_dump(exclude_unset=True).items():
+        setattr(actividad, key, value)
+
+    db.commit()
+    db.refresh(actividad)
+    return actividad
+
 
 
 @router.delete("/{actividad_id}")

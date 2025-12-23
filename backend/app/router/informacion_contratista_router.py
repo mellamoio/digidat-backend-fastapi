@@ -1,51 +1,118 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import List
-from ..model import informacion_contratista as model_informacion_contratista
-from ..schema import informacion_contratista as schema_informacion_contratista
-from ..config.db import get_db
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.config.db import get_db
+from app.model.informacion_contratista import InformacionContratista
+from app.schema.informacion_contratista import (
+    InformacionContratistaCreate,
+    InformacionContratistaUpdate,
+    InformacionContratistaResponse
+)
+
+from app.utils.response import custom_response
+
 
 router = APIRouter()
 
-@router.post("/", response_model=schema_informacion_contratista.InformacionContratista)
-def create_informacion_contratista(informacion_contratista: schema_informacion_contratista.InformacionContratistaCreate, db: Session = Depends(get_db)):
-    db_informacion_contratista = model_informacion_contratista.InformacionContratista(**informacion_contratista.dict())
-    db.add(db_informacion_contratista)
+
+@router.get("/")
+def listar(db: Session = Depends(get_db)):
+    infos = db.query(InformacionContratista).all()
+
+    data = [
+        InformacionContratistaResponse.from_orm(info).dict()
+        for info in infos
+    ]
+
+    return custom_response(
+        code=status.HTTP_200_OK,
+        message="Listado de Información de contratistas",
+        data=data
+    )
+
+
+@router.get("/{info_id}")
+def obtener(info_id: int, db: Session = Depends(get_db)):
+    info = db.query(InformacionContratista).filter_by(id=info_id).first()
+
+    if not info:
+        return custom_response(
+            code=status.HTTP_404_NOT_FOUND,
+            message="Información de contratista no encontrada",
+            response_code=False
+        )
+
+    data = InformacionContratistaResponse.from_orm(info).dict()
+
+    return custom_response(
+        code=status.HTTP_200_OK,
+        message="Información de contratista encontrada",
+        data=data
+    )
+
+@router.post("/")
+def crear(data: InformacionContratistaCreate, db: Session = Depends(get_db)):
+    info = InformacionContratista(**data.dict())
+    db.add(info)
     db.commit()
-    db.refresh(db_informacion_contratista)
-    return db_informacion_contratista
+    db.refresh(info)
 
-@router.get("/", response_model=List[schema_informacion_contratista.InformacionContratista])
-def read_informaciones_contratista(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    informaciones_contratista = db.query(model_informacion_contratista.InformacionContratista).offset(skip).limit(limit).all()
-    return informaciones_contratista
+    response_data = InformacionContratistaResponse.from_orm(info).dict()
 
-@router.get("/{informacion_contratista_id}", response_model=schema_informacion_contratista.InformacionContratista)
-def read_informacion_contratista(informacion_contratista_id: int, db: Session = Depends(get_db)):
-    db_informacion_contratista = db.query(model_informacion_contratista.InformacionContratista).filter(model_informacion_contratista.InformacionContratista.id == informacion_contratista_id).first()
-    if db_informacion_contratista is None:
-        raise HTTPException(status_code=404, detail="Información de contratista no encontrada")
-    return db_informacion_contratista
+    return custom_response(
+        code=status.HTTP_201_CREATED,
+        message="Información de contratista creada correctamente",
+        data=response_data
+    )
 
-@router.put("/{informacion_contratista_id}", response_model=schema_informacion_contratista.InformacionContratista)
-def update_informacion_contratista(informacion_contratista_id: int, informacion_contratista: schema_informacion_contratista.InformacionContratistaUpdate, db: Session = Depends(get_db)):
-    db_informacion_contratista = db.query(model_informacion_contratista.InformacionContratista).filter(model_informacion_contratista.InformacionContratista.id == informacion_contratista_id).first()
-    if db_informacion_contratista is None:
-        raise HTTPException(status_code=404, detail="Información de contratista no encontrada")
-    
-    for key, value in informacion_contratista.dict(exclude_unset=True).items():
-        setattr(db_informacion_contratista, key, value)
-    
+
+@router.put("/{info_id}")
+def actualizar(
+    info_id: int,
+    data: InformacionContratistaUpdate,
+    db: Session = Depends(get_db)
+):
+    info = db.query(InformacionContratista).filter_by(id=info_id).first()
+
+    if not info:
+        return custom_response(
+            code=status.HTTP_404_NOT_FOUND,
+            message="Información de contratista no encontrada",
+            response_code=False
+        )
+
+    for field, value in data.dict(exclude_unset=True).items():
+        setattr(info, field, value)
+
     db.commit()
-    db.refresh(db_informacion_contratista)
-    return db_informacion_contratista
+    db.refresh(info)
 
-@router.delete("/{informacion_contratista_id}", response_model=schema_informacion_contratista.InformacionContratista)
-def delete_informacion_contratista(informacion_contratista_id: int, db: Session = Depends(get_db)):
-    db_informacion_contratista = db.query(model_informacion_contratista.InformacionContratista).filter(model_informacion_contratista.InformacionContratista.id == informacion_contratista_id).first()
-    if db_informacion_contratista is None:
-        raise HTTPException(status_code=404, detail="Información de contratista no encontrada")
-    
-    db.delete(db_informacion_contratista)
+    response_data = InformacionContratistaResponse.from_orm(info).dict()
+
+    return custom_response(
+        code=status.HTTP_200_OK,
+        message="Información de contratista actualizada correctamente",
+        data=response_data
+    )
+
+
+@router.delete("/{info_id}")
+def eliminar(info_id: int, db: Session = Depends(get_db)):
+    info = db.query(InformacionContratista).filter_by(id=info_id).first()
+
+    if not info:
+        return custom_response(
+            code=status.HTTP_404_NOT_FOUND,
+            message="Información de contratista no encontrada",
+            response_code=False
+        )
+
+    db.delete(info)
     db.commit()
-    return db_informacion_contratista
+
+    return custom_response(
+        code=status.HTTP_200_OK,
+        message="Información de contratista eliminada correctamente",
+        data=None
+    )

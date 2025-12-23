@@ -1,51 +1,118 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import List
-from ..model import informacion_financista as model_informacion_financista
-from ..schema import informacion_financista as schema_informacion_financista
-from ..config.db import get_db
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.config.db import get_db
+from app.model.informacion_financista import InformacionFinancista
+from app.schema.informacion_financista import (
+    InformacionFinancistaCreate,
+    InformacionFinancistaUpdate,
+    InformacionFinancistaResponse
+)
+
+from app.utils.response import custom_response
+
 
 router = APIRouter()
 
-@router.post("/", response_model=schema_informacion_financista.InformacionFinancista)
-def create_informacion_financista(informacion_financista: schema_informacion_financista.InformacionFinancistaCreate, db: Session = Depends(get_db)):
-    db_informacion_financista = model_informacion_financista.InformacionFinancista(**informacion_financista.dict())
-    db.add(db_informacion_financista)
+
+@router.get("/")
+def listar(db: Session = Depends(get_db)):
+    infos = db.query(InformacionFinancista).all()
+
+    data = [
+        InformacionFinancistaResponse.from_orm(info).dict()
+        for info in infos
+    ]
+
+    return custom_response(
+        code=status.HTTP_200_OK,
+        message="Listado de información de financistas",
+        data=data
+    )
+
+
+@router.get("/{info_id}")
+def obtener(info_id: int, db: Session = Depends(get_db)):
+    info = db.query(InformacionFinancista).filter_by(id=info_id).first()
+
+    if not info:
+        return custom_response(
+            code=status.HTTP_404_NOT_FOUND,
+            message="Información de financista no encontrada",
+            response_code=False
+        )
+
+    data = InformacionFinancistaResponse.from_orm(info).dict()
+
+    return custom_response(
+        code=status.HTTP_200_OK,
+        message="Información de financista encontrada",
+        data=data
+    )
+
+@router.post("/")
+def crear(data: InformacionFinancistaCreate, db: Session = Depends(get_db)):
+    info = InformacionFinancista(**data.dict())
+    db.add(info)
     db.commit()
-    db.refresh(db_informacion_financista)
-    return db_informacion_financista
+    db.refresh(info)
 
-@router.get("/", response_model=List[schema_informacion_financista.InformacionFinancista])
-def read_informaciones_financista(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    informaciones_financista = db.query(model_informacion_financista.InformacionFinancista).offset(skip).limit(limit).all()
-    return informaciones_financista
+    response_data = InformacionFinancistaResponse.from_orm(info).dict()
 
-@router.get("/{informacion_financista_id}", response_model=schema_informacion_financista.InformacionFinancista)
-def read_informacion_financista(informacion_financista_id: int, db: Session = Depends(get_db)):
-    db_informacion_financista = db.query(model_informacion_financista.InformacionFinancista).filter(model_informacion_financista.InformacionFinancista.id == informacion_financista_id).first()
-    if db_informacion_financista is None:
-        raise HTTPException(status_code=404, detail="Información de financista no encontrada")
-    return db_informacion_financista
+    return custom_response(
+        code=status.HTTP_201_CREATED,
+        message="Información de financista creada correctamente",
+        data=response_data
+    )
 
-@router.put("/{informacion_financista_id}", response_model=schema_informacion_financista.InformacionFinancista)
-def update_informacion_financista(informacion_financista_id: int, informacion_financista: schema_informacion_financista.InformacionFinancistaUpdate, db: Session = Depends(get_db)):
-    db_informacion_financista = db.query(model_informacion_financista.InformacionFinancista).filter(model_informacion_financista.InformacionFinancista.id == informacion_financista_id).first()
-    if db_informacion_financista is None:
-        raise HTTPException(status_code=404, detail="Información de financista no encontrada")
-    
-    for key, value in informacion_financista.dict(exclude_unset=True).items():
-        setattr(db_informacion_financista, key, value)
-    
+
+@router.put("/{info_id}")
+def actualizar(
+    info_id: int,
+    data: InformacionFinancistaUpdate,
+    db: Session = Depends(get_db)
+):
+    info = db.query(InformacionFinancista).filter_by(id=info_id).first()
+
+    if not info:
+        return custom_response(
+            code=status.HTTP_404_NOT_FOUND,
+            message="Información de financista no encontrada",
+            response_code=False
+        )
+
+    for field, value in data.dict(exclude_unset=True).items():
+        setattr(info, field, value)
+
     db.commit()
-    db.refresh(db_informacion_financista)
-    return db_informacion_financista
+    db.refresh(info)
 
-@router.delete("/{informacion_financista_id}", response_model=schema_informacion_financista.InformacionFinancista)
-def delete_informacion_financista(informacion_financista_id: int, db: Session = Depends(get_db)):
-    db_informacion_financista = db.query(model_informacion_financista.InformacionFinancista).filter(model_informacion_financista.InformacionFinancista.id == informacion_financista_id).first()
-    if db_informacion_financista is None:
-        raise HTTPException(status_code=404, detail="Información de financista no encontrada")
-    
-    db.delete(db_informacion_financista)
+    response_data = InformacionFinancistaResponse.from_orm(info).dict()
+
+    return custom_response(
+        code=status.HTTP_200_OK,
+        message="Información de financista actualizada correctamente",
+        data=response_data
+    )
+
+
+@router.delete("/{info_id}")
+def eliminar(info_id: int, db: Session = Depends(get_db)):
+    info = db.query(InformacionFinancista).filter_by(id=info_id).first()
+
+    if not info:
+        return custom_response(
+            code=status.HTTP_404_NOT_FOUND,
+            message="Información de financista no encontrada",
+            response_code=False
+        )
+
+    db.delete(info)
     db.commit()
-    return db_informacion_financista
+
+    return custom_response(
+        code=status.HTTP_200_OK,
+        message="Información de financista eliminada correctamente",
+        data=None
+    )

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.config.db import get_db
-from app.schema.actividad_etapa import ActividadEtapaResponse, ActividadEtapaCreate
+from app.schema.actividad_etapa import ActividadEtapaResponse, ActividadEtapaCreate, ActividadEtapaEdit
 from app.model.actividad_etapa import ActividadEtapa
 from app.model.estado_etapa import EstadoEtapa
 
@@ -123,20 +123,18 @@ def get_actividad_etapa(actividad_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Actividad no encontrada")
     return actividad
 
-
-@router.post("/", response_model=ActividadEtapaResponse)
-def create_actividad_etapa(actividad: ActividadEtapaCreate, db: Session = Depends(get_db)):
-    """
-    Crear una nueva actividad de etapa
-    """
-    nueva_actividad = ActividadEtapa(**actividad.dict())
-    db.add(nueva_actividad)
+@router.put("/{actividad_id}", response_model=schema_actividad_etapa.ActividadEtapa)
+def update_actividad_etapa(actividad_id: int, actividad: schema_actividad_etapa.ActividadEtapaUpdate, db: Session = Depends(get_db)):
+    db_actividad = db.query(model_actividad_etapa.ActividadEtapa).filter(model_actividad_etapa.ActividadEtapa.id_actividad == actividad_id).first()
+    if db_actividad is None:
+        raise HTTPException(status_code=404, detail="Actividad de etapa no encontrada")
+    for key, value in actividad.dict(exclude_unset=True).items():
+        setattr(db_actividad, key, value)
     db.commit()
-    db.refresh(nueva_actividad)
-    return nueva_actividad
+    db.refresh(db_actividad)
+    return db_actividad
 
-
-@router.delete("/{actividad_id}")
+@router.delete("/{actividad_id}", response_model=schema_actividad_etapa.ActividadEtapa)
 def delete_actividad_etapa(actividad_id: int, db: Session = Depends(get_db)):
     """
     Eliminar una actividad de etapa

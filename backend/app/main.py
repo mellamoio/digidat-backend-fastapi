@@ -63,6 +63,13 @@ app = FastAPI(
 )
 
 app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.SECRET_KEY,
+    session_cookie="session",
+    max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+)
+
+app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
     allow_credentials=True,
@@ -70,12 +77,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=settings.SECRET_KEY,
-    session_cookie="session",
-    max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
-)
+
 
 # register_exception_handlers(app)
 

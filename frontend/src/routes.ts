@@ -15,4 +15,8 @@ export enum DigidatRoutes {
   LOGOUT = '/auth/logout',
   REFRESH_TOKEN = '/auth/refresh-token',
   GET_TIPOS_GASTO = '/all/tipogasto',
+
+
+  //corregir esto
+  GET_CATEGORIAS_DOCUMENTOS = '/all/categorias-documentos',
 }

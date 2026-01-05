@@ -18,7 +18,6 @@ export interface Obra {
   fecha_inicio: string;
   fecha_fin: string;
   id_responsable?: number;
-  id_empresa?: number;
   centros_operacion: CentroOperacion[];
   responsable?: Responsable;
   monto_recuperado?: number;

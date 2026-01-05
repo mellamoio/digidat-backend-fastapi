@@ -8,7 +8,9 @@ from app.model.centro_operacion import CentroOperacion
 from app.model.estado_etapa import EstadoEtapa
 from app.model.actividad_etapa import ActividadEtapa
 
+
 router = APIRouter()
+
 
 ACTIVIDADES_DEFAULT = {
     "Priorización": [
@@ -42,8 +44,19 @@ ACTIVIDADES_DEFAULT = {
     ]
 }
 
+
 def crear_actividades_para_obra(db: Session, id_obra: int):
+    """
+    Crea actividades de etapa para una obra.
+    NOTA: Esta función NO hace commit, debe hacerse desde el llamador.
+    """
     estados = db.query(EstadoEtapa).order_by(EstadoEtapa.orden).all()
+    
+    if not estados:
+        raise HTTPException(
+            status_code=500, 
+            detail="No hay estados de etapa configurados en el sistema"
+        )
     
     for estado in estados:
         actividades_nombres = ACTIVIDADES_DEFAULT.get(estado.nombre, [])
@@ -56,12 +69,13 @@ def crear_actividades_para_obra(db: Session, id_obra: int):
                 orden=index
             )
             db.add(nueva_actividad)
-    
-    db.commit()
+    # ✅ Removemos el db.commit() de aquí
+
 
 @router.post("/", response_model=schema_obra.ObraResponse, status_code=201)
 def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
     try:
+        # 1. Crear la obra
         new_obra = model_obra.Obra(
             nombre=obra.nombre,
             tipo_id=obra.tipo_id,
@@ -73,6 +87,7 @@ def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
             id_empresa=obra.id_empresa
         )
         
+        # 2. Asociar centros de operación si existen
         if obra.centros_operacion:
             centros = db.query(CentroOperacion).filter(
                 CentroOperacion.id.in_(obra.centros_operacion)
@@ -80,15 +95,21 @@ def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
             new_obra.centros_operacion = centros
         
         db.add(new_obra)
+        db.flush()  # ✅ Usar flush en vez de commit para obtener el ID
+        
+        # 3. Crear actividades de etapa automáticamente
+        crear_actividades_para_obra(db, new_obra.id_obra)
+        
+        # 4. Hacer UN SOLO commit de todo junto
         db.commit()
         db.refresh(new_obra)
         
-        crear_actividades_para_obra(db, new_obra.id_obra)
-        
         return new_obra
+        
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al crear la obra: {str(e)}")
+
 
 @router.get("/", response_model=List[schema_obra.ObraResponse])
 def read_obras(
@@ -103,6 +124,7 @@ def read_obras(
     
     return obras
 
+
 @router.get("/{obra_id}", response_model=schema_obra.ObraResponse)
 def read_obra(obra_id: int, db: Session = Depends(get_db)):
     db_obra = db.query(model_obra.Obra).filter(
@@ -113,6 +135,7 @@ def read_obra(obra_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Obra no encontrada")
     
     return db_obra
+
 
 @router.put("/{obra_id}", response_model=schema_obra.ObraResponse)
 def update_obra(obra_id: int, obra: schema_obra.ObraUpdate, db: Session = Depends(get_db)):
@@ -141,6 +164,7 @@ def update_obra(obra_id: int, obra: schema_obra.ObraUpdate, db: Session = Depend
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al actualizar la obra: {str(e)}")
+
 
 @router.delete("/{obra_id}")
 def delete_obra(obra_id: int, db: Session = Depends(get_db)):

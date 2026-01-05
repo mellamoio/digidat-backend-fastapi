@@ -22,14 +22,18 @@ def read_beneficiarios(skip: int = 0, limit: int = 100, db: Session = Depends(ge
 
 @router.get("/{beneficiario_id}", response_model=schema_beneficiario.Beneficiario)
 def read_beneficiario(beneficiario_id: int, db: Session = Depends(get_db)):
-    db_beneficiario = db.query(model_beneficiario.Beneficiario).filter(model_beneficiario.Beneficiario.id == beneficiario_id).first()
+    db_beneficiario = db.query(model_beneficiario.Beneficiario).filter(
+        model_beneficiario.Beneficiario.id_beneficiario == beneficiario_id
+    ).first()
     if db_beneficiario is None:
         raise HTTPException(status_code=404, detail="Beneficiario no encontrado")
     return db_beneficiario
 
 @router.put("/{beneficiario_id}", response_model=schema_beneficiario.Beneficiario)
 def update_beneficiario(beneficiario_id: int, beneficiario: schema_beneficiario.BeneficiarioUpdate, db: Session = Depends(get_db)):
-    db_beneficiario = db.query(model_beneficiario.Beneficiario).filter(model_beneficiario.Beneficiario.id == beneficiario_id).first()
+    db_beneficiario = db.query(model_beneficiario.Beneficiario).filter(
+        model_beneficiario.Beneficiario.id_beneficiario == beneficiario_id
+    ).first()
     if db_beneficiario is None:
         raise HTTPException(status_code=404, detail="Beneficiario no encontrado")
     
@@ -42,7 +46,9 @@ def update_beneficiario(beneficiario_id: int, beneficiario: schema_beneficiario.
 
 @router.delete("/{beneficiario_id}", response_model=schema_beneficiario.Beneficiario)
 def delete_beneficiario(beneficiario_id: int, db: Session = Depends(get_db)):
-    db_beneficiario = db.query(model_beneficiario.Beneficiario).filter(model_beneficiario.Beneficiario.id == beneficiario_id).first()
+    db_beneficiario = db.query(model_beneficiario.Beneficiario).filter(
+        model_beneficiario.Beneficiario.id_beneficiario == beneficiario_id
+    ).first()
     if db_beneficiario is None:
         raise HTTPException(status_code=404, detail="Beneficiario no encontrado")
     

@@ -4,6 +4,9 @@ import { FaEdit, FaTrash, FaChevronRight, FaUpload, FaEye } from "react-icons/fa
 import type { Obra } from "../../types/obra";
 import type { ActividadEtapa } from "../../types/actividad_etapa";
 import type { EstadoEtapa } from "../../types/estado_etapa";
+import InformacionFinancista from "./InformacionFinancista";
+import InformacionContratista from "./InformacionContratista";
+import Pagos from "./Pagos";
 import {
   DetallesLayout,
   DetallesContainer,
@@ -35,10 +38,12 @@ import {
   inicializarActividadesObra 
 } from "../../services/getActividadEtapa.service";
 
+
 export const Detalles: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const obraId = Number(id);
   const navigate = useNavigate();
+
 
   const [selectedMenu, setSelectedMenu] = useState<string>("Etapas y Ejecución");
   const [obra, setObra] = useState<Obra | null>(null);
@@ -50,13 +55,16 @@ export const Detalles: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [inicializando, setInicializando] = useState(false);
 
+
   const [paginacion, setPaginacion] = useState<{ [key: number]: { page: number; perPage: number } }>({});
+
 
   useEffect(() => {
     if (obraId) {
       fetchData();
     }
   }, [obraId]);
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -74,6 +82,7 @@ export const Detalles: React.FC = () => {
     }
   };
 
+
   const fetchObra = async () => {
     try {
       const obraData = await getObraById(obraId);
@@ -83,6 +92,7 @@ export const Detalles: React.FC = () => {
       message.error("Error al cargar la obra");
     }
   };
+
 
   const fetchEstados = async () => {
     try {
@@ -100,6 +110,7 @@ export const Detalles: React.FC = () => {
     }
   };
 
+
   const fetchActividades = async () => {
     try {
       const actividadesData = await getActividadesEtapa({ id_obra: obraId });
@@ -109,6 +120,7 @@ export const Detalles: React.FC = () => {
       message.error("Error al cargar las actividades");
     }
   };
+
 
   const handleInicializarActividades = async () => {
     setInicializando(true);
@@ -123,12 +135,14 @@ export const Detalles: React.FC = () => {
     }
   };
 
+
   const toggleSeccion = (estadoId: number) => {
     setSeccionesAbiertas(prev => ({
       ...prev,
       [estadoId]: !prev[estadoId]
     }));
   };
+
 
   const handlePageChange = (estadoId: number, page: number) => {
     setPaginacion(prev => ({
@@ -137,6 +151,7 @@ export const Detalles: React.FC = () => {
     }));
   };
 
+
   const handleRowsPerPageChange = (estadoId: number, newPerPage: number) => {
     setPaginacion(prev => ({
       ...prev,
@@ -144,9 +159,11 @@ export const Detalles: React.FC = () => {
     }));
   };
 
+
   const handleEditActividad = (actividad: ActividadEtapa) => {
     message.info(`Editar actividad: ${actividad.nombre_etapa}`);
   };
+
 
   const handleDeleteActividad = async (actividad: ActividadEtapa) => {
     try {
@@ -159,13 +176,16 @@ export const Detalles: React.FC = () => {
     }
   };
 
+
   const handleUploadDocument = (actividad: ActividadEtapa) => {
     message.info(`Subir documento para: ${actividad.nombre_etapa}`);
   };
 
+
   const handleViewDocument = (actividad: ActividadEtapa) => {
     message.info(`Ver documentos de: ${actividad.nombre_etapa}`);
   };
+
 
   const columns: TableColumn<ActividadEtapa>[] = [
     {
@@ -261,9 +281,11 @@ export const Detalles: React.FC = () => {
     },
   ];
 
+
   const getActividadesPorEstado = (estadoId: number) => {
     return actividades.filter(act => act.id_estado_etapa === estadoId);
   };
+
 
   const calcularProgresoTotal = () => {
     if (actividades.length === 0) return 0;
@@ -271,7 +293,9 @@ export const Detalles: React.FC = () => {
     return Math.round((actividadesConDocumento / actividades.length) * 100);
   };
 
+
   const handleEditClick = () => setEditModalVisible(true);
+
 
   const handleUpdateObra = (updatedObra?: Obra) => {
     if (updatedObra) {
@@ -281,7 +305,9 @@ export const Detalles: React.FC = () => {
     setEditModalVisible(false);
   };
 
+
   const handleDeleteClick = () => setShowDeleteModal(true);
+
 
   const handleDeleteObra = async () => {
     if (!obra?.id_obra) {
@@ -298,6 +324,7 @@ export const Detalles: React.FC = () => {
       message.error("Error al eliminar la obra");
     }
   };
+
 
   if (loading || !obra) {
     return (
@@ -317,14 +344,18 @@ export const Detalles: React.FC = () => {
     );
   }
 
+
   const fechaEntregaFormateada = obra.fecha_fin
     ? dayjs(obra.fecha_fin).format("DD/MM/YYYY")
     : "N/A";
 
+
   const nombreEtapa =
     estados.find((e) => e.id === obra.estado_id)?.nombre || "N/A";
 
+
   const progresoTotal = calcularProgresoTotal();
+
 
   return (
     <div className="page-container">
@@ -349,6 +380,8 @@ export const Detalles: React.FC = () => {
           <p style={{ color: "#868686" }}>
             <strong>Fecha de Entrega:</strong> {fechaEntregaFormateada}
           </p>
+          
+          {/* ✅ MENÚ CON LAS 4 PESTAÑAS */}
           <Menu>
             <MenuItem
               onClick={() => setSelectedMenu("Etapas y Ejecución")}
@@ -356,75 +389,104 @@ export const Detalles: React.FC = () => {
             >
               Etapas y Ejecución
             </MenuItem>
+            <MenuItem
+              onClick={() => setSelectedMenu("Información Financista")}
+              active={selectedMenu === "Información Financista"}
+            >
+              Información Financista
+            </MenuItem>
+            <MenuItem
+              onClick={() => setSelectedMenu("Información Contratista")}
+              active={selectedMenu === "Información Contratista"}
+            >
+              Información Contratista
+            </MenuItem>
+            <MenuItem
+              onClick={() => setSelectedMenu("Pagos")}
+              active={selectedMenu === "Pagos"}
+            >
+              Pagos
+            </MenuItem>
           </Menu>
-          <ContentPlaceholder>
-            {selectedMenu === "Etapas y Ejecución" && (
-              <div>
-                <ProgressBar value={progresoTotal} />
-                {actividades.length === 0 && (
-                  <button 
-                    onClick={handleInicializarActividades}
-                    disabled={inicializando}
-                    style={{
-                      padding: '10px 20px',
-                      background: inicializando ? '#ccc' : '#722AE9',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: inicializando ? 'not-allowed' : 'pointer',
-                      marginBottom: '20px',
-                      fontWeight: '600'
-                    }}
-                  >
-                    {inicializando ? 'Inicializando...' : 'Inicializar Actividades de Etapa'}
-                  </button>
-                )}
 
-                {estados
-                  .sort((a, b) => a.orden - b.orden)
-                  .map((estado) => {
-                    const actividadesEstado = getActividadesPorEstado(estado.id);
-                    const paginacionEstado = paginacion[estado.id] || { page: 1, perPage: 10 };
-                    const isOpen = seccionesAbiertas[estado.id] || false;
+        <ContentPlaceholder>
+          {selectedMenu === "Etapas y Ejecución" && obra?.id_obra ? (
+            <div>
+              <ProgressBar value={progresoTotal} />
+              {actividades.length === 0 && (
+                <button 
+                  onClick={handleInicializarActividades}
+                  disabled={inicializando}
+                  style={{
+                    padding: '10px 20px',
+                    background: inicializando ? '#ccc' : '#722AE9',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: inicializando ? 'not-allowed' : 'pointer',
+                    marginBottom: '20px',
+                    fontWeight: '600'
+                  }}
+                >
+                  {inicializando ? 'Inicializando...' : 'Inicializar Actividades de Etapa'}
+                </button>
+              )}
 
-                    return (
-                      <div key={estado.id} style={{ marginBottom: "20px" }}>
-                        <SeccionHeader onClick={() => toggleSeccion(estado.id)}>
-                          <IconoFlecha abierto={isOpen}>
-                            <FaChevronRight />
-                          </IconoFlecha>
-                          <span style={{ color: estado.color, fontWeight: "bold" }}>
-                            {estado.nombre}
-                          </span>
-                          <span style={{ marginLeft: "10px", color: "#868686" }}>
-                            ({actividadesEstado.length} actividades)
-                          </span>
-                        </SeccionHeader>
-                        {isOpen && (
-                          <SeccionContent>
-                            <DataTableCustom
-                              title=""
-                              columns={columns}
-                              data={actividadesEstado}
-                              totalRows={actividadesEstado.length}
-                              currentPage={paginacionEstado.page}
-                              rowsPerPage={paginacionEstado.perPage}
-                              onPageChange={(page) => handlePageChange(estado.id, page)}
-                              onRowsPerPageChange={(newPerPage) =>
-                                handleRowsPerPageChange(estado.id, newPerPage)
-                              }
-                              onEdit={handleEditActividad}
-                              onDelete={handleDeleteActividad}
-                              emptyText="No hay actividades en esta etapa"
-                            />
-                          </SeccionContent>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-            )}
-          </ContentPlaceholder>
+              {estados
+                .sort((a, b) => a.orden - b.orden)
+                .map((estado) => {
+                  const actividadesEstado = getActividadesPorEstado(estado.id);
+                  const paginacionEstado = paginacion[estado.id] || { page: 1, perPage: 10 };
+                  const isOpen = seccionesAbiertas[estado.id] || false;
+
+                  return (
+                    <div key={estado.id} style={{ marginBottom: "20px" }}>
+                      <SeccionHeader onClick={() => toggleSeccion(estado.id)}>
+                        <IconoFlecha abierto={isOpen}>
+                          <FaChevronRight />
+                        </IconoFlecha>
+                        <span style={{ color: estado.color, fontWeight: "bold" }}>
+                          {estado.nombre}
+                        </span>
+                        <span style={{ marginLeft: "10px", color: "#868686" }}>
+                          ({actividadesEstado.length} actividades)
+                        </span>
+                      </SeccionHeader>
+                      {isOpen && (
+                        <SeccionContent>
+                          <DataTableCustom
+                            title=""
+                            columns={columns}
+                            data={actividadesEstado}
+                            totalRows={actividadesEstado.length}
+                            currentPage={paginacionEstado.page}
+                            rowsPerPage={paginacionEstado.perPage}
+                            onPageChange={(page) => handlePageChange(estado.id, page)}
+                            onRowsPerPageChange={(newPerPage) =>
+                              handleRowsPerPageChange(estado.id, newPerPage)
+                            }
+                            onEdit={handleEditActividad}
+                            onDelete={handleDeleteActividad}
+                            emptyText="No hay actividades en esta etapa"
+                          />
+                        </SeccionContent>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          ) : selectedMenu === "Información Financista" && obra ? (
+            <InformacionFinancista id_obra_impuesto={obra.id_obra} />
+          ) : selectedMenu === "Información Contratista" && obra ? (
+            <InformacionContratista id_obra_impuesto={obra.id_obra} />
+          ) : selectedMenu === "Pagos" && obra ? (
+            <Pagos id_obra={obra.id_obra} />
+          ) : (
+            <p>{selectedMenu || "Selecciona una pestaña"}</p>
+          )}
+        </ContentPlaceholder>
+
+
           {editModalVisible && (
             <ModalObra
               isOpen={editModalVisible}
@@ -446,5 +508,6 @@ export const Detalles: React.FC = () => {
     </div>
   );
 };
+
 
 export default Detalles;

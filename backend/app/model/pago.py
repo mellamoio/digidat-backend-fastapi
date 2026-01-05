@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, Numeric, Date, ForeignKey
 from sqlalchemy.orm import relationship
 from app.config.db import Base
 
-
 class Pago(Base):
     __tablename__ = "pagos"
     
@@ -19,7 +18,7 @@ class Pago(Base):
     obra = relationship("Obra", back_populates="pagos")
     tipo_gasto = relationship("TipoGasto", back_populates="pagos")
     estado_reembolso = relationship("EstadoReembolso", back_populates="pagos")
-    beneficiario = relationship("Beneficiario", back_populates="pagos")
+    beneficiario = relationship("Beneficiario")  # ✅ SIN back_populates
     documentos = relationship(
         "Documento",
         back_populates="pago",

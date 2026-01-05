@@ -7,9 +7,7 @@ export interface Pago {
   monto_pagado: number;
   fecha: string;
   beneficiario: { id: number; nombre: string }[];
-  grupo_interes: { id: number; nombre: string }[];
   responsables: { id: number; nombre: string }[];
-  id_empresa: number;
   id_obra: number;
   documentos: FileObject[];
   tipo_gasto?: { id: number; name: string };
@@ -18,7 +16,6 @@ export interface Pago {
 export interface NewPago {
   concepto: string;
   beneficiario: { id: number; nombre: string }[];
-  grupo_interes: { id: number; nombre: string }[];
   fecha: string;
   monto_pagado: string;
   id_tipo_gasto: number;

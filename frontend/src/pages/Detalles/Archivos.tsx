@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import apiClient from "../../../../api/api";
-import type { ResponseError, ResponseSuccess } from "../../../../types/responses";
-import type { Archivo } from "../../../../types/archivo";
+import api from "../../api/api";
+import type { ResponseError, ResponseSuccess } from "../../types/responses";
+import type { Archivo } from "../../types/archivo";
 
 interface ArchivosS3Props {
   codigoRegistro: number;
@@ -13,7 +13,7 @@ const ArchivosS3: React.FC<ArchivosS3Props> = ({ codigoRegistro }) => {
 
   const obtenerArchivos = async () => {
     try {
-      const res = await apiClient.get<ResponseSuccess<Archivo[]>>("/archivospago", {
+      const res = await api.get<ResponseSuccess<Archivo[]>>("/archivospago", {
         params: {
           codigo_registro: codigoRegistro
         },
@@ -36,7 +36,7 @@ const ArchivosS3: React.FC<ArchivosS3Props> = ({ codigoRegistro }) => {
     formData.append("codigo_registro", codigoRegistro.toString());
 
     try {
-      const res = await apiClient.post<ResponseSuccess<any>>("/archivos3/subir", formData, {
+      const res = await api.post<ResponseSuccess<any>>("/archivos3/subir", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -55,7 +55,7 @@ const ArchivosS3: React.FC<ArchivosS3Props> = ({ codigoRegistro }) => {
 
   const eliminarArchivo = async (id: number) => {
     try {
-      const res = await apiClient.post<ResponseSuccess<any>>(`/archivospago/${id}`, {
+      const res = await api.post<ResponseSuccess<any>>(`/archivospago/${id}`, {
         data: {
           codigo_registro: codigoRegistro
         },

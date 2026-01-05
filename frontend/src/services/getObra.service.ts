@@ -1,11 +1,6 @@
-import { setQueryParams } from '../helpers/setQueryParams'
 import { handleErrorRequest } from '../helpers/handleErrorRequest'
 import type { Obra } from '../types/obra'
 import apiClient from '../api/api'
-
-interface GetObrasRequest {
-  id_empresa: number
-}
 
 interface CreateObraRequest {
   nombre: string
@@ -14,7 +9,6 @@ interface CreateObraRequest {
   fecha_inicio?: string | null
   fecha_fin?: string | null
   costo_proyecto?: number
-  id_empresa: number
   centros_operacion: number[]
 }
 
@@ -29,13 +23,9 @@ interface UpdateObraRequest {
   centros_operacion?: number[]
 }
 
-export const getObra = async ({
-  id_empresa
-}: GetObrasRequest): Promise<Obra[]> => {
+export const getObra = async (): Promise<Obra[]> => {
   try {
-    const params = { id_empresa: id_empresa.toString() }
-    const url = setQueryParams(params, 'v1/obras/')
-    const { data } = await apiClient.get<Obra[]>(url)
+    const { data } = await apiClient.get<Obra[]>('v1/obras/')
     return data || []
   } catch (e) {
     throw handleErrorRequest(e)

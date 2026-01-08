@@ -1,0 +1,50 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: digidat_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/digidat.sql:/docker-entrypoint-initdb.d/digidat.sql
+      - ./sql/backups:/backups
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --max_connections=200
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - digidat_network
+
+  adminer:
+    image: adminer:4.8.1
+    container_name: digidat_adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    networks:
+      - digidat_network
+
+volumes:
+  mysql_data:
+    name: digidat_mysql_data
+
+networks:
+  digidat_network:
+    driver: bridge

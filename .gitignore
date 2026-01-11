@@ -102,7 +102,7 @@ docker-compose.override.yml
 .
 
 # Terraform
-.terraform/
-*.tfstate
-*.tfstate.*
-.terraform.lock.hcl
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.*
+infra/.terraform.lock.hcl

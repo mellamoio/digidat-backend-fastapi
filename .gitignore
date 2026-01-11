@@ -100,3 +100,9 @@ Thumbs.db
 # Docker
 docker-compose.override.yml
 .
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl

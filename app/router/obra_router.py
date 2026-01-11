@@ -1,14 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from typing import List
-from app.config.db import get_db
-from app.schema import obra as schema_obra
-from app.model import obra as model_obra
+from app.config.db import get_async_db
+from app.schema.obra import ObraBase, ObraCreate, ObraUpdate, ObraResponse
+from app.model.obra import Obra
 from app.model.centro_operacion import CentroOperacion
 from app.model.estado_etapa import EstadoEtapa
 from app.model.actividad_etapa import ActividadEtapa
+from app.utils.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 ACTIVIDADES_DEFAULT = {
     "Priorización": [
@@ -42,8 +44,9 @@ ACTIVIDADES_DEFAULT = {
     ]
 }
 
-def crear_actividades_para_obra(db: Session, id_obra: int):
-    estados = db.query(EstadoEtapa).order_by(EstadoEtapa.orden).all()
+async def crear_actividades_para_obra(db: AsyncSession, id_obra: int):
+    result = await db.execute(select(EstadoEtapa).order_by(EstadoEtapa.orden))
+    estados = result.scalars().all()
     
     for estado in estados:
         actividades_nombres = ACTIVIDADES_DEFAULT.get(estado.nombre, [])
@@ -57,12 +60,12 @@ def crear_actividades_para_obra(db: Session, id_obra: int):
             )
             db.add(nueva_actividad)
     
-    db.commit()
+    await db.commit()
 
-@router.post("/", response_model=schema_obra.ObraResponse, status_code=201)
-def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
+@router.post("/", response_model=ObraResponse, status_code=201)
+async def create_obra(obra: ObraCreate, db: AsyncSession = Depends(get_async_db)):
     try:
-        new_obra = model_obra.Obra(
+        new_obra = Obra(
             nombre=obra.nombre,
             tipo_id=obra.tipo_id,
             estado_id=1,
@@ -74,50 +77,54 @@ def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
         )
         
         if obra.centros_operacion:
-            centros = db.query(CentroOperacion).filter(
+            result = await db.execute(select(CentroOperacion).where(
                 CentroOperacion.id.in_(obra.centros_operacion)
-            ).all()
+            ))
+            centros = result.scalars().all()
             new_obra.centros_operacion = centros
         
         db.add(new_obra)
-        db.commit()
-        db.refresh(new_obra)
+        await db.commit()
+        await db.refresh(new_obra)
         
-        crear_actividades_para_obra(db, new_obra.id_obra)
+        await crear_actividades_para_obra(db, new_obra.id_obra)
         
         return new_obra
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al crear la obra: {str(e)}")
 
-@router.get("/", response_model=List[schema_obra.ObraResponse])
-def read_obras(
+@router.get("/", response_model=List[ObraBase])
+async def read_obras(
     id_empresa: int = 1,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ):
-    obras = db.query(model_obra.Obra).filter(
-        model_obra.Obra.id_empresa == id_empresa
-    ).offset(skip).limit(limit).all()
+    result = await db.execute(select(Obra).where(
+        Obra.id_empresa == id_empresa
+    ).offset(skip).limit(limit))
+    obras = result.scalars().all()
     
     return obras
 
-@router.get("/{obra_id}", response_model=schema_obra.ObraResponse)
-def read_obra(obra_id: int, db: Session = Depends(get_db)):
-    db_obra = db.query(model_obra.Obra).filter(
-        model_obra.Obra.id_obra == obra_id
-    ).first()
+@router.get("/{obra_id}", response_model=ObraResponse)
+async def read_obra(obra_id: int, db: AsyncSession = Depends(get_async_db)):
+    result = await db.execute(select(Obra).where(
+        Obra.id_obra == obra_id
+    ))
+    db_obra = result.scalars().first()
     
     if db_obra is None:
         raise HTTPException(status_code=404, detail="Obra no encontrada")
     
     return db_obra
 
-@router.put("/{obra_id}", response_model=schema_obra.ObraResponse)
-def update_obra(obra_id: int, obra: schema_obra.ObraUpdate, db: Session = Depends(get_db)):
+@router.put("/{obra_id}", response_model=ObraResponse)
+async def update_obra(obra_id: int, obra: ObraUpdate, db: AsyncSession = Depends(get_async_db)):
     try:
-        db_obra = db.query(model_obra.Obra).filter(model_obra.Obra.id_obra == obra_id).first()
+        result = await db.execute(select(Obra).where(Obra.id_obra == obra_id))
+        db_obra = result.scalars().first()
         if db_obra is None:
             raise HTTPException(status_code=404, detail="Obra no encontrada")
         
@@ -129,26 +136,28 @@ def update_obra(obra_id: int, obra: schema_obra.ObraUpdate, db: Session = Depend
             setattr(db_obra, key, value)
         
         if centros_ids is not None:
-            centros = db.query(CentroOperacion).filter(
+            result = await db.execute(select(CentroOperacion).where(
                 CentroOperacion.id.in_(centros_ids)
-            ).all()
+            ))
+            centros = result.scalars().all()
             db_obra.centros_operacion = centros
         
-        db.commit()
-        db.refresh(db_obra)
+        await db.commit()
+        await db.refresh(db_obra)
         
         return db_obra
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al actualizar la obra: {str(e)}")
 
 @router.delete("/{obra_id}")
-def delete_obra(obra_id: int, db: Session = Depends(get_db)):
-    db_obra = db.query(model_obra.Obra).filter(model_obra.Obra.id_obra == obra_id).first()
+async def delete_obra(obra_id: int, db: AsyncSession = Depends(get_async_db)):
+    result = await db.execute(select(Obra).where(Obra.id_obra == obra_id))
+    db_obra = result.scalars().first()
     if db_obra is None:
         raise HTTPException(status_code=404, detail="Obra no encontrada")
     
-    db.delete(db_obra)
-    db.commit()
+    await db.delete(db_obra)
+    await db.commit()
     
     return {"ok": True, "message": "Obra eliminada correctamente", "id_obra": obra_id}

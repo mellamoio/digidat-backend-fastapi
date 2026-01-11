@@ -28,6 +28,23 @@ services:
     networks:
       - digidat_network
 
+  backend:
+    build: .
+    container_name: digidat_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - digidat_network
+
   adminer:
     image: adminer:4.8.1
     container_name: digidat_adminer

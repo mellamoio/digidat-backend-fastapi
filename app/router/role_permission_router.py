@@ -1,25 +1,20 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from app.config.db import SessionLocal
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from app.config.db import get_async_db
 from app.model.roles import Role
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 @router.get("/roles-with-permissions/")
-def get_roles_with_permissions(db: Session = Depends(get_db)):
-    roles = db.query(Role).all()
-    result = []
+async def get_roles_with_permissions(db: AsyncSession = Depends(get_async_db)):
+    result = await db.execute(select(Role))
+    roles = result.scalars().all()
+    out = []
     for role in roles:
-        result.append({
+        out.append({
             "id_role": role.id_role,
             "name": role.name,
             "permissions": [perm.name for perm in role.permissions]
         })
-    return result
+    return out

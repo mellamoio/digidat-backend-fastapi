@@ -1,7 +1,7 @@
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy import MetaData
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
 DATABASE_URL = settings.DATABASE_URL
@@ -12,31 +12,13 @@ Base = declarative_base(metadata=meta_data)
 if not DATABASE_URL:
     raise ValueError("No se encontró la variable de entorno DATABASE_URL en el archivo .env")
 
-engine = create_engine(
+async_engine = create_async_engine(
     DATABASE_URL,
     echo=True,
-    future=True,
     pool_pre_ping=True,
     pool_recycle=3600,
     pool_size=10,
     max_overflow=20,
-)
-
-ASYNC_DATABASE_URL = DATABASE_URL.replace("mysql+pymysql", "mysql+aiomysql")
-async_engine = create_async_engine(
-    ASYNC_DATABASE_URL,
-    echo=True,
-    pool_pre_ping=True,
-    pool_recycle=3600,
-    pool_size=10,
-    max_overflow=20,
-)
-
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine,
-    expire_on_commit=False
 )
 
 AsyncSessionLocal = sessionmaker(
@@ -46,16 +28,6 @@ AsyncSessionLocal = sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False
 )
-
-def get_db() -> scoped_session:
-    """
-    Obtiene una sesión de base de datos síncrona.
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 async def get_async_db() -> AsyncSession:
     """
@@ -69,18 +41,10 @@ async def get_async_db() -> AsyncSession:
             await session.rollback()
             raise
 
-def create_tables():
-    """Crea todas las tablas definidas en los modelos."""
-    Base.metadata.create_all(bind=engine)
-
 async def async_create_tables():
     """Crea todas las tablas de forma asíncrona."""
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
-def drop_tables():
-    """Elimina todas las tablas de la base de datos. ⚠️ Destruye todos los datos."""
-    Base.metadata.drop_all(bind=engine)
 
 async def async_drop_tables():
     """Elimina todas las tablas de forma asíncrona. ⚠️ Destruye todos los datos."""
@@ -91,6 +55,5 @@ if __name__ == "__main__":
     import asyncio
     
     print("Creando tablas en la base de datos...")
-    create_tables()
     asyncio.run(async_create_tables())
     print("¡Tablas creadas exitosamente!")

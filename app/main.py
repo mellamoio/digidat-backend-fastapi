@@ -1,12 +1,12 @@
 import logging
-from fastapi import FastAPI, Depends, HTTPException, APIRouter
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+""" from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+    from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+"""
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
-from typing import List, Optional
-from pydantic import AnyHttpUrl
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 from app.core.config import settings
-from app.core.database import create_tables, async_create_tables
+from app.core.database import async_create_tables
 from app.core.exceptions import register_exception_handlers
 
 from app.router import (
@@ -34,15 +34,15 @@ from app.router import (
     auth_router,
     document_router,
     role_permission_router,
-    centro_operacion_router,
-    tipos_obra
+    centro_operacion_router
 )
+
+from app.router.tipos_obra_router import router as tipos_obra_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Iniciando la aplicación...")
     try:
-        create_tables()
         await async_create_tables()
         logger.info("Tablas de la base de datos creadas correctamente")
     except Exception as e:
@@ -95,7 +95,7 @@ api_router.include_router(actividad_etapa_router, prefix="/actividad-etapa", tag
 api_router.include_router(beneficiario_router, prefix="/beneficiarios", tags=["Beneficiarios"])
 api_router.include_router(informacion_financista_router, prefix="/informacion-financistas", tags=["Información Financistas"])
 api_router.include_router(informacion_contratista_router, prefix="/informacion-contratistas", tags=["Información Contratistas"])
-api_router.include_router(tipos_obra.router, tags=["Tipos de Obra"])
+api_router.include_router(tipos_obra_router, prefix="/tipos-obra", tags=["Tipos de Obra"])
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

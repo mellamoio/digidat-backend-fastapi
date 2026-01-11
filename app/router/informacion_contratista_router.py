@@ -1,8 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
-from app.config.db import get_db
+from app.config.db import get_async_db
 from app.model.informacion_contratista import InformacionContratista
 from app.schema.informacion_contratista import (
     InformacionContratistaCreate,
@@ -11,14 +12,16 @@ from app.schema.informacion_contratista import (
 )
 
 from app.utils.response import custom_response
+from app.utils.auth import get_current_user
 
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get("/")
-def listar(db: Session = Depends(get_db)):
-    infos = db.query(InformacionContratista).all()
+async def listar(db: AsyncSession = Depends(get_async_db)):
+    result = await db.execute(select(InformacionContratista))
+    infos = result.scalars().all()
 
     data = [
         InformacionContratistaResponse.from_orm(info).dict()
@@ -33,8 +36,9 @@ def listar(db: Session = Depends(get_db)):
 
 
 @router.get("/{info_id}")
-def obtener(info_id: int, db: Session = Depends(get_db)):
-    info = db.query(InformacionContratista).filter_by(id=info_id).first()
+async def obtener(info_id: int, db: AsyncSession = Depends(get_async_db)):
+    result = await db.execute(select(InformacionContratista).where(InformacionContratista.id == info_id))
+    info = result.scalars().first()
 
     if not info:
         return custom_response(
@@ -52,11 +56,11 @@ def obtener(info_id: int, db: Session = Depends(get_db)):
     )
 
 @router.post("/")
-def crear(data: InformacionContratistaCreate, db: Session = Depends(get_db)):
+async def crear(data: InformacionContratistaCreate, db: AsyncSession = Depends(get_async_db)):
     info = InformacionContratista(**data.dict())
     db.add(info)
-    db.commit()
-    db.refresh(info)
+    await db.commit()
+    await db.refresh(info)
 
     response_data = InformacionContratistaResponse.from_orm(info).dict()
 
@@ -68,12 +72,13 @@ def crear(data: InformacionContratistaCreate, db: Session = Depends(get_db)):
 
 
 @router.put("/{info_id}")
-def actualizar(
+async def actualizar(
     info_id: int,
     data: InformacionContratistaUpdate,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ):
-    info = db.query(InformacionContratista).filter_by(id=info_id).first()
+    result = await db.execute(select(InformacionContratista).where(InformacionContratista.id == info_id))
+    info = result.scalars().first()
 
     if not info:
         return custom_response(
@@ -85,8 +90,8 @@ def actualizar(
     for field, value in data.dict(exclude_unset=True).items():
         setattr(info, field, value)
 
-    db.commit()
-    db.refresh(info)
+    await db.commit()
+    await db.refresh(info)
 
     response_data = InformacionContratistaResponse.from_orm(info).dict()
 
@@ -98,8 +103,9 @@ def actualizar(
 
 
 @router.delete("/{info_id}")
-def eliminar(info_id: int, db: Session = Depends(get_db)):
-    info = db.query(InformacionContratista).filter_by(id=info_id).first()
+async def eliminar(info_id: int, db: AsyncSession = Depends(get_async_db)):
+    result = await db.execute(select(InformacionContratista).where(InformacionContratista.id == info_id))
+    info = result.scalars().first()
 
     if not info:
         return custom_response(
@@ -108,8 +114,8 @@ def eliminar(info_id: int, db: Session = Depends(get_db)):
             response_code=False
         )
 
-    db.delete(info)
-    db.commit()
+    await db.delete(info)
+    await db.commit()
 
     return custom_response(
         code=status.HTTP_200_OK,

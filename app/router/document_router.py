@@ -7,12 +7,14 @@ from fastapi import (
     File,
     Form,
 )
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from datetime import datetime
 from typing import List, Union, Optional
 import uuid
+from starlette.concurrency import run_in_threadpool
 
-from app.config.db import get_db
+from app.config.db import get_async_db
 from app.model.document import Documento
 from app.schema.document_schema import (
     DocumentoCreate,
@@ -20,8 +22,9 @@ from app.schema.document_schema import (
     DocumentoUpdate,
 )
 from app.utils.s3_services import upload_file_to_s3
+from app.utils.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 # =========================================================
@@ -32,7 +35,7 @@ router = APIRouter()
     response_model=DocumentoResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def upload_documento(
+async def upload_documento(
     file: UploadFile = File(...),
 
     uploaded_by: Optional[int] = Form(None),
@@ -42,7 +45,7 @@ def upload_documento(
     id_informacion_contratista: Optional[int] = Form(None),
     id_pago: Optional[int] = Form(None),
 
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
 ):
     try:
         # 📁 Carpeta S3
@@ -50,15 +53,11 @@ def upload_documento(
         key = f"{folder}/{uuid.uuid4()}_{file.filename}"
 
         # 📥 Leer archivo (una sola vez)
-        file_bytes = file.file.read()
+        file_bytes = await file.read()
         size = len(file_bytes)
 
-        # ☁️ Subir a S3 usando bytes
-        upload_file_to_s3(
-            file_bytes=file_bytes,
-            key=key,
-            content_type=file.content_type,
-        )
+        # ☁️ Subir a S3 usando bytes (evita bloquear el event loop)
+        await run_in_threadpool(upload_file_to_s3, file_bytes=file_bytes, key=key, content_type=file.content_type)
 
         # 🗄️ Guardar en DB
         documento = Documento(
@@ -75,8 +74,8 @@ def upload_documento(
         )
 
         db.add(documento)
-        db.commit()
-        db.refresh(documento)
+        await db.commit()
+        await db.refresh(documento)
 
         return documento
 
@@ -94,9 +93,9 @@ def upload_documento(
     response_model=List[DocumentoResponse],
     status_code=status.HTTP_201_CREATED,
 )
-def create_documentos(
+async def create_documentos(
     documentos: Union[DocumentoCreate, List[DocumentoCreate]],
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
 ):
     if not isinstance(documentos, list):
         documentos = [documentos]
@@ -120,11 +119,12 @@ def create_documentos(
             )
         )
 
-    db.add_all(new_docs)
-    db.commit()
+    for doc in new_docs:
+        db.add(doc)
+    await db.commit()
 
     for doc in new_docs:
-        db.refresh(doc)
+        await db.refresh(doc)
 
     return new_docs
 
@@ -132,36 +132,32 @@ def create_documentos(
 # LISTAR DOCUMENTOS
 # =========================================================
 @router.get("/", response_model=List[DocumentoResponse])
-def get_documentos(
+async def get_documentos(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
 ):
-    documentos = (
-        db.query(Documento)
-        .filter(Documento.delete_date.is_(None))
-        .offset(skip)
-        .limit(limit)
-        .all()
+    result = await db.execute(
+        select(Documento).where(Documento.delete_date.is_(None)).offset(skip).limit(limit)
     )
+    documentos = result.scalars().all()
     return documentos
 
 # =========================================================
 # OBTENER DOCUMENTO POR ID
 # =========================================================
 @router.get("/{documento_id}", response_model=DocumentoResponse)
-def get_documento(
+async def get_documento(
     documento_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
 ):
-    documento = (
-        db.query(Documento)
-        .filter(
+    result = await db.execute(
+        select(Documento).where(
             Documento.id_documento == documento_id,
             Documento.delete_date.is_(None),
         )
-        .first()
     )
+    documento = result.scalars().first()
 
     if not documento:
         raise HTTPException(
@@ -178,19 +174,18 @@ def get_documento(
     "/{documento_id}",
     response_model=DocumentoResponse,
 )
-def update_documento(
+async def update_documento(
     documento_id: int,
     data_update: DocumentoUpdate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
 ):
-    documento = (
-        db.query(Documento)
-        .filter(
+    result = await db.execute(
+        select(Documento).where(
             Documento.id_documento == documento_id,
             Documento.delete_date.is_(None),
         )
-        .first()
     )
+    documento = result.scalars().first()
 
     if not documento:
         raise HTTPException(
@@ -203,8 +198,8 @@ def update_documento(
     for key, value in update_data.items():
         setattr(documento, key, value)
 
-    db.commit()
-    db.refresh(documento)
+    await db.commit()
+    await db.refresh(documento)
 
     return documento
 
@@ -215,18 +210,17 @@ def update_documento(
     "/{documento_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def soft_delete_documento(
+async def soft_delete_documento(
     documento_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
 ):
-    documento = (
-        db.query(Documento)
-        .filter(
+    result = await db.execute(
+        select(Documento).where(
             Documento.id_documento == documento_id,
             Documento.delete_date.is_(None),
         )
-        .first()
     )
+    documento = result.scalars().first()
 
     if not documento:
         raise HTTPException(
@@ -235,4 +229,4 @@ def soft_delete_documento(
         )
 
     documento.delete_date = datetime.utcnow()
-    db.commit()
+    await db.commit()

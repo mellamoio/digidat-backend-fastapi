@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from starlette.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 from werkzeug.security import check_password_hash
-from sqlalchemy.orm import Session
-from app.config.db import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from app.config.db import get_async_db
 from app.model.users import User
 from app.schema.auth_schema import LoginRequest
 from app.utils.auth import create_access_token
@@ -14,10 +15,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.post("/login", status_code=HTTP_200_OK)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+async def login(payload: LoginRequest, db: AsyncSession = Depends(get_async_db)):
     try:
         logger.debug(f"Request payload: {payload.dict()}")
-        user = db.query(User).filter(User.correo == payload.correo).first()
+        result = await db.execute(select(User).where(User.correo == payload.correo))
+        user = result.scalars().first()
         if not user:
             logger.warning(f"Intento de inicio de sesión fallido para el correo: {payload.correo}")
             return custom_response(

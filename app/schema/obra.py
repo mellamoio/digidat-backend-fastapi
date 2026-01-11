@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field,ConfigDict
 from typing import Optional, List
 from datetime import date
 
@@ -7,16 +7,18 @@ class CentroOperacionBase(BaseModel):
     id: int
     nombre: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
 
 class ResponsableBase(BaseModel):
     id_responsable: int
     nombre: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
 
 class ObraBase(BaseModel):
@@ -47,8 +49,9 @@ class ObraInDBBase(ObraBase):
     id_obra: int
     estado_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
 
 class Obra(ObraInDBBase):
@@ -61,5 +64,6 @@ class ObraResponse(ObraInDBBase):
     centros_operacion: List[CentroOperacionBase] = []
     responsable: Optional[ResponsableBase] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )

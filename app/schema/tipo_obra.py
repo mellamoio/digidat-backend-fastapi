@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class TipoObraBase(BaseModel):
     nombre: str
@@ -10,5 +10,6 @@ class TipoObraCreate(TipoObraBase):
 class TipoObra(TipoObraBase):
     id: int
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )

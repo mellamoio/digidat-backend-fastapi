@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -35,5 +35,7 @@ class DocumentoResponse(DocumentoBase):
     create_date: datetime
     delete_date: Optional[datetime] = None
 
-    class Config:
-        orm_mode = True
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+    )

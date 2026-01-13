@@ -1,4 +1,3 @@
-// src/constants/carpetas.ts
 export const CARPETA_PAGOS = "pagos";
 export const CARPETA_FINANCISTA = "financista";
 export const CARPETA_CONTRATISTA = "contratista";

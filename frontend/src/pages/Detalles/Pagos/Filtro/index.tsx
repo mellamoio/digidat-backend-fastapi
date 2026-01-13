@@ -1,41 +1,25 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../../api/api";
-import { FiltroContainer, InputWrapper, Label, IconWrapper, Column } from "./index.styled";
+import { 
+  FiltroContainer, 
+  InputWrapper, 
+  Label, 
+  IconWrapper, 
+  Column,
+  YearButton,
+  StyledRangePicker,
+  StyledAntdInput
+} from "./index.styled";
 import { FaSearch, FaFilter } from "react-icons/fa";
-import { Select, Dropdown, Button, DatePicker, message, Input as AntdInput } from "antd";
+import { Select, Dropdown, DatePicker, message } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-import styled from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
 import type { MenuProps } from "antd";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
-const { RangePicker } = DatePicker;
-
-const YearButton = styled(Button)`
-  min-width: 65px;
-  padding: 5px 8px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  background: #868686;
-  color: white;
-  border-radius: 4px;
-`;
-
-const StyledRangePicker = styled(RangePicker)`
-  max-width: 210px;
-  padding: 5px 8px;
-  width: 100%;
-  .ant-picker-suffix {
-    display: none;
-  }
-`;
-
-const StyledAntdInput = styled(AntdInput)`
-  max-width: 210px;
-  padding: 5px 8px;
-  width: 100%;
-`;
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 interface FiltroValues {
   year: string;
@@ -68,19 +52,24 @@ export const FiltroPagos: React.FC<FiltroPagosProps> = ({
     beneficiario: [],
   });
   const [years, setYears] = useState<string[]>([]);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const fetchYears = async () => {
     try {
-      const response = await api.get("/all/pagosoi", {
+      const response = await api.get("/v1/pagos/", {
         params: {
           id_obra,
         },
       });
 
       const pagos = response.data.data || response.data;
+      
       if (Array.isArray(pagos)) {
         const uniqueYears = Array.from(
-          new Set(pagos.map((pago: any) => new Date(pago.fecha).getFullYear().toString()))
+          new Set(pagos.map((pago: any) => {
+            const year = new Date(pago.fecha_pago).getFullYear().toString();
+            return year;
+          }))
         );
         setYears(uniqueYears);
       } else {
@@ -97,8 +86,22 @@ export const FiltroPagos: React.FC<FiltroPagosProps> = ({
     if (id_obra !== undefined) {
       fetchYears();
     }
-    onFilterChange(filters);
   }, [id_obra]);
+
+  // ✅ CORREGIDO: No aplicar filtro automáticamente en la primera carga
+  // El componente padre debe llamar a onFilterChange cuando esté listo
+  useEffect(() => {
+    if (isFirstLoad) {
+      // ❌ COMENTADO: No aplicar filtro automático
+      // const timer = setTimeout(() => {
+      //   onFilterChange(filters);
+      //   setIsFirstLoad(false);
+      // }, 800);
+      // return () => clearTimeout(timer);
+      
+      setIsFirstLoad(false); // ✅ Solo marcamos que ya no es la primera carga
+    }
+  }, [isFirstLoad]);
 
   const generateYears = (numYears: number) => {
     const currentYear = dayjs().year();
@@ -130,6 +133,7 @@ export const FiltroPagos: React.FC<FiltroPagosProps> = ({
         fechaInicio: dates[0].format("YYYY-MM-DD"),
         fechaFin: dates[1].format("YYYY-MM-DD"),
       };
+
       setFilters(newFilters);
       onFilterChange(newFilters);
     } else {

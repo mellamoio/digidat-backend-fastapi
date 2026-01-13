@@ -35,7 +35,9 @@ from app.router import (
     document_router,
     role_permission_router,
     centro_operacion_router,
-    tipos_obra
+    tipos_obra,
+    tipo_gasto_router,
+    pago_router
 )
 
 @asynccontextmanager
@@ -78,9 +80,6 @@ app.add_middleware(
 )
 
 
-
-# register_exception_handlers(app)
-
 api_router = APIRouter()
 
 api_router.include_router(auth_router, prefix="/auth", tags=["Autenticación"])
@@ -96,6 +95,8 @@ api_router.include_router(beneficiario_router, prefix="/beneficiarios", tags=["B
 api_router.include_router(informacion_financista_router, prefix="/informacion-financistas", tags=["Información Financistas"])
 api_router.include_router(informacion_contratista_router, prefix="/informacion-contratistas", tags=["Información Contratistas"])
 api_router.include_router(tipos_obra.router, tags=["Tipos de Obra"])
+api_router.include_router(tipo_gasto_router, prefix="/tipos-gasto", tags=["Tipos de Gasto"])
+api_router.include_router(pago_router, prefix="/pagos", tags=["Pagos"])
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

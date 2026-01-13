@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useMemo, type ReactNode
 import useSWR from "swr";
 import { getUsers } from "../services/getUser.service";
 import { getObra } from "../services/getObra.service";
-import api from "../api/api";
+import { fetchTiposGasto } from "../services/getPagos.service";
 import type { User } from "../types/user";
 import type { Obra } from "../types/obra";
 import { message } from "antd";
@@ -10,9 +10,7 @@ import { filterDateRange } from "../helpers/filterDateRange";
 
 interface TipoGasto {
   id: number;
-  name: string;
-  created_at?: string | null;
-  updated_at?: string | null;
+  nombre: string;
 }
 
 interface DigidatContextType {
@@ -50,6 +48,7 @@ export const SateliteProvider = ({ children }: { children: ReactNode }) => {
   const [obrasOriginales, setObrasOriginales] = useState<Obra[] | null>(null);
   const [obrasFiltradas, setObrasFiltradas] = useState<Obra[] | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [tiposGastoData, setTiposGastoData] = useState<TipoGasto[] | null>(null);
   const [params, setParams] = useState<DigidatContextType['params']>({
     obra_id: undefined,
     tipo: undefined,
@@ -80,14 +79,24 @@ export const SateliteProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const { data: tiposGastoData } = useSWR(
-    '/all/tipogasto',
-    () => api.get('/all/tipogasto').then((res) => res.data.data),
-    { revalidateOnFocus: false }
-  );
+  useEffect(() => {
+    const loadTiposGasto = async () => {
+      try {
+        const tipos = await fetchTiposGasto();
+        setTiposGastoData(tipos);
+      } catch (error) {
+        console.error("[DigidatContext] Error al cargar tipos de gasto:", error);
+        setTiposGastoData([
+          { id: 1, nombre: "Administrativo" },
+          { id: 2, nombre: "Reembolsable" },
+        ]);
+      }
+    };
+    loadTiposGasto();
+  }, []);
 
   const { data: obrasData, mutate: mutateObras } = useSWR(
-    '/all/obraporimpuestoco',
+    '/obras',
     () => getObra(),
     { revalidateOnFocus: false }
   );
@@ -119,7 +128,6 @@ export const SateliteProvider = ({ children }: { children: ReactNode }) => {
       );
     }
 
-    // Filtrado por rango de fechas usando filterDateRange
     if (params.year || params.fecha_conclusion || params.fecha_reembolso) {
       filtered = filtered.filter((obra) => {
         if (!obra.fecha_inicio) return false;
@@ -206,7 +214,7 @@ export const SateliteProvider = ({ children }: { children: ReactNode }) => {
       fetchUsuarios: fetchUsuariosData,
       filteredObras,
       setFilteredObras,
-      tiposGastoData: tiposGastoData || null,
+      tiposGastoData,
       obras: obrasData || null,
       obrasOriginales,
       obrasFiltradas,

@@ -1,14 +1,16 @@
+// En types/user.ts
 export interface User {
   id_responsable: number;
   nombre: string;
   correo: string;
   contrasena_hash?: string;
-  estado: boolean;
+  estado: boolean | 'ACTIVO' | 'INACTIVO';
   id_role: number;
   cargo?: string;
   fecha_creacion?: string;
   fecha_actualizacion?: string;
 }
+
 
 export interface UserCreate {
   nombre: string;

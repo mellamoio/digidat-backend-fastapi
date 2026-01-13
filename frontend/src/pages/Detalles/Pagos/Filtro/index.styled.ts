@@ -1,4 +1,7 @@
 import styled from "styled-components";
+import { Button, DatePicker, Input } from "antd";
+
+const { RangePicker } = DatePicker;
 
 export const FiltroContainer = styled.div<{ isCollapsed: boolean }>`
   position: relative;
@@ -47,5 +50,32 @@ export const Label = styled.label`
 
 export const InputWrapper = styled.div`
   position: relative;
+  width: 100%;
+`;
+
+export const YearButton = styled(Button)`
+  min-width: 65px;
+  padding: 5px 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #868686;
+  color: white;
+  border-radius: 4px;
+`;
+
+export const StyledRangePicker = styled(RangePicker)`
+  max-width: 210px;
+  padding: 5px 8px;
+  width: 100%;
+  .ant-picker-suffix {
+    display: none;
+  }
+`;
+
+export const StyledAntdInput = styled(Input)`
+  max-width: 210px;
+  padding: 5px 8px;
   width: 100%;
 `;

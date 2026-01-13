@@ -8,17 +8,14 @@ import React, {
 } from 'react'
 import useSWR from 'swr'
 import apiClient from '../api/api'
-import { useSatelite } from './DigidatContext'
 import type { Obra } from '../types/obra'
 import dayjs from 'dayjs'
 import { filterDateRange } from '../helpers/filterDateRange'
+import { fetchTiposGasto } from '../services/getPagos.service'
 
 interface TipoGasto {
   id: number
-  name: string
-  id_empresa?: number
-  created_at?: string | null
-  updated_at?: string | null
+  nombre: string
 }
 
 interface KpisObras {
@@ -29,7 +26,6 @@ interface KpisObras {
 }
 
 interface ObrasContextType {
-  empresaId: string
   obras: Obra[] | null
   obrasOriginales: Obra[] | null
   obrasFiltradas: Obra[] | null
@@ -58,9 +54,6 @@ interface ObrasContextType {
 const ObrasContext = createContext<ObrasContextType | undefined>(undefined)
 
 export const ObrasProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { empresaId: contextEmpresaId } = useSatelite()
-  const empresaId = contextEmpresaId || '1'
-
   const [params, setParams] = useState<ObrasContextType['params']>({
     obra_id: undefined,
     tipo: undefined,
@@ -75,18 +68,32 @@ export const ObrasProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [obrasFiltradas, setObrasFiltradas] = useState<Obra[] | null>(null)
   const [kpis, setKpis] = useState<KpisObras | null>(null)
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [tiposGastoData, setTiposGastoData] = useState<TipoGasto[] | null>(null)
 
+  // ✅ Cargar obras sin empresaId
   const { data: obrasData, mutate: mutateObras } = useSWR(
-    [`v1/obras/`, empresaId],
-    () => apiClient.get('/v1/obras/', { params: { id_empresa: empresaId } }).then(res => res.data),
+    'v1/obras/',
+    () => apiClient.get('/v1/obras/').then(res => res.data),
     { revalidateOnFocus: false }
   )
 
-  const { data: tiposGastoData } = useSWR(
-    [`/all/tipogasto`, empresaId],
-    () => apiClient.get('/all/tipogasto', { params: { id_empresa: empresaId } }).then(res => res.data),
-    { revalidateOnFocus: false }
-  )
+  // ✅ Cargar tipos de gasto desde el nuevo endpoint de FastAPI
+  useEffect(() => {
+    const loadTiposGasto = async () => {
+      try {
+        const tipos = await fetchTiposGasto()
+        setTiposGastoData(tipos)
+      } catch (error) {
+        console.error("[ObrasContext] Error al cargar tipos de gasto:", error)
+        // Valores por defecto
+        setTiposGastoData([
+          { id: 1, nombre: "Administrativo" },
+          { id: 2, nombre: "Reembolsable" },
+        ])
+      }
+    }
+    loadTiposGasto()
+  }, [])
 
   useEffect(() => {
     if (obrasData && Array.isArray(obrasData)) {
@@ -149,35 +156,6 @@ export const ObrasProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setObrasFiltradas(filteredObras)
   }, [obrasData, params, selectedId])
 
-  const tiposGastoFiltrados = useMemo(() => {
-    if (!tiposGastoData || !obrasFiltradas) return null
-    
-    let filtered = [...tiposGastoData]
-    const obraIds = obrasFiltradas.map((obra) => obra.id_obra)
-    
-    filtered = filtered.filter(
-      (tipoGasto: TipoGasto & { id_obra?: number }) =>
-        obraIds.includes(tipoGasto.id_obra!)
-    )
-    
-    if (params.fecha_fin && params.fecha_inicio) {
-      filtered = filtered.filter((tipoGasto: TipoGasto) => {
-        const tipoGastoFecha = tipoGasto.created_at ? dayjs(tipoGasto.created_at) : null
-        if (!tipoGastoFecha) return false
-        
-        const fechaInicio = dayjs(params.fecha_inicio)
-        const fechaFin = dayjs(params.fecha_fin)
-        
-        return (
-          tipoGastoFecha.isAfter(fechaInicio, 'day') &&
-          tipoGastoFecha.isBefore(fechaFin, 'day')
-        )
-      })
-    }
-    
-    return filtered
-  }, [tiposGastoData, params.fecha_fin, params.fecha_inicio, obrasFiltradas])
-
   const kpisIniciales = useMemo(() => {
     const validObrasFiltradas = obrasFiltradas
       ? obrasFiltradas.filter((obra): obra is Obra => obra !== undefined)
@@ -189,18 +167,13 @@ export const ObrasProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         const costo = Number(obra.costo_proyecto ?? 0)
         return sum + (isNaN(costo) ? 0 : costo)
       }, 0),
-      montoPagado: tiposGastoFiltrados
-        ? tiposGastoFiltrados.reduce(
-            (sum: number, tipoGasto: any) => sum + (tipoGasto.monto_pagado || 0),
-            0
-          )
-        : 0,
+      montoPagado: 0, // Este cálculo dependerá de cómo obtengas los pagos
       montoRecuperado: validObrasFiltradas.reduce(
         (sum: number, obra: Obra) => sum + (obra.monto_recuperado || 0),
         0
       )
     }
-  }, [obrasFiltradas, tiposGastoFiltrados])
+  }, [obrasFiltradas])
 
   useEffect(() => {
     setKpis(kpisIniciales)
@@ -238,7 +211,6 @@ export const ObrasProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ObrasContext.Provider
       value={{
-        empresaId,
         obras: obrasData || null,
         obrasOriginales,
         obrasFiltradas,

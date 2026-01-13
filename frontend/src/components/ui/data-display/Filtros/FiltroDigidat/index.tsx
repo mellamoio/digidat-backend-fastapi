@@ -211,8 +211,8 @@ const FiltroVerticalDigidat: React.FC = () => {
         <SelectFiltro
           showSearch
           mode="multiple"
-          placeholder="Buscar beneficiarios..."
-          label="Beneficiarios Involucrados (Centros de Operación)"
+          placeholder="Buscar Centros de Operación"
+          label="Centros de Operación"
           value={params.centros_operacion || []}
           options={centrosOperacion.map((centro) => ({
             label: centro.nombre,

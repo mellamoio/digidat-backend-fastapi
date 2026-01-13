@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { SeccionContainer, SeccionHeader, IconoFlecha, SeccionContent, BarraProgreso } from "./index.styled";
-import type { SeccionDesplegableProps } from "../../../types/seccion_desplegable";
+import type { SeccionDesplegableProps } from "../../Dashboard/types/seccion_desplegable";
 
 const SeccionDesplegable: React.FC<SeccionDesplegableProps> = ({
   titulo,

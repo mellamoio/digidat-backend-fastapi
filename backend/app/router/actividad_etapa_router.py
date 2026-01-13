@@ -9,8 +9,6 @@ from app.model.estado_etapa import EstadoEtapa
 
 router = APIRouter()
 
-
-# Actividades por defecto para cada estado
 ACTIVIDADES_DEFAULT = {
     "Priorización": [
         "Aprobar la Capacidad Presupuestal",

@@ -38,6 +38,7 @@ from app.router import (
 )
 
 from app.router.tipos_obra_router import router as tipos_obra_router
+from app.router.pago_router import router as pago_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -89,6 +90,7 @@ api_router.include_router(role_router, prefix="/roles", tags=["Roles"])
 api_router.include_router(role_permission_router, prefix="/role-permissions", tags=["Permisos de Roles"])
 api_router.include_router(document_router, prefix="/documents", tags=["Documentos"])
 api_router.include_router(obra_router, prefix="/obras", tags=["Obras"])
+api_router.include_router(pago_router, prefix="/pago", tags=["Pagos"])
 api_router.include_router(centro_operacion_router, prefix="/centros-operacion", tags=["Centros de Operación"])
 api_router.include_router(estado_etapa_router, prefix="/estados-etapa", tags=["Estados de Etapa"])
 api_router.include_router(actividad_etapa_router, prefix="/actividad-etapa", tags=["Actividades de Etapas"])

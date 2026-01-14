@@ -10,11 +10,14 @@ import ModalVistaPrevia from "../../../components/ui/feedback/Modal/ModalVistaPr
 import {
   fetchInformacionContratista,
   sendContratista,
-  type ContratistaData,
   deleteContratista,
 } from "../../../services/getInformacionContratista.service";
+import type { 
+  ContratistaData,
+  ContratistaDataCreate,
+  ContratistaEntityData 
+} from "../../../types/informacion_contratista";
 import { useSatelite } from "../../../context/DigidatContext";
-import { getTiposContratista } from "../../../services/getTipoInformacion.service";
 import {
   AddButton,
   ModalBackground,
@@ -32,46 +35,44 @@ import type { FileObject } from "../../../types/pagos";
 import api from "../../../api/api";
 import { usePagination } from "../../../hooks/usePagination";
 
-interface ContratistaFileObject extends FileObject {
+interface contratistaFileObject extends FileObject {
   categoria_id?: number | null;
 }
 
-interface Contratista {
+interface contratista {
   id: number;
   tipo: string;
   id_tipo_contratista: number;
   aspecto: string;
   comentarios: string;
-  documentos: ContratistaFileObject[];
+  documentos: contratistaFileObject[];
   responsables: { id: string; nombre: string }[];
   categorias: { id: string; nombre: string }[];
-  id_obra_impuesto: number;
+  id_obra: number;
 }
 
 interface TablaContratistaProps {
-  id_obra_impuesto: number;
+  id_obra: number;
 }
 
-const tipoContratistaOptions = [
-  { value: "1", label: "Infraestructura" },
-  { value: "2", label: "Sobre Experiencia del Ejecutor" },
-  { value: "3", label: "Sobre Experiencia de los Profesionales" }
+const tipocontratistaOptions = [
+  { value: "1", label: "Empresa Financiadora" },
+  { value: "2", label: "Consorcio" },
+  { value: "3", label: "Entidad Supervisora" },
 ];
 
-const ID_EMPRESA = 1;
 
-const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto }) => {
+const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra }) => {
   const { usuarios: responsablesList, fetchUsuarios } = useSatelite();
-  const [data, setData] = useState<Contratista[]>([]);
-  const [tipoOptions, setTipoOptions] = useState<{ value: string; label: string }[]>([]);
+  const [data, setData] = useState<contratista[]>([]);
   const [modalState, setModalState] = useState({
     formOpen: false,
     uploadOpen: false,
     previewOpen: false,
     deleteOpen: false,
-    editData: null as Contratista | null,
+    editData: null as contratista | null,
     selectedRowId: null as number | null,
-    selectedDocuments: [] as ContratistaFileObject[],
+    selectedDocuments: [] as contratistaFileObject[],
     categoriaId: undefined as number | undefined,
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -79,48 +80,33 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
   const hasLoaded = useRef(false);
 
   const {
-      currentPage,
-      handlePageChange,
-      handleRowsPerPageChange,
-      rows,
-      rowsPage,
-      rowsTotal
-  } = usePagination<Contratista>(data ?? null)
-  const loadTipos = useCallback(async () => {
-    try {
-      const tipos = await getTiposContratista(ID_EMPRESA);
-      const options = tipos.map((tipo) => ({
-        value: tipo.id.toString(),
-        label: tipo.name || "Sin nombre",
-      }));
-      setTipoOptions(options);
-      return options;
-    } catch (error) {
-      console.error("[loadTipos] Error cargando tipos de contratista:", error);
-      setErrorMessage("Error al cargar los tipos de contratista.");
-      return [];
-    }
-  }, []);
+    currentPage,
+    handlePageChange,
+    handleRowsPerPageChange,
+    rows,
+    rowsPage,
+    rowsTotal
+  } = usePagination<contratista>(data ?? null);
 
   const getDocumentosPorActividad = useCallback(
-    async (contratistaId: number, categoriaId?: number): Promise<ContratistaFileObject[]> => {
-      if (!contratistaId) {
-        console.warn("[getDocumentosPorActividad] contratistaId inválido:", contratistaId);
-        return [];
-      }
+    async (contratistaId: number, categoriaId?: number): Promise<contratistaFileObject[]> => {
+      if (!contratistaId) return [];
+      
       try {
         const params: any = {
           actividad_id: contratistaId,
           carpeta_base: CARPETA_CONTRATISTA.replace(/^\//, ""),
           codigo_registro: contratistaId,
-          empresa_id: ID_EMPRESA,
-          id_obra_impuesto,
+          id_obra,
         };
+
         if (categoriaId) {
           params.categoria_id = categoriaId;
         }
+
         const response = await api.get("/archivos/all", { params });
         const documentos = response.data?.data || response.data || [];
+        
         return documentos.map((doc: any, index: number) => {
           const nombre = doc.nombre_original || doc.nombre || `archivo_${index}`;
           return {
@@ -133,120 +119,94 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
             categoria_id: Number(doc.categoria) || categoriaId || null,
           };
         });
-      } catch (error) {
-        console.error(
-          `[getDocumentosPorActividad] Error fetching documents for contratista ${contratistaId}:`,
-          error
-        );
+      } catch {
         return [];
       }
     },
-    [id_obra_impuesto]
+    [id_obra]
   );
 
-  const fetchData = useCallback(async (tipoOptions: { value: string; label: string }[]) => {
+  const fetchData = useCallback(async () => {
     try {
-      setIsLoading(true);
-      const response = await fetchInformacionContratista(ID_EMPRESA, id_obra_impuesto);
-      if (!response.success || !Array.isArray(response.data)) {
-        throw new Error("Respuesta del backend vacía o inválida");
+      const dataArray = await fetchInformacionContratista(id_obra);
+      
+      if (dataArray.length === 0) {
+        setData([]);
+        setErrorMessage(null);
+        return;
       }
 
-      const mappedData: Contratista[] = [];
-      for (const item of response.data) {
-        let responsablesArray: any[] = [];
-        if (item.responsables) {
-          if (typeof item.responsables === "string") {
-            try {
-              responsablesArray = JSON.parse(item.responsables);
-            } catch (parseError) {
-              console.warn(
-                "[fetchData] Error parseando item.responsables:",
-                item.responsables,
-                parseError
-              );
+      const mappedData = await Promise.all(
+        dataArray.map(async (item: ContratistaData) => {
+          try {
+            let categoriasArray: any[] = [];
+            if (typeof item.id_categoria_documento === "string") {
+              try {
+                categoriasArray = JSON.parse(item.id_categoria_documento);
+              } catch {}
+            } else if (Array.isArray(item.id_categoria_documento)) {
+              categoriasArray = item.id_categoria_documento;
             }
-          } else if (Array.isArray(item.responsables)) {
-            responsablesArray = item.responsables;
-          } else if (typeof item.responsables === "object") {
-            responsablesArray = [item.responsables];
-          }
-        }
 
-        let categoriasArray: any[] = [];
-        if (item.id_categoria_documento) {
-          if (typeof item.id_categoria_documento === "string") {
-            try {
-              categoriasArray = JSON.parse(item.id_categoria_documento);
-            } catch (parseError) {
-              console.warn(
-                "[fetchData] Error parseando item.id_categoria_documento:",
-                item.id_categoria_documento,
-                parseError
-              );
+            let responsablesArray: any[] = [];
+            if (typeof item.responsables === "string") {
+              try {
+                responsablesArray = JSON.parse(item.responsables);
+              } catch {}
+            } else if (Array.isArray(item.responsables)) {
+              responsablesArray = item.responsables;
             }
-          } else if (Array.isArray(item.id_categoria_documento)) {
-            categoriasArray = item.id_categoria_documento;
-          } else if (typeof item.id_categoria_documento === "object") {
-            categoriasArray = [item.id_categoria_documento];
+
+            return {
+              id: item.id || 0,
+              tipo: tipocontratistaOptions.find(
+                opt => opt.value === String(item.id_tipo_contratista)
+              )?.label || "Desconocido",
+              id_tipo_contratista: item.id_tipo_contratista,
+              aspecto: item.aspecto || "",
+              comentarios: item.comentarios || "",
+              documentos: await getDocumentosPorActividad(item.id || 0),
+              responsables: responsablesArray.map((r) => ({
+                id: String(r.id),
+                nombre: r.nombre || "Desconocido",
+              })),
+              categorias: categoriasArray.map((c) => ({
+                id: String(c.id),
+                nombre: c.nombre || "Desconocida",
+              })),
+              id_obra: item.id_obra || id_obra,
+            };
+          } catch {
+            return null;
           }
-        }
+        })
+      );
 
-        const documentos = await getDocumentosPorActividad(item.id || 0);
-
-        const tipo = tipoOptions.find(
-          (opt) => opt.value === String(item.id_tipo_contratista)
-        )?.label || "Desconocido";
-
-        const contratista: Contratista = {
-          id: item.id || 0,
-          tipo,
-          id_tipo_contratista: Number(item.id_tipo_contratista) || 1,
-          aspecto: item.aspecto || "",
-          comentarios: item.comentarios || "",
-          documentos,
-          responsables: responsablesArray.map((r: any) => ({
-            id: r.id ? String(r.id) : "unknown",
-            nombre: r.nombre || "Desconocido",
-          })),
-          categorias: categoriasArray.map((c: any) => ({
-            id: c.id ? String(c.id) : "unknown",
-            nombre: c.nombre || "Desconocida",
-          })),
-          id_obra_impuesto,
-        };
-
-        mappedData.push(contratista);
-      }
-
-      setData(mappedData);
+      const validData = mappedData.filter((item): item is contratista => item !== null);
+      setData(validData);
       setErrorMessage(null);
     } catch (error: any) {
-      console.error("[fetchData] Error fetching contratista data:", error);
       setData([]);
-      setErrorMessage(`Error al cargar los datos: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+      setErrorMessage(`Error de conexión: ${error.message}`);
     }
-  }, [getDocumentosPorActividad, id_obra_impuesto]);
+  }, [getDocumentosPorActividad, id_obra]);
 
   useEffect(() => {
     if (hasLoaded.current) return;
     hasLoaded.current = true;
 
     const loadData = async () => {
+      setIsLoading(true);
       try {
-        const tipos = await loadTipos();
-        await Promise.all([fetchData(tipos), fetchUsuarios()]);
-      } catch (error) {
-        console.error("[loadData] Error cargando datos iniciales:", error);
-        setErrorMessage("Error al cargar los datos iniciales.");
+        await Promise.all([fetchData(), fetchUsuarios()]);
+      } finally {
+        setIsLoading(false);
       }
     };
     loadData();
-  }, [fetchData, fetchUsuarios, loadTipos]);
+  }, [fetchData, fetchUsuarios]);
 
-  const mapToContratistaData = (contratista: Contratista | null): ContratistaData | null => {
+  const mapToEntityData = useCallback((contratista: contratista | null): ContratistaEntityData | null => {
     if (!contratista) return null;
     return {
       id: contratista.id,
@@ -261,69 +221,75 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
         id: parseInt(resp.id),
         nombre: resp.nombre,
       })),
-      id_empresa: ID_EMPRESA,
-      id_obra_impuesto,
+      id_empresa: 1,
+      id_obra: contratista.id_obra,
     };
+  }, []);
+
+  const adaptedSendService = async (
+    data: ContratistaEntityData,
+    id?: number
+  ): Promise<ContratistaEntityData> => {
+    const adaptedData: ContratistaDataCreate = {
+      id_tipo_contratista: data.id_tipo_contratista,
+      aspecto: data.aspecto,
+      comentarios: data.comentarios,
+      id_categoria_documento: data.id_categoria_documento || [],
+      responsables: data.responsables || [],
+      id_obra: id_obra
+    };
+    
+    const response = await sendContratista(adaptedData, id);
+    
+    return {
+      ...response,
+      id_empresa: 1,
+    } as ContratistaEntityData;
   };
 
-  const calcularProgreso = () => {
+  const calcularProgreso = useCallback(() => {
     if (!data.length) return 0;
-    const totalCategorias = data.reduce(
-      (sum, row) => sum + row.categorias.length,
-      0
-    );
+    const totalCategorias = data.reduce((sum, row) => sum + row.categorias.length, 0);
     let categoriasConDocumentos = 0;
+    
     data.forEach((row) => {
       row.categorias.forEach((categoria) => {
         const categoriaId = parseInt(categoria.id);
-        const tieneDocumento = row.documentos.some(
-          (doc) => doc.categoria_id === categoriaId
-        );
+        const tieneDocumento = row.documentos.some((doc) => doc.categoria_id === categoriaId);
         if (tieneDocumento) {
           categoriasConDocumentos += 1;
         }
       });
     });
-    return totalCategorias > 0
-      ? Math.round((categoriasConDocumentos / totalCategorias) * 100)
-      : 0;
-  };
 
-  const handleOpenModal = useCallback(
-    (type: string, row?: Contratista, categoriaId?: number) => {
-      setModalState((prev) => {
-        const filteredDocuments =
-          type === "preview"
-            ? (row?.documentos || []).filter(
-                (doc) => doc.categoria_id === categoriaId
-              )
-            : type === "upload"
-            ? []
-            : prev.selectedDocuments;
-        const uniqueDocuments = Array.from(
-          new Map(
-            filteredDocuments.map((doc) => [
-              doc.id || doc.url || `temp-${doc.nombre_original}`,
-              doc,
-            ])
-          ).values()
-        );
-        return {
-          ...prev,
-          formOpen: type === "form",
-          uploadOpen: type === "upload",
-          previewOpen: type === "preview",
-          deleteOpen: type === "delete",
-          editData: row || null,
-          selectedRowId: row?.id || null,
-          selectedDocuments: uniqueDocuments,
-          categoriaId:
-            type === "upload" || type === "preview" ? categoriaId : undefined,
-        };
-      });
-    },
-    []
-  );
+    return totalCategorias > 0 ? Math.round((categoriasConDocumentos / totalCategorias) * 100) : 0;
+  }, [data]);
+
+  const handleOpenModal = useCallback((type: string, row?: contratista, categoriaId?: number) => {
+    setModalState((prev) => {
+      const filteredDocuments = type === "preview"
+        ? (row?.documentos || []).filter((doc) => doc.categoria_id === categoriaId)
+        : type === "upload"
+        ? []
+        : prev.selectedDocuments;
+      
+      const uniqueDocuments = Array.from(
+        new Map(filteredDocuments.map((doc) => [doc.id || doc.url, doc])).values()
+      );
+
+      return {
+        ...prev,
+        formOpen: type === "form",
+        uploadOpen: type === "upload",
+        previewOpen: type === "preview",
+        deleteOpen: type === "delete",
+        editData: row || null,
+        selectedRowId: row?.id || null,
+        selectedDocuments: uniqueDocuments,
+        categoriaId: type === "upload" || type === "preview" ? categoriaId : undefined,
+      };
+    });
+  }, []);
 
   const handleCloseModal = useCallback((type: string) => {
     setModalState((prev) => ({
@@ -331,112 +297,41 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
       [type]: false,
       editData: type !== "previewOpen" ? null : prev.editData,
       selectedRowId: type === "deleteOpen" ? null : prev.selectedRowId,
-      selectedDocuments:
-        type === "previewOpen" || type === "uploadOpen"
-          ? []
-          : prev.selectedDocuments,
-      categoriaId:
-        type === "uploadOpen" || type === "previewOpen"
-          ? undefined
-          : prev.categoriaId,
+      selectedDocuments: type === "previewOpen" || type === "uploadOpen" ? [] : prev.selectedDocuments,
+      categoriaId: type === "uploadOpen" || type === "previewOpen" ? undefined : prev.categoriaId,
     }));
   }, []);
 
-  const handleGuardar = async (
-    response: ContratistaData,
-    formattedValues?: ContratistaData
-  ) => {
-    try {
-
-      const contratistaId = response.id || formattedValues?.id;
-      if (!contratistaId) {
-        console.error("[handleGuardar] No se proporcionó un contratistaId válido");
-        throw new Error("No se proporcionó un contratistaId válido");
-      }
-
-      const documentos = await getDocumentosPorActividad(contratistaId);
-
-      const tipo = tipoOptions.find(
-        (opt) => opt.value === String(response.id_tipo_contratista || formattedValues?.id_tipo_contratista)
-      )?.label || "Desconocido";
-
-      const responsablesRaw = formattedValues?.responsables || response.responsables || [];
-      let responsablesArray: any[] = [];
-      if (typeof responsablesRaw === "string") {
-        try {
-          responsablesArray = JSON.parse(responsablesRaw);
-        } catch (parseError) {
-          console.warn("[handleGuardar] Error parseando responsablesRaw:", responsablesRaw, parseError);
-        }
-      } else if (Array.isArray(responsablesRaw)) {
-        responsablesArray = responsablesRaw;
-      } else if (responsablesRaw && typeof responsablesRaw === "object") {
-        responsablesArray = [responsablesRaw];
-      }
-
-      const categoriasRaw = formattedValues?.id_categoria_documento || response.id_categoria_documento || [];
-      let categoriasArray: any[] = [];
-      if (typeof categoriasRaw === "string") {
-        try {
-          categoriasArray = JSON.parse(categoriasRaw);
-        } catch (parseError) {
-          console.warn("[handleGuardar] Error parseando categoriasRaw:", categoriasRaw, parseError);
-        }
-      } else if (Array.isArray(categoriasRaw)) {
-        categoriasArray = categoriasRaw;
-      } else if (categoriasRaw && typeof categoriasRaw === "object") {
-        categoriasArray = [categoriasRaw];
-      }
-
-      const nuevoContratista: Contratista = {
-        id: contratistaId,
-        tipo,
-        id_tipo_contratista: Number(formattedValues?.id_tipo_contratista || response.id_tipo_contratista) || 1,
-        aspecto: response.aspecto || formattedValues?.aspecto || "",
-        comentarios: response.comentarios || formattedValues?.comentarios || "",
-        documentos,
-        responsables: responsablesArray.map((r) => ({
-          id: r.id ? String(r.id) : "unknown",
-          nombre: r.nombre || "Desconocido",
-        })),
-        categorias: categoriasArray.map((c) => ({
-          id: c.id ? String(c.id) : "unknown",
-          nombre: c.nombre || "Desconocida",
-        })),
-        id_obra_impuesto,
-      };
-
-      setData((prev) => {
-        const exists = prev.some((item) => item.id === contratistaId);
-        if (exists) {
-          return prev.map((item) => (item.id === contratistaId ? nuevoContratista : item));
-        }
-        return [...prev, nuevoContratista];
-      });
-
-      handleCloseModal("formOpen");
-    } catch (error: any) {
-      console.error("[handleGuardar] Error al guardar contratista:", error);
-      setErrorMessage(`Error al guardar el contratista: ${error.message}`);
-      await fetchData(tipoOptions);
-      handleCloseModal("formOpen");
-    }
+  const handleGuardar = async () => {
+    await fetchData();
+    handleCloseModal("formOpen");
   };
 
   const handleEliminar = async () => {
     if (!modalState.selectedRowId) {
-      console.warn("[handleEliminar] No se proporcionó selectedRowId");
       handleCloseModal("deleteOpen");
       return;
     }
 
     try {
-      await deleteContratista(modalState.selectedRowId, id_obra_impuesto);
+      await deleteContratista(modalState.selectedRowId);
+
+      const contratista = data.find((item) => item.id === modalState.selectedRowId);
+      if (contratista && contratista.documentos.length > 0) {
+        await Promise.all(
+          contratista.documentos.map(async (doc) => {
+            try {
+              await api.delete(`/archivosdelete/${doc.id}`, {
+                params: { codigo_registro: modalState.selectedRowId, id_obra },
+              });
+            } catch {}
+          })
+        );
+      }
+
       setData((prev) => prev.filter((item) => item.id !== modalState.selectedRowId));
     } catch (error: any) {
-      console.error("[handleEliminar] Error al eliminar:", error);
-      setErrorMessage(`Error al eliminar el requisito: ${error.message}`);
-      await fetchData(tipoOptions);
+      alert(`Error al eliminar: ${error.message}`);
     } finally {
       handleCloseModal("deleteOpen");
     }
@@ -450,8 +345,7 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
       await api.delete(`/archivosdelete/${doc.id}`, {
         params: {
           codigo_registro: modalState.editData.id,
-          id_obra_impuesto,
-          empresa_id: ID_EMPRESA,
+          id_obra,
         },
       });
 
@@ -473,86 +367,39 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
       if (updatedDocuments.length === 0) {
         handleCloseModal("previewOpen");
       }
-    } catch (error) {
-      console.error("[handleRemoveDocument] Error removing document:", error);
-      setErrorMessage("Error al eliminar el documento.");
-      await fetchData(tipoOptions);
+    } catch {
+      fetchData();
     }
   };
 
-  const handleDocumentsSaved = async (
-    actividadId: number,
-    nuevosDocumentos: { file: File; url: string; id: number }[]
-  ) => {
+  const handleDocumentsSaved = async (actividadId: number) => {
     try {
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === actividadId
-            ? {
-                ...item,
-                documentos: [
-                  ...item.documentos,
-                  ...nuevosDocumentos.map((doc, index) => ({
-                    id: `temp_${index}_${Date.now()}`,
-                    file: doc.file,
-                    url: doc.url,
-                    nombre_original: doc.file.name,
-                    esImagen: doc.file.name.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/) != null,
-                    esPDF: doc.file.name.toLowerCase().endsWith(".pdf"),
-                    categoria_id: modalState.categoriaId || null,
-                  })),
-                ],
-              }
-            : item
-        )
-      );
-
       const documentosBackend = await getDocumentosPorActividad(actividadId, modalState.categoriaId);
       setData((prev) =>
         prev.map((item) =>
-          item.id === actividadId
-            ? { ...item, documentos: documentosBackend }
-            : item
+          item.id === actividadId ? { ...item, documentos: documentosBackend } : item
         )
       );
 
       handleCloseModal("uploadOpen");
-    } catch (error) {
-      console.error("[handleDocumentsSaved] Error al procesar documentos:", error);
-      setErrorMessage("Error al procesar los documentos.");
-      await fetchData(tipoOptions);
+    } catch {
+      await fetchData();
     }
   };
 
   const getInitials = (name: string) =>
-    name
-      .trim()
-      .split(" ")
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase() || name.slice(0, 2).toUpperCase();
+    name.trim().split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase() || name.slice(0, 2).toUpperCase();
 
   const getCategoryInitials = (categorias: { id: string; nombre: string }[]) =>
-    categorias.length
-      ? categorias.map((cat) => getInitials(cat.nombre || "Desconocido"))
-      : ["ND"];
+    categorias.length ? categorias.map((cat) => getInitials(cat.nombre || "Desconocido")) : ["ND"];
 
-  const columns: TableColumn<Contratista>[] = [
+  const columns: TableColumn<contratista>[] = [
     { name: "Tipo", selector: (row) => row.tipo, sortable: true },
     {
       name: "Aspecto",
       sortable: true,
       cell: (row) => (
-        <div
-          style={{
-            whiteSpace: "normal",
-            overflowWrap: "break-word",
-            maxWidth: "200px",
-            overflow: "visible",
-            lineHeight: "1.5",
-          }}
-        >
+        <div style={{ whiteSpace: "normal", overflowWrap: "break-word", maxWidth: "200px", overflow: "visible", lineHeight: "1.5" }}>
           {row.aspecto}
         </div>
       ),
@@ -560,15 +407,7 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
     {
       name: "Comentarios",
       cell: (row) => (
-        <div
-          style={{
-            whiteSpace: "normal",
-            overflowWrap: "break-word",
-            maxWidth: "300px",
-            overflow: "visible",
-            lineHeight: "1.5",
-          }}
-        >
+        <div style={{ whiteSpace: "normal", overflowWrap: "break-word", maxWidth: "300px", overflow: "visible", lineHeight: "1.5" }}>
           {row.comentarios}
         </div>
       ),
@@ -580,19 +419,11 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
         <div style={{ display: "flex", gap: "8px" }}>
           {getCategoryInitials(row.categorias).map((initials, index) => {
             const categoriaId = parseInt(row.categorias[index]?.id);
-            const hasDocuments = row.documentos.some(
-              (doc) => doc.categoria_id === categoriaId
-            );
-
+            const hasDocuments = row.documentos.some((doc) => doc.categoria_id === categoriaId);
             return (
-              <Tooltip
-                key={index}
-                title={row.categorias[index]?.nombre || "Sin categoría"}
-              >
+              <Tooltip key={index} title={row.categorias[index]?.nombre || "Sin categoría"}>
                 <button
-                  onClick={() =>
-                    handleOpenModal(hasDocuments ? "preview" : "upload", row, categoriaId)
-                  }
+                  onClick={() => handleOpenModal(hasDocuments ? "preview" : "upload", row, categoriaId)}
                   style={{
                     background: hasDocuments ? "#4CAF50" : "#D3D3D3",
                     border: "none",
@@ -612,10 +443,7 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
           {!row.categorias.length && (
             <Tooltip title="Subir documento">
               <IconWrapper>
-                <button
-                  onClick={() => handleOpenModal("upload", row)}
-                  style={{ background: "none", border: "none", cursor: "pointer" }}
-                >
+                <button onClick={() => handleOpenModal("upload", row)} style={{ background: "none", border: "none", cursor: "pointer" }}>
                   <FaFileUpload size={14} />
                 </button>
               </IconWrapper>
@@ -664,9 +492,10 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
   const campos: CampoFormulario[] = [
     {
       key: "id_tipo_contratista",
-      label: "Tipo de Contratista",
+      label: "Tipo de contratista",
       type: "select",
       required: true,
+      options: tipocontratistaOptions,
     },
     { key: "aspecto", label: "Aspecto", type: "text", required: true },
     { key: "comentarios", label: "Comentarios", type: "editor", required: true },
@@ -676,6 +505,7 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
       type: "select",
       required: false,
       multiple: true,
+      options: [],
     },
     {
       key: "responsables",
@@ -683,21 +513,26 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
       type: "select",
       required: false,
       multiple: true,
-      options: responsablesList.map((r) => ({
-        value: r.id_responsable.toString(),
-        label: r.nombre || "Desconocido",
-      })),
+      options: responsablesList.map((r) => ({ value: r.id_responsable.toString(), label: r.nombre || "Desconocido" })),
     },
   ];
 
   return (
     <Container>
-      {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
-
+      {!isLoading && errorMessage && (
+        <div style={{ color: "red", padding: "10px", marginBottom: "10px" }}>
+          {errorMessage}
+        </div>
+      )}
+      
+      {!isLoading && !errorMessage && (
+        <AddButton onClick={() => handleOpenModal("form")}>
+          Nuevo Requisito
+        </AddButton>
+      )}
+      
+      {!isLoading && !errorMessage && (
         <>
-          <AddButton onClick={() => handleOpenModal("form")}>
-            Nuevo Requisito
-          </AddButton>
           <ProgressContainer>
             <ProgressLabel>Avance: {calcularProgreso()}%</ProgressLabel>
             <ProgressBarStyled $progress={calcularProgreso()} />
@@ -711,22 +546,22 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
             rowsPerPage={rowsPage}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleRowsPerPageChange}
-            emptyText="No hay datos disponibles"
+            emptyText="No hay información disponible"
             stickyColumns
           />
         </>
+      )}
+
       {modalState.formOpen && (
         <ModalBackground>
-          <FormularioRequisito<ContratistaData>
+          <FormularioRequisito<ContratistaEntityData>
             onClose={() => handleCloseModal("formOpen")}
-            initialData={mapToContratistaData(modalState.editData)}
-            onGuardar={(response, formattedValues) =>
-              handleGuardar(response, formattedValues)
-            }
+            initialData={mapToEntityData(modalState.editData)}
+            onGuardar={handleGuardar}
             tituloNuevo="Nuevo Requisito"
             tituloEditar="Editar Requisito"
             campos={campos}
-            sendService={(data, id) => sendContratista(data, id_obra_impuesto, id)}
+            sendService={adaptedSendService}
             tipoFieldName="id_tipo_contratista"
           />
         </ModalBackground>
@@ -739,9 +574,9 @@ const TablaContratista: React.FC<TablaContratistaProps> = ({ id_obra_impuesto })
             tipo="contratista"
             actividadId={modalState.editData.id}
             carpetaBase={CARPETA_CONTRATISTA}
-            onDocumentsSaved={(docs) => handleDocumentsSaved(modalState.editData!.id, docs)}
+            onDocumentsSaved={() => handleDocumentsSaved(modalState.editData!.id)}
             codigoRegistro={modalState.editData.id}
-            id_obra={id_obra_impuesto}
+            id_obra={id_obra}
             categoriaId={modalState.categoriaId}
           />
         </ModalBackground>

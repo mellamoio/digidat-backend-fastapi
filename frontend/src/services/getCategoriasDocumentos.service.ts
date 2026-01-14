@@ -1,23 +1,19 @@
-
-import { api } from "../api/api";
-import { handleErrorRequest } from "../helpers/handleErrorRequest";
-import { DigidatRoutes } from '../routes'
+import apiClient from "../api/api";
 
 export interface CategoriaDocumento {
-  id: number;
+  id_categoria: number;
   nombre: string;
-  descripcion: string;
+  descripcion?: string;
+  estado: boolean;
+  fecha_creacion: string;
 }
 
-export const getCategoriasDocumentos = async (): Promise<CategoriaDocumento[]> => {
+export const fetchCategoriasDocumento = async (): Promise<CategoriaDocumento[]> => {
   try {
-    const { data } = await api.get<CategoriaDocumento[]>(DigidatRoutes.GET_CATEGORIAS_DOCUMENTOS);
-    if (!Array.isArray(data)) {
-      throw new Error("La respuesta no es un array de categorías de documentos");
-    }
-    return data;
-  } catch (e) {
-    console.error("Error en getCategoriasDocumentos:", e);
-    throw new Error(handleErrorRequest(e));
+    const response = await apiClient.get("v1/categorias-documento/");
+    return response.data || [];
+  } catch (error: any) {
+    console.error("[fetchCategoriasDocumento] Error:", error);
+    throw new Error(error.response?.data?.detail || "Error al obtener categorías");
   }
 };

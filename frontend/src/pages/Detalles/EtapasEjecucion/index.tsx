@@ -4,7 +4,6 @@ import { FaChevronRight, FaUpload, FaEye, FaEdit, FaTrash } from "react-icons/fa
 import { message } from "antd";
 import type { TableColumn } from "react-data-table-component";
 import { DataTableCustom } from "../../../components/DataTableCustom";
-import { ProgressBar } from "../../../components/ui/data-display/ProgressBar/ProgressBar";
 import ModalEliminar from "../../../components/ui/feedback/Modal/ModalEliminar";
 import type { ActividadEtapa } from "../../../types/actividad_etapa";
 import type { EstadoEtapa } from "../../../types/estado_etapa";
@@ -19,8 +18,7 @@ import {
 import {
   SeccionHeader,
   IconoFlecha,
-  SeccionContent,
-  ProgressBarContainer
+  SeccionContent
 } from "./index.styled";
 
 interface EtapasEjecucionProps {
@@ -302,20 +300,9 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
     return actividades.filter(act => act.id_estado_etapa === estadoId);
   };
 
-  const calcularProgresoTotal = () => {
-    if (actividades.length === 0) return 0;
-    const actividadesConDocumento = actividades.filter(act => act.tiene_documento).length;
-    return Math.round((actividadesConDocumento / actividades.length) * 100);
-  };
-
-  const progresoTotal = calcularProgresoTotal();
 
   return (
     <>
-      <ProgressBarContainer>
-        <ProgressBar value={progresoTotal} />
-      </ProgressBarContainer>
-      
       {actividades.length === 0 && (
         <button 
           onClick={handleInicializarActividades}

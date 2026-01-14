@@ -15,7 +15,7 @@ import {
   Button,
 } from "./ModalDocumento.styled";
 import ModalVistaPrevia from "./ModalVistaPrevia";
-import { getCategoriasDocumentos, type CategoriaDocumento } from "../../../../services/getCategoriasDocumentos.service";
+import { fetchCategoriasDocumento, type CategoriaDocumento } from "../../../../services/getCategoriasDocumentos.service";
 import type { FileObject } from "../../../../types/pagos";
 import type { Archivo } from "../../../../types/subirDocumento";
 
@@ -84,7 +84,7 @@ const ModalDocumento: React.FC<ModalDocumentoProps> = ({
     const fetchCategorias = async () => {
       setLoading(true);
       try {
-        const data = await getCategoriasDocumentos();
+        const data = await fetchCategoriasDocumento();
         setCategoriasDocumentos(data);
         setSelectedCategoria(categoriaId ? categoriaId.toString() : categoria);
       } catch (error) {
@@ -368,7 +368,7 @@ const ModalDocumento: React.FC<ModalDocumentoProps> = ({
             >
               {categoriasDocumentos.length > 0 ? (
                 categoriasDocumentos.map((cat) => (
-                  <option key={cat.id} value={cat.id.toString()}>
+                  <option key={cat.id_categoria} value={cat.id_categoria.toString()}>
                     {cat.nombre}
                   </option>
                 ))

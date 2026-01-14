@@ -10,8 +10,10 @@ from .beneficiario_router import router as beneficiario_router
 from .informacion_financista_router import router as informacion_financista_router
 from .informacion_contratista_router import router as informacion_contratista_router
 from .centro_operacion_router import router as centro_operacion_router
+from .tipos_obra_router import router as tipos_obra_router
 from .tipo_gasto_router import router as tipo_gasto_router
 from .pago_router import router as pago_router
+
 
 __all__ = [
     "auth_router",
@@ -26,6 +28,7 @@ __all__ = [
     "informacion_financista_router",
     "informacion_contratista_router",
     "centro_operacion_router",
+    "tipos_obra_router",
     "tipo_gasto_router",
     "pago_router",
 ]

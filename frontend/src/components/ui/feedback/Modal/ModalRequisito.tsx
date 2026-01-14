@@ -1,6 +1,4 @@
 import { Form, Select, Input } from "antd";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import { ButtonPrimary } from "../../../../components/ui/Buttons/Primary";
 import { ButtonSecondary } from "../../../../components/ui/Buttons/Secondary";
 import {
@@ -12,23 +10,25 @@ import {
   Required,
   ButtonGroup,
   FormGrid,
-  EditorWrapper,
   FormWrapper,
 } from "./ModalRequisito.styled";
 import { useEffect, useState } from "react";
 import { getUsers } from "../../../../services/getUser.service";
-import { getCategoriasDocumentos } from "../../../../services/getCategoriasDocumentos.service";
-import { getTiposFinancista, getTiposContratista } from "../../../../services/getTipoInformacion.service";
+import { fetchCategoriasDocumento } from "../../../../services/getCategoriasDocumentos.service";
+
+const { TextArea } = Input;
+
 
 export interface EntityData {
   id?: number;
-  aspecto: string;
-  comentarios: string;
-  id_categoria_documento: { id: number; nombre: string }[];
-  responsables: { id: number; nombre: string }[];
-  id_empresa: number;
+  aspecto?: string;
+  comentarios?: string;
+  id_categoria_documento?: { id: number; nombre: string }[];
+  responsables?: { id: number; nombre: string }[];
+  id_empresa?: number;
   [key: string]: any;
 }
+
 
 export interface CampoFormulario {
   key: string;
@@ -38,7 +38,9 @@ export interface CampoFormulario {
   options?: { value: string; label: string }[];
   multiple?: boolean;
   disabled?: boolean;
+  rows?: number;
 }
+
 
 interface FormularioRequisitoProps<T extends EntityData> {
   onClose: () => void;
@@ -51,7 +53,9 @@ interface FormularioRequisitoProps<T extends EntityData> {
   tipoFieldName: keyof T;
 }
 
+
 const ID_EMPRESA = 1;
+
 
 const FormularioRequisito = <T extends EntityData>({
   onClose,
@@ -70,72 +74,64 @@ const FormularioRequisito = <T extends EntityData>({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+
   useEffect(() => {
     const loadData = async () => {
-      if (isLoading) return;
       setIsLoading(true);
       setErrorMessage(null);
       try {
+        // ✅ Cargar responsables
         try {
           const responsablesResponse = await getUsers();
           if (Array.isArray(responsablesResponse)) {
             setResponsablesOptions(
-              responsablesResponse.map((resp) => {
-                const nombre = resp.nombre || resp.nombre || "Desconocido";
-                return {
-                  value: resp.id_responsable.toString(),
-                  label: nombre,
-                };
-              })
+              responsablesResponse.map((resp) => ({
+                value: resp.id_responsable.toString(),
+                label: resp.nombre || "Desconocido",
+              }))
             );
-          } else {
-            console.warn("[loadData] Respuesta de responsables no válida:", responsablesResponse);
-            setErrorMessage((prev) => prev || "Error al cargar los responsables.");
           }
         } catch (error) {
           console.error("[loadData] Error cargando responsables:", error);
-          setErrorMessage((prev) => prev || "Error al cargar los responsables.");
         }
 
+        // ✅ Cargar categorías desde el backend
         try {
-          const categoriasResponse = await getCategoriasDocumentos();
+          const categoriasResponse = await fetchCategoriasDocumento();
           if (Array.isArray(categoriasResponse)) {
             setCategoriasOptions(
               categoriasResponse.map((cat) => ({
-                value: cat.id.toString(),
-                label: cat.nombre || "Desconocida",
+                value: cat.id_categoria.toString(),
+                label: cat.nombre,
               }))
             );
-          } else {
-            console.warn("[loadData] Respuesta de categorías no válida:", categoriasResponse);
-            setErrorMessage((prev) => prev || "Error al cargar las categorías de documentos.");
           }
         } catch (error) {
           console.error("[loadData] Error cargando categorías:", error);
-          setErrorMessage((prev) => prev || "Error al cargar las categorías de documentos.");
+          // Fallback a categorías por defecto si falla
+          setCategoriasOptions([
+            { value: "1", label: "Documentos Legales" },
+            { value: "2", label: "Documentos Técnicos" },
+            { value: "3", label: "Documentos Administrativos" },
+            { value: "4", label: "Planos y Diseños" },
+            { value: "5", label: "Permisos y Licencias" },
+          ]);
         }
 
-        try {
-          let tiposResponse: { id: number; name: string }[] = [];
-          if (tipoFieldName === "id_tipo_financista") {
-            tiposResponse = await getTiposFinancista(ID_EMPRESA);
-          } else if (tipoFieldName === "id_tipo_contratista") {
-            tiposResponse = await getTiposContratista(ID_EMPRESA);
-          }
-          if (Array.isArray(tiposResponse) && tiposResponse.length > 0) {
-            const mappedOptions = tiposResponse.map((tipo) => ({
-              value: tipo.id.toString(),
-              label: tipo.name || "Sin nombre",
-            }));
-            setTipoOptions(mappedOptions);
-          } else {
-            console.warn("[loadData] No se recibieron tipos válidos:", tiposResponse);
-            setErrorMessage((prev) => prev || "No se pudieron cargar los tipos.");
-          }
-        } catch (error) {
-          console.error("[loadData] Error cargando tipos:", error);
-          setErrorMessage((prev) => prev || "Error al cargar los tipos.");
+        // ✅ Tipos de financista/contratista
+        if (tipoFieldName === "id_tipo_financista") {
+          setTipoOptions([
+            { value: "1", label: "Requisito Legal" },
+            { value: "2", label: "Información Financiera" },
+          ]);
+        } else if (tipoFieldName === "id_tipo_contratista") {
+          setTipoOptions([
+            { value: "1", label: "Empresa Constructora" },
+            { value: "2", label: "Empresa Supervisora" },
+          ]);
         }
+      } catch (error) {
+        console.error("[loadData] Error general:", error);
       } finally {
         setIsLoading(false);
       }
@@ -143,27 +139,41 @@ const FormularioRequisito = <T extends EntityData>({
     loadData();
   }, [tipoFieldName]);
 
+
   useEffect(() => {
     if (initialData) {
       const tipoValue = initialData[tipoFieldName] ? String(initialData[tipoFieldName]) : undefined;
       const validTipoValue = tipoValue && tipoOptions.some((opt) => opt.value === tipoValue) ? tipoValue : undefined;
 
-      form.setFieldsValue({
+      const formValues: any = {
         ...initialData,
         [tipoFieldName]: validTipoValue,
-        id_categoria_documento: Array.isArray(initialData.id_categoria_documento)
-          ? initialData.id_categoria_documento.map((cat) => cat.id.toString())
-          : [],
-        responsables: Array.isArray(initialData.responsables)
-          ? initialData.responsables.map((resp) => resp.id.toString())
-          : [],
-        comentarios: initialData.comentarios || "",
-        aspecto: initialData.aspecto || "",
-      });
+      };
+
+      // Mapear categorías
+      if (initialData.id_categoria_documento && Array.isArray(initialData.id_categoria_documento)) {
+        formValues.id_categoria_documento = initialData.id_categoria_documento.map((cat) => 
+          cat.id.toString()
+        );
+      }
+
+      // Mapear responsables
+      if (initialData.responsables && Array.isArray(initialData.responsables)) {
+        formValues.responsables = initialData.responsables.map((resp) => 
+          resp.id.toString()
+        );
+      }
+
+      if (initialData.id_responsable) {
+        formValues.id_responsable = String(initialData.id_responsable);
+      }
+
+      form.setFieldsValue(formValues);
     } else {
       form.resetFields();
     }
   }, [initialData, tipoOptions, form, tipoFieldName]);
+
 
   const handleSubmit = async () => {
     try {
@@ -171,58 +181,116 @@ const FormularioRequisito = <T extends EntityData>({
       setIsLoading(true);
       const values = await form.validateFields();
 
-      const formattedValues: T = {
+      const formattedValues: any = {
         id: initialData?.id,
-        [tipoFieldName]: values[tipoFieldName as string]
-          ? parseInt(values[tipoFieldName as string])
-          : undefined,
-        aspecto: values.aspecto || "",
-        comentarios: stripHtml(values.comentarios || ""),
-        id_categoria_documento: values.id_categoria_documento
-          ? values.id_categoria_documento.map((id: string) => {
-              const cat = categoriasOptions.find((opt) => opt.value === id);
-              return { id: parseInt(id), nombre: cat?.label || "Desconocida" };
-            })
-          : [],
-        responsables: values.responsables
-          ? values.responsables.map((id: string) => {
-              const resp = responsablesOptions.find((opt) => opt.value === id);
-              return { id: parseInt(id), nombre: resp?.label || "Desconocido" };
-            })
-          : [],
-        id_empresa: ID_EMPRESA,
-      } as T;
+        ...values,
+      };
 
-      if (!formattedValues[tipoFieldName] || isNaN(formattedValues[tipoFieldName] as number)) {
-        throw new Error(`El campo ${String(tipoFieldName)} es requerido y debe ser un número válido.`);
+      // Procesar tipo
+      if (values[tipoFieldName as string] !== undefined) {
+        formattedValues[tipoFieldName] = parseInt(values[tipoFieldName as string]);
       }
 
-      const response = await sendService(formattedValues, formattedValues.id);
+      // Procesar categorías
+      if (values.id_categoria_documento) {
+        formattedValues.id_categoria_documento = values.id_categoria_documento.map((id: string) => {
+          const cat = categoriasOptions.find((opt) => opt.value === id);
+          return { id: parseInt(id), nombre: cat?.label || "Desconocida" };
+        });
+      }
 
-      onGuardar(response, formattedValues);
+      // Procesar responsables (array)
+      if (values.responsables) {
+        formattedValues.responsables = values.responsables.map((id: string) => {
+          const resp = responsablesOptions.find((opt) => opt.value === id);
+          return { id: parseInt(id), nombre: resp?.label || "Desconocido" };
+        });
+      }
+
+      // Procesar responsable único
+      if (values.id_responsable) {
+        formattedValues.id_responsable = parseInt(values.id_responsable);
+      }
+
+      if (values.comentarios) {
+        formattedValues.comentarios = values.comentarios;
+      }
+
+      formattedValues.id_empresa = ID_EMPRESA;
+      
+      if (!formattedValues.id_obra && initialData?.id_obra) {
+        formattedValues.id_obra = initialData.id_obra;
+      }
+
+      const response = await sendService(formattedValues as T, formattedValues.id);
+
+      onGuardar(response, formattedValues as T);
       form.resetFields();
       onClose();
     } catch (error: any) {
-      console.error("[handleSubmit] Error al guardar el requisito:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      const errorMsg = error.message.includes("Formato de respuesta")
-        ? "La API devolvió una respuesta inesperada. Verifica el endpoint del backend."
-        : error.message.includes(tipoFieldName)
+      console.error("[handleSubmit] Error:", error);
+      
+      const errorMsg = error.message?.includes(tipoFieldName as string)
         ? `Por favor, seleccione un ${String(tipoFieldName).replace("id_", "")} válido.`
-        : `No se pudo guardar el requisito: ${error.message}`;
+        : `No se pudo guardar: ${error.message || "Error desconocido"}`;
+      
       setErrorMessage(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const stripHtml = (html: string): string => {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    return doc.body.textContent || "";
+
+  const renderField = (campo: CampoFormulario) => {
+    switch (campo.type) {
+      case "select":
+        return (
+          <Select
+            mode={campo.multiple ? "multiple" : undefined}
+            placeholder={`Seleccione ${campo.label}`}
+            disabled={campo.disabled || isLoading}
+            allowClear
+            showSearch
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
+            options={
+              campo.key === "responsables" || campo.key === "id_responsable"
+                ? responsablesOptions
+                : campo.key === "id_categoria_documento"
+                ? categoriasOptions
+                : campo.key === tipoFieldName
+                ? tipoOptions
+                : campo.options || []
+            }
+            notFoundContent={isLoading ? "Cargando..." : "Sin opciones disponibles"}
+          />
+        );
+
+      case "textarea":
+        return (
+          <TextArea
+            placeholder={`Ingrese ${campo.label}`}
+            disabled={campo.disabled || isLoading}
+            rows={campo.rows || 4}
+            style={{ fontWeight: "normal" }}
+          />
+        );
+
+      case "text":
+        return (
+          <Input
+            placeholder={`Ingrese ${campo.label}`}
+            disabled={campo.disabled || isLoading}
+            style={{ fontWeight: "normal" }}
+          />
+        );
+
+      default:
+        return <Input placeholder={`Ingrese ${campo.label}`} />;
+    }
   };
+
 
   return (
     <Overlay onClick={onClose}>
@@ -232,14 +300,25 @@ const FormularioRequisito = <T extends EntityData>({
           <CloseButton onClick={onClose}>X</CloseButton>
         </HeaderModal>
         <FormWrapper>
-          {errorMessage && <div style={{ color: "red", marginBottom: "10px" }}>{errorMessage}</div>}
+          {errorMessage && (
+            <div style={{ 
+              color: "red", 
+              background: "#fff2f0", 
+              border: "1px solid #ffccc7",
+              borderRadius: "4px",
+              padding: "10px", 
+              marginBottom: "15px" 
+            }}>
+              {errorMessage}
+            </div>
+          )}
           <Form form={form} layout="vertical" initialValues={initialData || {}}>
             <FormGrid>
               {campos.map((campo) => (
                 <div
                   key={campo.key}
                   className={
-                    campo.key === "comentarios"
+                    campo.key === "comentarios" || campo.key === "detalle"
                       ? "full-width"
                       : campo.key === "id_categoria_documento"
                       ? "categorias"
@@ -260,52 +339,14 @@ const FormularioRequisito = <T extends EntityData>({
                     }
                     rules={[{ required: campo.required, message: `${campo.label} es requerido` }]}
                   >
-                    {campo.type === "select" ? (
-                      <Select
-                        mode={campo.multiple ? "multiple" : undefined}
-                        placeholder={`Seleccione ${campo.label}`}
-                        disabled={campo.disabled || isLoading}
-                        allowClear
-                        showSearch
-                        loading={campo.key === tipoFieldName && isLoading}
-                        filterOption={(input, option) =>
-                          (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={
-                          campo.key === "responsables"
-                            ? responsablesOptions
-                            : campo.key === "id_categoria_documento"
-                            ? categoriasOptions
-                            : campo.key === tipoFieldName
-                            ? tipoOptions
-                            : campo.options || []
-                        }
-                        notFoundContent={isLoading ? "Cargando..." : "Sin tipos disponibles"}
-                      />
-                    ) : campo.type === "editor" ? (
-                      <EditorWrapper>
-                        <ReactQuill
-                          theme="snow"
-                          value={form.getFieldValue(campo.key) || ""}
-                          onChange={(value) => form.setFieldsValue({ [campo.key]: value })}
-                        />
-                      </EditorWrapper>
-                    ) : campo.type === "text" ? (
-                      <Input
-                        placeholder={`Ingrese ${campo.label}`}
-                        disabled={campo.disabled || isLoading}
-                        style={{ fontWeight: "normal" }}
-                      />
-                    ) : (
-                      <Input placeholder={`Ingrese ${campo.label}`} />
-                    )}
+                    {renderField(campo)}
                   </Form.Item>
                 </div>
               ))}
             </FormGrid>
             <ButtonGroup>
               <ButtonSecondary label="Cancelar" handleClick={onClose} />
-              <ButtonPrimary label="Guardar" handleClick={handleSubmit}/>
+              <ButtonPrimary label={isLoading ? "Guardando..." : "Guardar"} handleClick={handleSubmit} />
             </ButtonGroup>
           </Form>
         </FormWrapper>
@@ -313,5 +354,6 @@ const FormularioRequisito = <T extends EntityData>({
     </Overlay>
   );
 };
+
 
 export default FormularioRequisito;

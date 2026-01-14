@@ -12,7 +12,7 @@ from .auditoria import Auditoria
 from .document import Documento
 from .roles import Role, Permission
 from .users import User
-
+from .categoria_documento import CategoriaDocumento
 
 __all__ = [
     "Base",
@@ -30,4 +30,5 @@ __all__ = [
     "Role",
     "Permission",
     "User",
+    "CategoriaDocumento"
 ]

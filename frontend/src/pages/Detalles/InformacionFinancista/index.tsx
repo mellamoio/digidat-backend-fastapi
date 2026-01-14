@@ -10,11 +10,14 @@ import ModalVistaPrevia from "../../../components/ui/feedback/Modal/ModalVistaPr
 import {
   fetchInformacionFinancista,
   sendFinancista,
-  type FinancistaData,
   deleteFinancista,
 } from "../../../services/getInformacionFinancista.service";
+import type { 
+  FinancistaData,
+  FinancistaDataCreate,
+  FinancistaEntityData 
+} from "../../../types/informacion_financista";
 import { useSatelite } from "../../../context/DigidatContext";
-import { getTiposFinancista } from "../../../services/getTipoInformacion.service";
 import {
   AddButton,
   ModalBackground,
@@ -45,11 +48,11 @@ interface Financista {
   documentos: FinancistaFileObject[];
   responsables: { id: string; nombre: string }[];
   categorias: { id: string; nombre: string }[];
-  id_obra_impuesto: number;
+  id_obra: number;
 }
 
 interface TablaFinancistaProps {
-  id_obra_impuesto: number;
+  id_obra: number;
 }
 
 const tipoFinancistaOptions = [
@@ -57,9 +60,7 @@ const tipoFinancistaOptions = [
   { value: "2", label: "Información Financiera" },
 ];
 
-const ID_EMPRESA = 1;
-
-const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) => {
+const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra }) => {
   const { usuarios: responsablesList, fetchUsuarios } = useSatelite();
   const [data, setData] = useState<Financista[]>([]);
   const [modalState, setModalState] = useState({
@@ -77,36 +78,36 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
   const hasLoaded = useRef(false);
 
   const {
-      currentPage,
-      handlePageChange,
-      handleRowsPerPageChange,
-      rows,
-      rowsPage,
-      rowsTotal
-  } = usePagination<Financista>(data ?? null)
+    currentPage,
+    handlePageChange,
+    handleRowsPerPageChange,
+    rows,
+    rowsPage,
+    rowsTotal
+  } = usePagination<Financista>(data ?? null);
 
   const getDocumentosPorActividad = useCallback(
     async (financistaId: number, categoriaId?: number): Promise<FinancistaFileObject[]> => {
-      if (!financistaId) {
-        console.warn("[getDocumentosPorActividad] financistaId inválido:", financistaId);
-        return [];
-      }
+      if (!financistaId) return [];
+      
       try {
         const params: any = {
           actividad_id: financistaId,
           carpeta_base: CARPETA_FINANCISTA.replace(/^\//, ""),
           codigo_registro: financistaId,
-          empresa_id: ID_EMPRESA,
-          id_obra_impuesto,
+          id_obra,
         };
+
         if (categoriaId) {
           params.categoria_id = categoriaId;
         }
+
         const response = await api.get("/archivos/all", { params });
         const documentos = response.data?.data || response.data || [];
+        
         return documentos.map((doc: any, index: number) => {
           const nombre = doc.nombre_original || doc.nombre || `archivo_${index}`;
-          const processedDoc: FinancistaFileObject = {
+          return {
             id: doc.id ? String(doc.id) : `temp_${index}`,
             file: null,
             url: doc.url || doc.path || `${CARPETA_FINANCISTA}/${nombre}`,
@@ -115,113 +116,78 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
             esPDF: nombre.toLowerCase().endsWith(".pdf"),
             categoria_id: Number(doc.categoria) || categoriaId || null,
           };
-          return processedDoc;
         });
-      } catch (error) {
-        console.error(`[getDocumentosPorActividad] Error fetching documents for financista ${financistaId}:`, error);
+      } catch {
         return [];
       }
     },
-    [id_obra_impuesto]
+    [id_obra]
   );
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetchInformacionFinancista(ID_EMPRESA, id_obra_impuesto);
-      if (!response.data) {
-        throw new Error("Respuesta del backend vacía o inválida");
+      const dataArray = await fetchInformacionFinancista(id_obra);
+      
+      if (dataArray.length === 0) {
+        setData([]);
+        setErrorMessage(null);
+        return;
       }
 
-      const dataToMap = Array.isArray(response.data) ? response.data : [];
       const mappedData = await Promise.all(
-        dataToMap.map(
-          async (item: FinancistaData & { tipo_financista?: { id: number; name: string } }, index: number) => {
-            try {
-              let responsablesArray: any[] = [];
-              if (typeof item.responsables === "string") {
-                try {
-                  responsablesArray = JSON.parse(item.responsables);
-                } catch (parseError) {
-                  console.warn(
-                    "[fetchData] Error parseando item.responsables:",
-                    item.responsables,
-                    parseError
-                  );
-                  responsablesArray = [];
-                }
-              } else if (Array.isArray(item.responsables)) {
-                responsablesArray = item.responsables;
-              } else if (item.responsables && typeof item.responsables === "object") {
-                responsablesArray = [item.responsables];
-              } else if (item.responsables != null) {
-                console.warn(
-                  "[fetchData] Valor inesperado en item.responsables:",
-                  item.responsables,
-                  "Item completo:",
-                  JSON.stringify(item, null, 2)
-                );
-                responsablesArray = [];
-              }
-
-              let categoriasArray: any[] = [];
-              if (typeof item.id_categoria_documento === "string") {
-                try {
-                  categoriasArray = JSON.parse(item.id_categoria_documento);
-                } catch (parseError) {
-                  console.warn(
-                    "[fetchData] Error parseando item.id_categoria_documento:",
-                    item.id_categoria_documento,
-                    parseError
-                  );
-                  categoriasArray = [];
-                }
-              } else if (Array.isArray(item.id_categoria_documento)) {
-                categoriasArray = item.id_categoria_documento;
-              } else if (item.id_categoria_documento != null) {
-                console.warn(
-                  "[fetchData] Valor inesperado en item.id_categoria_documento:",
-                  item.id_categoria_documento
-                );
-                categoriasArray = [];
-              }
-
-              return {
-                id: item.id || 0,
-                tipo:
-                  item.tipo_financista?.name ||
-                  tipoFinancistaOptions.find((opt) => opt.value === item.id_tipo_financista?.toString())?.label ||
-                  "Desconocido",
-                id_tipo_financista: Number(item.id_tipo_financista) || 1,
-                aspecto: item.aspecto || "",
-                comentarios: item.comentarios || "",
-                documentos: await getDocumentosPorActividad(item.id || 0),
-                responsables: responsablesArray.map((r) => ({
-                  id: r.id ? String(r.id) : "unknown",
-                  nombre: r.nombre || "Desconocido",
-                })),
-                categorias: categoriasArray.map((c) => ({
-                  id: c.id ? String(c.id) : "unknown",
-                  nombre: c.nombre || "Desconocida",
-                })),
-                id_obra_impuesto: item.id_obra_impuesto || id_obra_impuesto,
-              };
-            } catch (mapError) {
-              console.error(`[fetchData] Error procesando item ${index}:`, mapError);
-              return null;
+        dataArray.map(async (item: FinancistaData) => {
+          try {
+            let categoriasArray: any[] = [];
+            if (typeof item.id_categoria_documento === "string") {
+              try {
+                categoriasArray = JSON.parse(item.id_categoria_documento);
+              } catch {}
+            } else if (Array.isArray(item.id_categoria_documento)) {
+              categoriasArray = item.id_categoria_documento;
             }
+
+            let responsablesArray: any[] = [];
+            if (typeof item.responsables === "string") {
+              try {
+                responsablesArray = JSON.parse(item.responsables);
+              } catch {}
+            } else if (Array.isArray(item.responsables)) {
+              responsablesArray = item.responsables;
+            }
+
+            return {
+              id: item.id || 0,
+              tipo: tipoFinancistaOptions.find(
+                opt => opt.value === String(item.id_tipo_financista)
+              )?.label || "Desconocido",
+              id_tipo_financista: item.id_tipo_financista,
+              aspecto: item.aspecto || "",
+              comentarios: item.comentarios || "",
+              documentos: await getDocumentosPorActividad(item.id || 0),
+              responsables: responsablesArray.map((r) => ({
+                id: String(r.id),
+                nombre: r.nombre || "Desconocido",
+              })),
+              categorias: categoriasArray.map((c) => ({
+                id: String(c.id),
+                nombre: c.nombre || "Desconocida",
+              })),
+              id_obra: item.id_obra || id_obra,
+            };
+          } catch {
+            return null;
           }
-        )
+        })
       );
 
       const validData = mappedData.filter((item): item is Financista => item !== null);
       setData(validData);
       setErrorMessage(null);
     } catch (error: any) {
-      console.error("[fetchData] Error fetching financista data:", error.message, error.stack);
       setData([]);
-      setErrorMessage(`Error al cargar los datos de financistas: ${error.message}`);
+      setErrorMessage(`Error de conexión: ${error.message}`);
     }
-  }, [getDocumentosPorActividad, id_obra_impuesto]);
+  }, [getDocumentosPorActividad, id_obra]);
 
   useEffect(() => {
     if (hasLoaded.current) return;
@@ -231,8 +197,6 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
       setIsLoading(true);
       try {
         await Promise.all([fetchData(), fetchUsuarios()]);
-      } catch (error) {
-        console.error("[loadData] Error cargando datos iniciales:", error);
       } finally {
         setIsLoading(false);
       }
@@ -240,7 +204,7 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
     loadData();
   }, [fetchData, fetchUsuarios]);
 
-  const mapToFinancistaData = (financista: Financista | null): FinancistaData | null => {
+  const mapToEntityData = useCallback((financista: Financista | null): FinancistaEntityData | null => {
     if (!financista) return null;
     return {
       id: financista.id,
@@ -255,17 +219,37 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
         id: parseInt(resp.id),
         nombre: resp.nombre,
       })),
-      id_empresa: ID_EMPRESA,
-      id_obra_impuesto,
+      id_empresa: 1,
+      id_obra: financista.id_obra,
     };
+  }, []);
+
+  const adaptedSendService = async (
+    data: FinancistaEntityData,
+    id?: number
+  ): Promise<FinancistaEntityData> => {
+    const adaptedData: FinancistaDataCreate = {
+      id_tipo_financista: data.id_tipo_financista,
+      aspecto: data.aspecto,
+      comentarios: data.comentarios,
+      id_categoria_documento: data.id_categoria_documento || [],
+      responsables: data.responsables || [],
+      id_obra: id_obra
+    };
+    
+    const response = await sendFinancista(adaptedData, id);
+    
+    return {
+      ...response,
+      id_empresa: 1,
+    } as FinancistaEntityData;
   };
 
-  const calcularProgreso = () => {
+  const calcularProgreso = useCallback(() => {
     if (!data.length) return 0;
-
     const totalCategorias = data.reduce((sum, row) => sum + row.categorias.length, 0);
-
     let categoriasConDocumentos = 0;
+    
     data.forEach((row) => {
       row.categorias.forEach((categoria) => {
         const categoriaId = parseInt(categoria.id);
@@ -277,7 +261,7 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
     });
 
     return totalCategorias > 0 ? Math.round((categoriasConDocumentos / totalCategorias) * 100) : 0;
-  };
+  }, [data]);
 
   const handleOpenModal = useCallback((type: string, row?: Financista, categoriaId?: number) => {
     setModalState((prev) => {
@@ -286,9 +270,11 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
         : type === "upload"
         ? []
         : prev.selectedDocuments;
+      
       const uniqueDocuments = Array.from(
-        new Map(filteredDocuments.map((doc) => [doc.id || doc.url || `temp-${doc.nombre_original}`, doc])).values()
+        new Map(filteredDocuments.map((doc) => [doc.id || doc.url, doc])).values()
       );
+
       return {
         ...prev,
         formOpen: type === "form",
@@ -314,98 +300,19 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
     }));
   }, []);
 
-  const handleGuardar = async (
-    response: FinancistaData & { tipo_financista?: { id: number; name: string }, obra_id?: number },
-    formattedValues?: FinancistaData
-  ) => {
-    try {
-      const financistaId = response.id || formattedValues?.id || response.obra_id;
-
-      if (!financistaId) {
-        await fetchData();
-        handleCloseModal("formOpen");
-        return;
-      }
-
-      if (modalState.editData) {
-        const documentos = await getDocumentosPorActividad(financistaId);
-        const tipo =
-          response.tipo_financista?.name ||
-          tipoFinancistaOptions.find(
-            (opt) => opt.value === (response.id_tipo_financista || formattedValues?.id_tipo_financista)?.toString()
-          )?.label ||
-          "Desconocido";
-
-        const responsablesRaw = formattedValues?.responsables || response.responsables || [];
-        let responsablesArray: any[] = [];
-        if (typeof responsablesRaw === "string") {
-          try {
-            responsablesArray = JSON.parse(responsablesRaw);
-          } catch (parseError) {
-            console.warn("[handleGuardar] Error parseando responsablesRaw:", responsablesRaw, parseError);
-            responsablesArray = [];
-          }
-        } else if (Array.isArray(responsablesRaw)) {
-          responsablesArray = responsablesRaw;
-        } else if (responsablesRaw && typeof responsablesRaw === "object") {
-          responsablesArray = [responsablesRaw];
-        }
-
-        const categoriasRaw = formattedValues?.id_categoria_documento || response.id_categoria_documento || [];
-        let categoriasArray: any[] = [];
-        if (typeof categoriasRaw === "string") {
-          try {
-            categoriasArray = JSON.parse(categoriasRaw);
-          } catch (parseError) {
-            console.warn("[handleGuardar] Error parseando categoriasRaw:", categoriasRaw, parseError);
-            categoriasArray = [];
-          }
-        } else if (Array.isArray(categoriasRaw)) {
-          categoriasArray = categoriasRaw;
-        }
-
-        const nuevoFinancista: Financista = {
-          id: financistaId,
-          tipo,
-          id_tipo_financista: Number(formattedValues?.id_tipo_financista || response.id_tipo_financista) || 1,
-          aspecto: response.aspecto || formattedValues?.aspecto || "",
-          comentarios: response.comentarios || formattedValues?.comentarios || "",
-          documentos,
-          responsables: responsablesArray.map((r) => ({
-            id: r.id ? String(r.id) : "unknown",
-            nombre: r.nombre || "Desconocido",
-          })),
-          categorias: categoriasArray.map((c) => ({
-            id: c.id ? String(c.id) : "unknown",
-            nombre: c.nombre || "Desconocida",
-          })),
-          id_obra_impuesto,
-        };
-
-        setData((prev) =>
-          prev.map((item) => (item.id === nuevoFinancista.id ? nuevoFinancista : item))
-        );
-      } else {
-        await fetchData();
-      }
-
-      handleCloseModal("formOpen");
-    } catch (error: any) {
-      console.error("[handleGuardar] Error processing financista:", error.message, error.stack);
-      await fetchData();
-      handleCloseModal("formOpen");
-    }
+  const handleGuardar = async () => {
+    await fetchData();
+    handleCloseModal("formOpen");
   };
 
   const handleEliminar = async () => {
     if (!modalState.selectedRowId) {
-      console.warn("[handleEliminar] No se proporcionó selectedRowId");
       handleCloseModal("deleteOpen");
       return;
     }
 
     try {
-      await deleteFinancista(modalState.selectedRowId, id_obra_impuesto);
+      await deleteFinancista(modalState.selectedRowId);
 
       const financista = data.find((item) => item.id === modalState.selectedRowId);
       if (financista && financista.documentos.length > 0) {
@@ -413,22 +320,16 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
           financista.documentos.map(async (doc) => {
             try {
               await api.delete(`/archivosdelete/${doc.id}`, {
-                params: { codigo_registro: modalState.selectedRowId, id_obra_impuesto },
+                params: { codigo_registro: modalState.selectedRowId, id_obra },
               });
-            } catch (docError) {
-              console.warn(`[handleEliminar] Error al eliminar documento ${doc.id}:`, docError);
-            }
+            } catch {}
           })
         );
       }
 
-      setData((prev) => {
-        const newData = prev.filter((item) => item.id !== modalState.selectedRowId);
-        return newData;
-      });
+      setData((prev) => prev.filter((item) => item.id !== modalState.selectedRowId));
     } catch (error: any) {
-      console.error("[handleEliminar] Error al eliminar financista:", error.message, error.stack);
-      alert(`Error al eliminar el requisito: ${error.message}`);
+      alert(`Error al eliminar: ${error.message}`);
     } finally {
       handleCloseModal("deleteOpen");
     }
@@ -442,8 +343,7 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
       await api.delete(`/archivosdelete/${doc.id}`, {
         params: {
           codigo_registro: modalState.editData.id,
-          id_obra_impuesto,
-          empresa_id: ID_EMPRESA,
+          id_obra,
         },
       });
 
@@ -465,52 +365,22 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
       if (updatedDocuments.length === 0) {
         handleCloseModal("previewOpen");
       }
-    } catch (error) {
-      console.error("[handleRemoveDocument] Error removing document:", error);
+    } catch {
       fetchData();
     }
   };
 
-  const handleDocumentsSaved = async (
-    actividadId: number,
-    nuevosDocumentos: { file: File; url: string; id: number }[]
-  ) => {
+  const handleDocumentsSaved = async (actividadId: number) => {
     try {
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === actividadId
-            ? {
-                ...item,
-                documentos: [
-                  ...item.documentos,
-                  ...nuevosDocumentos.map((doc, index) => ({
-                    id: `temp_${index}_${Date.now()}`,
-                    file: doc.file,
-                    url: doc.url,
-                    nombre_original: doc.file.name,
-                    esImagen: doc.file.name.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/) != null,
-                    esPDF: doc.file.name.toLowerCase().endsWith(".pdf"),
-                    categoria_id: modalState.categoriaId || null,
-                  })),
-                ],
-              }
-            : item
-        )
-      );
-
       const documentosBackend = await getDocumentosPorActividad(actividadId, modalState.categoriaId);
       setData((prev) =>
         prev.map((item) =>
-          item.id === actividadId
-            ? { ...item, documentos: documentosBackend }
-            : item
+          item.id === actividadId ? { ...item, documentos: documentosBackend } : item
         )
       );
 
       handleCloseModal("uploadOpen");
-    } catch (error) {
-      console.error("[handleDocumentsSaved] Error al procesar documentos:", error);
-      setErrorMessage("Error al procesar los documentos.");
+    } catch {
       await fetchData();
     }
   };
@@ -527,15 +397,7 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
       name: "Aspecto",
       sortable: true,
       cell: (row) => (
-        <div
-          style={{
-            whiteSpace: "normal",
-            overflowWrap: "break-word",
-            maxWidth: "200px",
-            overflow: "visible",
-            lineHeight: "1.5",
-          }}
-        >
+        <div style={{ whiteSpace: "normal", overflowWrap: "break-word", maxWidth: "200px", overflow: "visible", lineHeight: "1.5" }}>
           {row.aspecto}
         </div>
       ),
@@ -543,15 +405,7 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
     {
       name: "Comentarios",
       cell: (row) => (
-        <div
-          style={{
-            whiteSpace: "normal",
-            overflowWrap: "break-word",
-            maxWidth: "300px",
-            overflow: "visible",
-            lineHeight: "1.5",
-          }}
-        >
+        <div style={{ whiteSpace: "normal", overflowWrap: "break-word", maxWidth: "300px", overflow: "visible", lineHeight: "1.5" }}>
           {row.comentarios}
         </div>
       ),
@@ -587,10 +441,7 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
           {!row.categorias.length && (
             <Tooltip title="Subir documento">
               <IconWrapper>
-                <button
-                  onClick={() => handleOpenModal("upload", row)}
-                  style={{ background: "none", border: "none", cursor: "pointer" }}
-                >
+                <button onClick={() => handleOpenModal("upload", row)} style={{ background: "none", border: "none", cursor: "pointer" }}>
                   <FaFileUpload size={14} />
                 </button>
               </IconWrapper>
@@ -666,10 +517,20 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
 
   return (
     <Container>
-      {!isLoading && errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
+      {!isLoading && errorMessage && (
+        <div style={{ color: "red", padding: "10px", marginBottom: "10px" }}>
+          {errorMessage}
+        </div>
+      )}
+      
+      {!isLoading && !errorMessage && (
+        <AddButton onClick={() => handleOpenModal("form")}>
+          Nuevo Requisito
+        </AddButton>
+      )}
+      
       {!isLoading && !errorMessage && (
         <>
-          <AddButton onClick={() => handleOpenModal("form")}>Nuevo Requisito</AddButton>
           <ProgressContainer>
             <ProgressLabel>Avance: {calcularProgreso()}%</ProgressLabel>
             <ProgressBarStyled $progress={calcularProgreso()} />
@@ -683,21 +544,22 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
             rowsPerPage={rowsPage}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleRowsPerPageChange}
-            emptyText="No hay datos disponibles"
+            emptyText="No hay información disponible"
             stickyColumns
           />
         </>
       )}
+
       {modalState.formOpen && (
         <ModalBackground>
-          <FormularioRequisito<FinancistaData>
+          <FormularioRequisito<FinancistaEntityData>
             onClose={() => handleCloseModal("formOpen")}
-            initialData={mapToFinancistaData(modalState.editData)}
+            initialData={mapToEntityData(modalState.editData)}
             onGuardar={handleGuardar}
             tituloNuevo="Nuevo Requisito"
             tituloEditar="Editar Requisito"
             campos={campos}
-            sendService={(data, id) => sendFinancista(data, id_obra_impuesto, id)}
+            sendService={adaptedSendService}
             tipoFieldName="id_tipo_financista"
           />
         </ModalBackground>
@@ -710,9 +572,9 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra_impuesto }) =
             tipo="financista"
             actividadId={modalState.editData.id}
             carpetaBase={CARPETA_FINANCISTA}
-            onDocumentsSaved={(docs) => handleDocumentsSaved(modalState.editData!.id, docs)}
+            onDocumentsSaved={() => handleDocumentsSaved(modalState.editData!.id)}
             codigoRegistro={modalState.editData.id}
-            id_obra={id_obra_impuesto}
+            id_obra={id_obra}
             categoriaId={modalState.categoriaId}
           />
         </ModalBackground>

@@ -1,35 +1,28 @@
 import api from "../api/api";
 import { handleErrorRequest } from "../helpers/handleErrorRequest";
-
-export interface ContratistaData {
-    id?: number;
-    id_tipo_contratista: number;
-    aspecto: string;
-    comentarios: string;
-    id_categoria_documento: { id: number; nombre: string }[];
-    responsables: { id: number; nombre: string }[];
-    id_empresa: number;
-    id_obra_impuesto: number;
-}
-
-export interface ApiResponse {
-    success?: boolean;
-    data?: ContratistaData | ContratistaData[];
-    message?: string;
-    obra_id?: number;
-}
+import { DigidatRoutes } from "../routes";
+import type {
+    ContratistaData,
+    ContratistaDataCreate,
+    ContratistaApiResponse} from "../types/informacion_contratista";
 
 export const fetchInformacionContratista = async (
-    id_empresa: number = 1,
-    id_obra_impuesto: number
-): Promise<ApiResponse> => {
+    id_obra: number
+): Promise<ContratistaApiResponse> => {
     try {
-        const response = await api.get<ApiResponse>("/all/informacioncontratista", {
-            params: { id_empresa, id_obra_impuesto },
-        });
+        
+        const response = await api.get<ContratistaApiResponse>(
+            DigidatRoutes.GET_INFORMACION_CONTRATISTA,
+            {
+                params: { id_obra },
+            }
+        );
+        
         return response.data;
     } catch (error: any) {
         console.error("[fetchInformacionContratista] Error:", error);
+        console.error("Error response:", error.response?.data);
+        
         if (error.response?.status === 403) {
             throw new Error("Acceso denegado: Verifica tus permisos o token de autenticación.");
         }
@@ -37,85 +30,49 @@ export const fetchInformacionContratista = async (
     }
 };
 
+
 export const sendContratista = async (
-    data: ContratistaData,
-    id_obra_impuesto: number,
+    data: ContratistaDataCreate,
     id?: number
 ): Promise<ContratistaData> => {
     try {
-        const payload = { ...data, id_obra_impuesto };
-
-        let response;
+        
         if (id) {
-            response = await api.post("/edit/informacioncontratista", {
-                ...payload,
-                id,
-            }, {
-                params: { id, id_obra_impuesto }
-            });
+            const url = DigidatRoutes.UPDATE_INFORMACION_CONTRATISTA.replace(':id', id.toString());
+            const response = await api.put<ContratistaData>(url, data);
+            
+            return (response.data as any).data || response.data;
         } else {
-            response = await api.post("/add/informacioncontratista", payload, {
-                params: { id_obra_impuesto }
-            });
-        }
-
-        let result: ContratistaData;
-        if ("success" in response.data && response.data.success !== undefined) {
-            if (!response.data.success) {
-                throw new Error(response.data.message || "Error en la API: success es false");
-            }
-            if (!response.data.data || typeof response.data.data !== "object") {
-                throw new Error("La API no devolvió datos válidos en la propiedad 'data'");
-            }
-            result = response.data.data as ContratistaData;
-        } else if ("id" in response.data || "id_tipo_contratista" in response.data) {
-            result = response.data as ContratistaData;
-        } else if ("message" in response.data && response.data.message?.includes("ingresado con éxito")) {
-            console.warn("[sendContratista] Respuesta no contiene datos del contratista, recargando...");
-            const updatedData = await fetchInformacionContratista(data.id_empresa, id_obra_impuesto);
-            if (!updatedData.success || !Array.isArray(updatedData.data)) {
-                throw new Error("No se pudieron recargar los datos del contratista");
-            }
-            const newContratista = updatedData.data.find(
-                (item) => item.aspecto === data.aspecto && item.id_tipo_contratista === data.id_tipo_contratista
+            const response = await api.post<ContratistaData>(
+                DigidatRoutes.CREATE_INFORMACION_CONTRATISTA,
+                data
             );
-            if (!newContratista) {
-                throw new Error("No se encontró el contratista recién creado en los datos recargados");
-            }
-            result = newContratista as ContratistaData;
-        } else {
-            throw new Error("Formato de respuesta de la API no reconocido");
+            
+            return (response.data as any).data || response.data;
         }
-
-        if (!result.id_tipo_contratista || !result.aspecto || !result.id_obra_impuesto) {
-            console.warn("[sendContratista] Respuesta incompleta:", result);
-            throw new Error("La respuesta de la API no contiene todos los campos requeridos");
-        }
-
-        if (id && !result.id) {
-            result.id = id;
-        }
-
-        return result;
     } catch (error: any) {
-        console.error("[sendContratista] Error detallado:", {
-            message: error.message,
-            response: error.response?.data,
-            status: error.response?.status,
-        });
+        console.error("[sendContratista] Error:", error);
+        console.error("❌ Error detail:", error.response?.data);
+        
+        if (error.response?.status === 422) {
+            const detail = error.response?.data?.detail;
+            console.error("Validation errors:", detail);
+            throw new Error(`Datos inválidos: ${JSON.stringify(detail)}`);
+        }
+        
         if (error.response?.status === 403) {
             throw new Error("Acceso denegado: Verifica tus permisos o token de autenticación.");
         }
-        throw new Error(error.message || "Error al enviar los datos del contratista");
+        
+        throw handleErrorRequest(error);
     }
 };
 
-export const deleteContratista = async (
-    id: number,
-    id_obra_impuesto: number
-): Promise<void> => {
+
+export const deleteContratista = async (id: number): Promise<void> => {
     try {
-        await api.post("/delete/informacioncontratista", { id, id_obra_impuesto });
+        const url = DigidatRoutes.DELETE_INFORMACION_CONTRATISTA.replace(':id', id.toString());
+        await api.delete(url);
     } catch (error: any) {
         console.error("[deleteContratista] Error:", error);
         if (error.response?.status === 403) {

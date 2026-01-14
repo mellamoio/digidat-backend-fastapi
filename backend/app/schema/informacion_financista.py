@@ -1,11 +1,15 @@
-from typing import Optional
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, Field
+from typing import Optional, List, Any
+from datetime import datetime
 
 
 class InformacionFinancistaBase(BaseModel):
-    id_responsable: int
+    id_tipo_financista: int
     id_obra: int
-    detalle: Optional[str] = None
+    aspecto: str
+    comentarios: Optional[str] = None
+    id_categoria_documento: Optional[Any] = None
+    responsables: Optional[Any] = None
 
 
 class InformacionFinancistaCreate(InformacionFinancistaBase):
@@ -13,14 +17,29 @@ class InformacionFinancistaCreate(InformacionFinancistaBase):
 
 
 class InformacionFinancistaUpdate(BaseModel):
-    id_responsable: Optional[int] = None
-    id_obra: Optional[int] = None
-    detalle: Optional[str] = None
+    id_tipo_financista: Optional[int] = None
+    aspecto: Optional[str] = None
+    comentarios: Optional[str] = None
+    id_categoria_documento: Optional[Any] = None
+    responsables: Optional[Any] = None
 
 
 class InformacionFinancistaResponse(InformacionFinancistaBase):
     id: int
+    
+    class Config:
+        from_attributes = True
+        arbitrary_types_allowed = True
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+
+class InformacionFinancistaResponseProcessed(BaseModel):
+    id: int
+    id_tipo_financista: int
+    id_obra: int
+    aspecto: str
+    comentarios: Optional[str] = None
+    id_categoria_documento: Optional[List[dict]] = []
+    responsables: Optional[List[dict]] = []
+    
+    class Config:
+        from_attributes = True

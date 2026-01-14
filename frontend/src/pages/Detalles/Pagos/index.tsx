@@ -496,13 +496,13 @@ const Pagos: React.FC<PagosProps> = ({ id_obra }) => {
   };
 
   const handleAddPago = async () => {
-
     if (!validateForm()) {
       message.error("Por favor, completa todos los campos obligatorios.");
       return;
     }
 
     try {
+      await addPago(newPago);
       await loadData();
       message.success("Pago agregado exitosamente.");
 
@@ -516,17 +516,14 @@ const Pagos: React.FC<PagosProps> = ({ id_obra }) => {
       };
 
       handleFilterChange(currentFilters);
-
       window.dispatchEvent(new CustomEvent("pagosUpdated"));
     } catch (error: any) {
       console.error("❌ [handleAddPago] Error al agregar pago:", error);
       message.error(`Error al agregar el pago: ${error.message}`);
-      setShouldReloadData(true);
     } finally {
       resetFormState();
     }
   };
-
 
   const handleUpdatePago = async () => {
     if (editingIndex === null || !editPagoId) {

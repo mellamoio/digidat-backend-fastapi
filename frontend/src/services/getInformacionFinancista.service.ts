@@ -1,33 +1,31 @@
-import apiClient from "../api/api";
+import api from "../api/api";
 import { handleErrorRequest } from "../helpers/handleErrorRequest";
-
-export interface FinancistaData {
-    id: number;
-    id_tipo_financista: number;
-    aspecto: string;
-    comentarios: string;
-    id_categoria_documento: { id: number; nombre: string }[];
-    responsables: { id: number; nombre: string }[];
-    id_empresa: number;
-    id_obra_impuesto: number;
-}
-
-export interface ApiResponse {
-    success: boolean;
-    data: FinancistaData[];
-}
+import { DigidatRoutes } from "../routes";
+import type {
+    FinancistaData,
+    FinancistaDataCreate,
+    FinancistaApiResponse,
+    FinancistaSingleResponse
+} from "../types/informacion_financista";
 
 export const fetchInformacionFinancista = async (
-    id_empresa: number = 1,
-    id_obra_impuesto: number
-): Promise<ApiResponse> => {
+    id_obra: number
+): Promise<FinancistaApiResponse> => {
     try {
-        const response = await apiClient.get<ApiResponse>("/all/informacionfinancista", {
-            params: { id_empresa, id_obra_impuesto },
-        });
+        
+        const response = await api.get<FinancistaApiResponse>(
+            DigidatRoutes.GET_INFORMACION_FINANCISTA,
+            {
+                params: { id_obra },
+            }
+        );
+        
+        
         return response.data;
     } catch (error: any) {
         console.error("[fetchInformacionFinancista] Error:", error);
+        console.error("Error response:", error.response?.data);
+        
         if (error.response?.status === 403) {
             throw new Error("Acceso denegado: Verifica tus permisos o token de autenticación.");
         }
@@ -35,43 +33,49 @@ export const fetchInformacionFinancista = async (
     }
 };
 
+
 export const sendFinancista = async (
-    data: FinancistaData,
-    id_obra_impuesto: number,
+    data: FinancistaDataCreate,
     id?: number
 ): Promise<FinancistaData> => {
     try {
-        const payload = { ...data, id_obra_impuesto };
+        
         if (id) {
-            const response = await apiClient.post<FinancistaData>(
-                "/edit/informacionfinancista",
-                { ...payload, id },
-                { params: { id, id_obra_impuesto } }
-            );
-            return response.data;
+            const url = DigidatRoutes.UPDATE_INFORMACION_FINANCISTA.replace(':id', id.toString());
+            const response = await api.put<FinancistaData>(url, data);
+            
+            return (response.data as any).data || response.data;
         } else {
-            const response = await apiClient.post<FinancistaData>(
-                "/add/informacionfinancista",
-                payload,
-                { params: { id_obra_impuesto } }
+            const response = await api.post<FinancistaData>(
+                DigidatRoutes.CREATE_INFORMACION_FINANCISTA,
+                data
             );
-            return response.data;
+            
+            return (response.data as any).data || response.data;
         }
     } catch (error: any) {
         console.error("[sendFinancista] Error:", error);
+        console.error("❌ Error detail:", error.response?.data);
+        
+        if (error.response?.status === 422) {
+            const detail = error.response?.data?.detail;
+            console.error("Validation errors:", detail);
+            throw new Error(`Datos inválidos: ${JSON.stringify(detail)}`);
+        }
+        
         if (error.response?.status === 403) {
             throw new Error("Acceso denegado: Verifica tus permisos o token de autenticación.");
         }
+        
         throw handleErrorRequest(error);
     }
 };
 
-export const deleteFinancista = async (
-    id: number,
-    id_obra_impuesto: number
-): Promise<void> => {
+
+export const deleteFinancista = async (id: number): Promise<void> => {
     try {
-        await apiClient.post("/delete/informacionfinancista", { id, id_obra_impuesto });
+        const url = DigidatRoutes.DELETE_INFORMACION_FINANCISTA.replace(':id', id.toString());
+        await api.delete(url);
     } catch (error: any) {
         console.error("[deleteFinancista] Error:", error);
         if (error.response?.status === 403) {

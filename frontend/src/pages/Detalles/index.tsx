@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import type { Obra } from "../../types/obra";
-import InformacionFinancista from "./InformacionFinancista";
+import TablaFinancista from "./InformacionFinancista/index";
 import InformacionContratista from "./InformacionContratista";
 import Pagos from "./Pagos";
-import EtapasEjecucion from "./EtapasEjecucion"; // ✅ IMPORTAR COMPONENTE NUEVO
+import EtapasEjecucion from "./EtapasEjecucion";
 import {
   DetallesLayout,
   DetallesContainer,
@@ -24,7 +24,6 @@ import { Header as HeaderComponent } from "../../components/ui/layout/Container/
 import dayjs from "dayjs";
 import { message } from "antd";
 import { getObraById, deleteObra } from "../../services/getObra.service";
-import { getEstadosEtapa } from "../../services/getEstadoEtapa.service";
 
 export const Detalles: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -158,10 +157,10 @@ export const Detalles: React.FC = () => {
               <EtapasEjecucion obraId={obra.id_obra} />
             )}
             {selectedMenu === "Información Financista" && obra && (
-              <InformacionFinancista id_obra_impuesto={obra.id_obra} />
+              <TablaFinancista id_obra={obra.id_obra} />
             )}
             {selectedMenu === "Información Contratista" && obra && (
-              <InformacionContratista id_obra_impuesto={obra.id_obra} />
+              <InformacionContratista id_obra={obra.id_obra} />
             )}
             {selectedMenu === "Pagos" && obra && (
               <Pagos id_obra={obra.id_obra} />

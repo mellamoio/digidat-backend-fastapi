@@ -1,12 +1,9 @@
 import logging
-from fastapi import FastAPI, Depends, HTTPException, APIRouter
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
-from typing import List, Optional
-from pydantic import AnyHttpUrl
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,9 +15,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 from app.core.config import settings
 from app.core.database import create_tables, async_create_tables
 from app.core.exceptions import register_exception_handlers
+
 
 from app.router import (
     obra_router,
@@ -35,13 +34,17 @@ from app.router import (
     document_router,
     role_permission_router,
     centro_operacion_router,
-    tipos_obra,
+    tipos_obra_router,
     tipo_gasto_router,
-    pago_router
+    pago_router,
 )
+
+from app.router.categoria_documento_router import router as categoria_documento_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Gestor del ciclo de vida de la aplicación"""
     logger.info("Iniciando la aplicación...")
     try:
         create_tables()
@@ -54,6 +57,7 @@ async def lifespan(app: FastAPI):
     yield
     logger.info("Deteniendo la aplicación...")
 
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="API para la gestión de obras, proyectos y usuarios",
@@ -64,12 +68,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
     session_cookie="session",
     max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -80,7 +86,11 @@ app.add_middleware(
 )
 
 
+register_exception_handlers(app)
+
+
 api_router = APIRouter()
+
 
 api_router.include_router(auth_router, prefix="/auth", tags=["Autenticación"])
 api_router.include_router(user_router, prefix="/users", tags=["Usuarios"])
@@ -92,31 +102,37 @@ api_router.include_router(centro_operacion_router, prefix="/centros-operacion", 
 api_router.include_router(estado_etapa_router, prefix="/estados-etapa", tags=["Estados de Etapa"])
 api_router.include_router(actividad_etapa_router, prefix="/actividad-etapa", tags=["Actividades de Etapas"])
 api_router.include_router(beneficiario_router, prefix="/beneficiarios", tags=["Beneficiarios"])
-api_router.include_router(informacion_financista_router, prefix="/informacion-financistas", tags=["Información Financistas"])
-api_router.include_router(informacion_contratista_router, prefix="/informacion-contratistas", tags=["Información Contratistas"])
-api_router.include_router(tipos_obra.router, tags=["Tipos de Obra"])
+api_router.include_router(informacion_financista_router, prefix="/informacion-financista", tags=["Información Financista"])
+api_router.include_router(informacion_contratista_router, prefix="/informacion-contratista", tags=["Información Contratistas"])
+api_router.include_router(tipos_obra_router, prefix="/tipos-obra", tags=["Tipos de Obra"])
 api_router.include_router(tipo_gasto_router, prefix="/tipos-gasto", tags=["Tipos de Gasto"])
 api_router.include_router(pago_router, prefix="/pagos", tags=["Pagos"])
+api_router.include_router(categoria_documento_router, prefix="/categorias-documento", tags=["Categorías de Documentos"])
+
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+
 @app.get(f"{settings.API_V1_STR}/health")
 async def health_check():
-    """Verifica el estado de salud de la API."""
+    """Endpoint de verificación de estado de salud de la API."""
     return {
         "status": "ok",
         "version": "1.0.0",
         "environment": "development" if settings.DEBUG else "production"
     }
 
+
 @app.get("/")
 async def root():
     """Ruta de bienvenida de la API."""
     return {
         "message": f"Bienvenido a {settings.PROJECT_NAME} API",
-        "documentation": "/docs" if settings.DEBUG else None,
+        "documentation": f"{settings.API_V1_STR}/docs" if settings.DEBUG else None,
+        "health": f"{settings.API_V1_STR}/health",
         "version": "1.0.0"
     }
+
 
 if __name__ == "__main__":
     import uvicorn
@@ -124,7 +140,5 @@ if __name__ == "__main__":
         "app.main:app",
         host=settings.HOST,
         port=settings.PORT,
-        reload=settings.DEBUG,
-        ssl_keyfile=getattr(settings, 'SSL_KEYFILE', None),
-        ssl_certfile=getattr(settings, 'SSL_CERTFILE', None)
+        reload=settings.DEBUG
     )

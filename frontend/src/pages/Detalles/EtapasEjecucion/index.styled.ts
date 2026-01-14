@@ -33,10 +33,3 @@ export const SeccionContent = styled.div`
   }
 `;
 
-export const ProgressBarContainer = styled.div`
-  margin-bottom: 24px;
-  padding: 16px;
-  background: #f9f9f9;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-`;

@@ -34,6 +34,21 @@ export enum DigidatRoutes {
   UPDATE_PAGO = '/v1/pagos/:id',
   DELETE_PAGO = '/v1/pagos/:id',
   
-  // Corregir cuando estén migrados
-  GET_CATEGORIAS_DOCUMENTOS = '/all/categorias-documentos',
+  // Información Financista
+  GET_INFORMACION_FINANCISTA = '/v1/informacion-financista/',
+  GET_INFORMACION_FINANCISTA_BY_ID = '/v1/informacion-financista/:id',
+  CREATE_INFORMACION_FINANCISTA = '/v1/informacion-financista/',
+  UPDATE_INFORMACION_FINANCISTA = '/v1/informacion-financista/:id',
+  DELETE_INFORMACION_FINANCISTA = '/v1/informacion-financista/:id',
+
+  // Información Contratista
+  GET_INFORMACION_CONTRATISTA = '/v1/informacion-contratista/',
+  GET_INFORMACION_CONTRATISTA_BY_ID = '/v1/informacion-contratista/:id',
+  CREATE_INFORMACION_CONTRATISTA = '/v1/informacion-contratista/',
+  UPDATE_INFORMACION_CONTRATISTA = '/v1/informacion-contratista/:id',
+  DELETE_INFORMACION_CONTRATISTA = '/v1/informacion-contratista/:id',
+  
+  // Categorías Documentos
+  GET_CATEGORIAS_DOCUMENTOS = '/v1/categorias-documentos/',
+
 }

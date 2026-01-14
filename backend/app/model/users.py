@@ -24,8 +24,6 @@ class User(Base):
     rol = relationship("Role", back_populates="usuarios", lazy="select")
     obras = relationship("Obra", back_populates="responsable", foreign_keys="[Obra.id_responsable]")
     documentos = relationship("Documento", back_populates="responsable")
-    informaciones_financistas = relationship("InformacionFinancista", back_populates="responsable")
-    informaciones_contratista = relationship("InformacionContratista", back_populates="responsable")
 
     def __repr__(self):
         return (

@@ -4,17 +4,6 @@
 -- ------------------------------------------------------
 -- Server version	8.0.43
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
 --
 -- Table structure for table `actividades_etapa`
 --
@@ -29,12 +18,13 @@ CREATE TABLE `actividades_etapa` (
   `fecha_registro` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `id_estado_etapa` int NOT NULL,
   `orden` int DEFAULT '1',
+  `comentario_etapa` text,
   PRIMARY KEY (`id_etapa`),
   KEY `id_obra` (`id_obra`),
   KEY `fk_estado_etapa` (`id_estado_etapa`),
   CONSTRAINT `actividades_etapa_ibfk_1` FOREIGN KEY (`id_obra`) REFERENCES `obras` (`id_obra`) ON DELETE CASCADE,
   CONSTRAINT `fk_estado_etapa` FOREIGN KEY (`id_estado_etapa`) REFERENCES `estados_etapa` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=139 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=177 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +33,7 @@ CREATE TABLE `actividades_etapa` (
 
 LOCK TABLES `actividades_etapa` WRITE;
 /*!40000 ALTER TABLE `actividades_etapa` DISABLE KEYS */;
-INSERT INTO `actividades_etapa` VALUES (101,8,'Aprobar la Capacidad Presupuestal','2025-12-19 02:05:06',1,1),(102,8,'Aprobar la Ejecución Conjunta de Proyectos','2025-12-19 02:05:06',1,2),(103,8,'Evaluar la Propuesta de Proyectos del Sector Privado','2025-12-19 02:05:06',1,3),(104,8,'Aprobar la Lista de Proyectos Priorizados por Entidad Pública','2025-12-19 02:05:06',1,4),(105,8,'Designar al Comité Especial','2025-12-19 02:05:06',2,1),(106,8,'Otorgar la Certificación Presupuestaria y/o compromiso de Priorización de Recursos para Entidades Públicas de Gobierno Nacional','2025-12-19 02:05:06',2,2),(107,8,'Aprobar las bases para el proceso de selección','2025-12-19 02:05:06',2,3),(108,8,'Realizar el Proceso de Selección','2025-12-19 02:05:06',3,1),(109,8,'Realizar la suscripción de Convenio','2025-12-19 02:05:06',3,2),(110,8,'Realizar la suscripción de contrato de la Supervisión del Proyecto','2025-12-19 02:05:06',3,3),(111,8,'Realizar modificación de Estudios','2025-12-19 02:05:06',3,4),(112,8,'Aprobar el Estudio definitivo, expediente de operación y/o mantenimiento','2025-12-19 02:05:06',3,5),(113,8,'Aprobar la Sustitución del Ejecutor de Proyecto','2025-12-19 02:05:06',3,6),(114,8,'Aprobar la ampliación de plazos','2025-12-19 02:05:06',3,7),(115,8,'Realizar la culminación y recepción del proyecto','2025-12-19 02:05:06',3,8),(116,8,'Aprobar la liquidación del proyecto','2025-12-19 02:05:06',3,9),(117,8,'Emitir conformidad de Mantenimiento u Operación','2025-12-19 02:05:06',4,1),(118,8,'Emitir el CIPRL o CIPGN','2025-12-19 02:05:06',5,1),(119,8,'Emitir el CIPRA por el CIPGN por Avance de Obra','2025-12-19 02:05:06',5,2);
+INSERT INTO `actividades_etapa` VALUES (102,8,'Aprobar la Ejecución Conjunta de Proyectos','2025-12-19 02:05:06',1,2,NULL),(106,8,'Otorgar la Certificación Presupuestaria y/o compromiso de Priorización de Recursos para Entidades Públicas de Gobierno Nacional','2025-12-19 02:05:06',2,2,NULL),(107,8,'Aprobar las bases para el proceso de selección','2025-12-19 02:05:06',2,3,NULL),(109,8,'Realizar la suscripción de Convenio','2025-12-19 02:05:06',3,2,NULL),(111,8,'Realizar modificación de Estudios','2025-12-19 02:05:06',3,4,NULL),(112,8,'Aprobar el Estudio definitivo, expediente de operación y/o mantenimiento','2025-12-19 02:05:06',3,5,NULL),(113,8,'Aprobar la Sustitución del Ejecutor de Proyecto','2025-12-19 02:05:06',3,6,NULL),(114,8,'Aprobar la ampliación de plazos','2025-12-19 02:05:06',3,7,NULL),(115,8,'Realizar la culminación y recepción del proyecto','2025-12-19 02:05:06',3,8,NULL),(116,8,'Aprobar la liquidación del proyecto','2025-12-19 02:05:06',3,9,NULL),(117,8,'Emitir conformidad de Mantenimiento u Operación','2025-12-19 02:05:06',4,1,NULL),(118,8,'Emitir el CIPRL o CIPGN','2025-12-19 02:05:06',5,1,NULL),(119,8,'Emitir el CIPRA por el CIPGN por Avance de Obra','2025-12-19 02:05:06',5,2,NULL),(139,16,'Aprobar la Capacidad Presupuestal','2026-01-13 21:25:28',1,1,NULL),(140,16,'Aprobar la Ejecución Conjunta de Proyectos','2026-01-13 21:25:28',1,2,NULL),(141,16,'Evaluar la Propuesta de Proyectos del Sector Privado','2026-01-13 21:25:28',1,3,NULL),(142,16,'Aprobar la Lista de Proyectos Priorizados por Entidad Pública','2026-01-13 21:25:28',1,4,NULL),(143,16,'Designar al Comité Especial','2026-01-13 21:25:28',2,1,NULL),(144,16,'Otorgar la Certificación Presupuestaria y/o compromiso de Priorización de Recursos para Entidades Públicas de Gobierno Nacional','2026-01-13 21:25:28',2,2,NULL),(145,16,'Aprobar las bases para el proceso de selección','2026-01-13 21:25:28',2,3,NULL),(146,16,'Realizar el Proceso de Selección','2026-01-13 21:25:28',3,1,NULL),(147,16,'Realizar la suscripción de Convenio','2026-01-13 21:25:28',3,2,NULL),(148,16,'Realizar la suscripción de contrato de la Supervisión del Proyecto','2026-01-13 21:25:28',3,3,NULL),(149,16,'Realizar modificación de Estudios','2026-01-13 21:25:28',3,4,NULL),(150,16,'Aprobar el Estudio definitivo, expediente de operación y/o mantenimiento','2026-01-13 21:25:28',3,5,NULL),(151,16,'Aprobar la Sustitución del Ejecutor de Proyecto','2026-01-13 21:25:28',3,6,NULL),(152,16,'Aprobar la ampliación de plazos','2026-01-13 21:25:28',3,7,NULL),(153,16,'Realizar la culminación y recepción del proyecto','2026-01-13 21:25:28',3,8,NULL),(154,16,'Aprobar la liquidación del proyecto','2026-01-13 21:25:28',3,9,NULL),(155,16,'Emitir conformidad de Mantenimiento u Operación','2026-01-13 21:25:28',4,1,NULL),(156,16,'Emitir el CIPRL o CIPGN','2026-01-13 21:25:28',5,1,NULL),(157,16,'Emitir el CIPRA por el CIPGN por Avance de Obra','2026-01-13 21:25:28',5,2,NULL),(158,17,'Aprobar la Capacidad Presupuestal','2026-01-14 01:36:35',1,1,NULL),(159,17,'Aprobar la Ejecución Conjunta de Proyectos','2026-01-14 01:36:35',1,2,NULL),(160,17,'Evaluar la Propuesta de Proyectos del Sector Privado','2026-01-14 01:36:35',1,3,NULL),(161,17,'Aprobar la Lista de Proyectos Priorizados por Entidad Pública','2026-01-14 01:36:35',1,4,NULL),(162,17,'Designar al Comité Especial','2026-01-14 01:36:35',2,1,NULL),(163,17,'Otorgar la Certificación Presupuestaria y/o compromiso de Priorización de Recursos para Entidades Públicas de Gobierno Nacional','2026-01-14 01:36:35',2,2,NULL),(164,17,'Aprobar las bases para el proceso de selección','2026-01-14 01:36:35',2,3,NULL),(165,17,'Realizar el Proceso de Selección','2026-01-14 01:36:35',3,1,NULL),(166,17,'Realizar la suscripción de Convenio','2026-01-14 01:36:35',3,2,NULL),(167,17,'Realizar la suscripción de contrato de la Supervisión del Proyecto','2026-01-14 01:36:35',3,3,NULL),(168,17,'Realizar modificación de Estudios','2026-01-14 01:36:35',3,4,NULL),(169,17,'Aprobar el Estudio definitivo, expediente de operación y/o mantenimiento','2026-01-14 01:36:35',3,5,NULL),(170,17,'Aprobar la Sustitución del Ejecutor de Proyecto','2026-01-14 01:36:35',3,6,NULL),(171,17,'Aprobar la ampliación de plazos','2026-01-14 01:36:35',3,7,NULL),(172,17,'Realizar la culminación y recepción del proyecto','2026-01-14 01:36:35',3,8,NULL),(173,17,'Aprobar la liquidación del proyecto','2026-01-14 01:36:35',3,9,NULL),(174,17,'Emitir conformidad de Mantenimiento u Operación','2026-01-14 01:36:35',4,1,NULL),(175,17,'Emitir el CIPRL o CIPGN','2026-01-14 01:36:35',5,1,NULL),(176,17,'Emitir el CIPRA por el CIPGN por Avance de Obra','2026-01-14 01:36:35',5,2,NULL);
 /*!40000 ALTER TABLE `actividades_etapa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -62,7 +52,7 @@ CREATE TABLE `auditoria` (
   `usuario` varchar(100) NOT NULL,
   `fecha` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_auditoria`)
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -71,7 +61,7 @@ CREATE TABLE `auditoria` (
 
 LOCK TABLES `auditoria` WRITE;
 /*!40000 ALTER TABLE `auditoria` DISABLE KEYS */;
-INSERT INTO `auditoria` VALUES (1,'obras',1,'INSERT','root@localhost','2025-10-15 16:55:47'),(2,'pagos',1,'INSERT','root@localhost','2025-10-15 16:55:47'),(3,'obras',2,'INSERT','root@172.18.0.1','2025-11-19 21:54:52'),(4,'obras',2,'DELETE','root@localhost','2025-11-19 22:25:02'),(5,'obras',3,'INSERT','root@172.18.0.1','2025-11-19 23:33:30'),(6,'obras',4,'INSERT','root@172.18.0.1','2025-11-19 23:35:39'),(7,'obras',5,'INSERT','root@172.18.0.1','2025-11-19 23:42:40'),(8,'obras',6,'INSERT','digidat_user@172.18.0.1','2025-11-20 14:46:15'),(9,'obras',7,'INSERT','digidat_user@172.18.0.1','2025-11-26 00:09:25'),(10,'obras',8,'INSERT','digidat_user@172.18.0.1','2025-11-26 00:10:05'),(11,'obras',9,'INSERT','digidat_user@172.18.0.1','2025-11-26 00:41:19'),(12,'obras',1,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:11'),(13,'obras',3,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:33'),(14,'obras',4,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:35'),(15,'obras',5,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:36'),(16,'obras',6,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:38'),(17,'obras',7,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:39'),(18,'obras',8,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:40'),(19,'obras',9,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:41'),(20,'obras',10,'INSERT','digidat_user@172.18.0.1','2025-11-26 01:05:10'),(21,'obras',10,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:09:14'),(22,'obras',1,'INSERT','digidat_user@172.18.0.1','2025-11-26 01:09:54'),(23,'obras',2,'INSERT','digidat_user@172.18.0.1','2025-11-26 18:24:53'),(24,'obras',3,'INSERT','digidat_user@172.18.0.1','2025-11-26 18:46:54'),(25,'obras',4,'INSERT','digidat_user@172.18.0.1','2025-11-28 01:09:30'),(26,'obras',1,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:39:18'),(27,'obras',4,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:39:54'),(28,'obras',3,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:39:57'),(29,'obras',2,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:39:59'),(30,'obras',5,'INSERT','digidat_user@172.18.0.1','2025-11-28 02:40:11'),(31,'obras',6,'INSERT','digidat_user@172.18.0.1','2025-11-28 02:43:42'),(32,'obras',6,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:46:34'),(33,'obras',5,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:46:37'),(34,'obras',7,'INSERT','digidat_user@172.18.0.1','2025-11-28 02:46:51'),(35,'obras',8,'INSERT','digidat_user@172.18.0.1','2025-12-19 02:05:06'),(36,'obras',9,'INSERT','digidat_user@172.18.0.1','2025-12-19 03:09:08'),(37,'obras',7,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:02:56'),(38,'obras',9,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:03:00'),(39,'obras',10,'INSERT','digidat_user@172.18.0.1','2026-01-04 22:03:17'),(40,'obras',11,'INSERT','digidat_user@172.18.0.1','2026-01-04 22:03:27'),(41,'obras',12,'INSERT','digidat_user@172.18.0.1','2026-01-04 22:03:28'),(42,'obras',13,'INSERT','digidat_user@172.18.0.1','2026-01-04 22:03:57'),(43,'obras',10,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:13:56'),(44,'obras',11,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:13:59'),(45,'obras',12,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:14:02'),(46,'obras',13,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:14:06');
+INSERT INTO `auditoria` VALUES (1,'obras',1,'INSERT','root@localhost','2025-10-15 16:55:47'),(2,'pagos',1,'INSERT','root@localhost','2025-10-15 16:55:47'),(3,'obras',2,'INSERT','root@172.18.0.1','2025-11-19 21:54:52'),(4,'obras',2,'DELETE','root@localhost','2025-11-19 22:25:02'),(5,'obras',3,'INSERT','root@172.18.0.1','2025-11-19 23:33:30'),(6,'obras',4,'INSERT','root@172.18.0.1','2025-11-19 23:35:39'),(7,'obras',5,'INSERT','root@172.18.0.1','2025-11-19 23:42:40'),(8,'obras',6,'INSERT','digidat_user@172.18.0.1','2025-11-20 14:46:15'),(9,'obras',7,'INSERT','digidat_user@172.18.0.1','2025-11-26 00:09:25'),(10,'obras',8,'INSERT','digidat_user@172.18.0.1','2025-11-26 00:10:05'),(11,'obras',9,'INSERT','digidat_user@172.18.0.1','2025-11-26 00:41:19'),(12,'obras',1,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:11'),(13,'obras',3,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:33'),(14,'obras',4,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:35'),(15,'obras',5,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:36'),(16,'obras',6,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:38'),(17,'obras',7,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:39'),(18,'obras',8,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:40'),(19,'obras',9,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:04:41'),(20,'obras',10,'INSERT','digidat_user@172.18.0.1','2025-11-26 01:05:10'),(21,'obras',10,'DELETE','digidat_user@172.18.0.1','2025-11-26 01:09:14'),(22,'obras',1,'INSERT','digidat_user@172.18.0.1','2025-11-26 01:09:54'),(23,'obras',2,'INSERT','digidat_user@172.18.0.1','2025-11-26 18:24:53'),(24,'obras',3,'INSERT','digidat_user@172.18.0.1','2025-11-26 18:46:54'),(25,'obras',4,'INSERT','digidat_user@172.18.0.1','2025-11-28 01:09:30'),(26,'obras',1,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:39:18'),(27,'obras',4,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:39:54'),(28,'obras',3,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:39:57'),(29,'obras',2,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:39:59'),(30,'obras',5,'INSERT','digidat_user@172.18.0.1','2025-11-28 02:40:11'),(31,'obras',6,'INSERT','digidat_user@172.18.0.1','2025-11-28 02:43:42'),(32,'obras',6,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:46:34'),(33,'obras',5,'DELETE','digidat_user@172.18.0.1','2025-11-28 02:46:37'),(34,'obras',7,'INSERT','digidat_user@172.18.0.1','2025-11-28 02:46:51'),(35,'obras',8,'INSERT','digidat_user@172.18.0.1','2025-12-19 02:05:06'),(36,'obras',9,'INSERT','digidat_user@172.18.0.1','2025-12-19 03:09:08'),(37,'obras',7,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:02:56'),(38,'obras',9,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:03:00'),(39,'obras',10,'INSERT','digidat_user@172.18.0.1','2026-01-04 22:03:17'),(40,'obras',11,'INSERT','digidat_user@172.18.0.1','2026-01-04 22:03:27'),(41,'obras',12,'INSERT','digidat_user@172.18.0.1','2026-01-04 22:03:28'),(42,'obras',13,'INSERT','digidat_user@172.18.0.1','2026-01-04 22:03:57'),(43,'obras',10,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:13:56'),(44,'obras',11,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:13:59'),(45,'obras',12,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:14:02'),(46,'obras',13,'DELETE','digidat_user@172.18.0.1','2026-01-04 22:14:06'),(49,'pagos',2,'INSERT','digidat_user@172.18.0.1','2026-01-13 20:45:07'),(50,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:45:18'),(51,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:45:58'),(52,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:54:13'),(53,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:54:40'),(54,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:54:43'),(55,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:54:46'),(56,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:54:50'),(57,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:54:52'),(58,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:54:54'),(59,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-13 20:54:58'),(60,'obras',16,'INSERT','digidat_user@172.18.0.1','2026-01-13 21:25:28'),(61,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-14 00:36:11'),(62,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-14 00:36:20'),(63,'pagos',2,'UPDATE','digidat_user@172.18.0.1','2026-01-14 00:36:27'),(64,'obras',17,'INSERT','digidat_user@172.18.0.1','2026-01-14 01:36:35'),(65,'pagos',3,'INSERT','digidat_user@172.18.0.1','2026-01-14 02:43:12'),(66,'pagos',3,'UPDATE','digidat_user@172.18.0.1','2026-01-14 02:43:27');
 /*!40000 ALTER TABLE `auditoria` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -80,6 +70,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `beneficiarios`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `beneficiarios` (
   `id_beneficiario` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(255) NOT NULL,
@@ -259,7 +251,12 @@ DROP TABLE IF EXISTS `informacioncontratista`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `informacioncontratista` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `id_tipo_contratista` int NOT NULL DEFAULT '1',
   `id_obra` int NOT NULL,
+  `aspecto` text NOT NULL,
+  `comentarios` text,
+  `id_categoria_documento` json DEFAULT NULL,
+  `responsables` json DEFAULT NULL,
   `detalle` text,
   `id_responsable` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -288,7 +285,12 @@ DROP TABLE IF EXISTS `informacionfinancista`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `informacionfinancista` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `id_tipo_financista` int NOT NULL DEFAULT '1',
   `id_obra` int NOT NULL,
+  `aspecto` text NOT NULL,
+  `comentarios` text,
+  `id_categoria_documento` json DEFAULT NULL,
+  `responsables` json DEFAULT NULL,
   `detalle` text,
   `id_responsable` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -296,7 +298,7 @@ CREATE TABLE `informacionfinancista` (
   KEY `id_responsable` (`id_responsable`),
   CONSTRAINT `informacionfinancista_ibfk_1` FOREIGN KEY (`id_obra`) REFERENCES `obras` (`id_obra`) ON DELETE CASCADE,
   CONSTRAINT `informacionfinancista_ibfk_2` FOREIGN KEY (`id_responsable`) REFERENCES `usuarios` (`id_responsable`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -305,6 +307,7 @@ CREATE TABLE `informacionfinancista` (
 
 LOCK TABLES `informacionfinancista` WRITE;
 /*!40000 ALTER TABLE `informacionfinancista` DISABLE KEYS */;
+INSERT INTO `informacionfinancista` VALUES (2,1,16,'dsadfd','saddasds','\"[{\\\"id\\\": 2, \\\"nombre\\\": \\\"Documentos T\\\\u00e9cnicos\\\"}]\"','\"[{\\\"id\\\": 2, \\\"nombre\\\": \\\"Iosef\\\"}]\"',NULL,NULL),(3,2,16,'dsada','sdasd','\"[{\\\"id\\\": 1, \\\"nombre\\\": \\\"Documentos Legales\\\"}, {\\\"id\\\": 2, \\\"nombre\\\": \\\"Documentos T\\\\u00e9cnicos\\\"}]\"','\"[{\\\"id\\\": 2, \\\"nombre\\\": \\\"Iosef\\\"}]\"',NULL,NULL),(4,2,8,'adsasd','sadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsdsadsd','\"[{\\\"id\\\": 1, \\\"nombre\\\": \\\"Documentos Legales\\\"}]\"','\"[{\\\"id\\\": 2, \\\"nombre\\\": \\\"Iosef\\\"}]\"',NULL,NULL);
 /*!40000 ALTER TABLE `informacionfinancista` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -331,7 +334,7 @@ CREATE TABLE `obra_centro_operacion` (
 
 LOCK TABLES `obra_centro_operacion` WRITE;
 /*!40000 ALTER TABLE `obra_centro_operacion` DISABLE KEYS */;
-INSERT INTO `obra_centro_operacion` VALUES (8,6);
+INSERT INTO `obra_centro_operacion` VALUES (17,1),(17,2),(17,3),(17,4),(17,5),(8,6),(17,6),(17,7),(16,8),(17,8);
 /*!40000 ALTER TABLE `obra_centro_operacion` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -358,7 +361,7 @@ CREATE TABLE `obras` (
   CONSTRAINT `fk_obra_estado` FOREIGN KEY (`estado_id`) REFERENCES `estados_obra` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_obra_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `usuarios` (`id_responsable`) ON DELETE SET NULL,
   CONSTRAINT `obras_ibfk_1` FOREIGN KEY (`id_responsable`) REFERENCES `usuarios` (`id_responsable`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -367,7 +370,7 @@ CREATE TABLE `obras` (
 
 LOCK TABLES `obras` WRITE;
 /*!40000 ALTER TABLE `obras` DISABLE KEYS */;
-INSERT INTO `obras` VALUES (8,'obra 2',10,1,'2025-12-18','2025-12-31',129,2,1);
+INSERT INTO `obras` VALUES (8,'obra 2',10,1,'2025-12-18','2025-12-31',129,2,1),(16,'dsada',10,1,'2026-01-13','2026-01-22',12222,1,1),(17,'111',9,1,'2026-01-13','2026-01-15',1000,2,1);
 /*!40000 ALTER TABLE `obras` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -436,12 +439,13 @@ CREATE TABLE `pagos` (
   `id_pago` int NOT NULL AUTO_INCREMENT,
   `id_obra` int NOT NULL,
   `id_beneficiario` int NOT NULL,
-  `concepto_pago` varchar(255) NOT NULL,
   `monto_pagado` decimal(15,2) NOT NULL,
   `fecha_pago` date NOT NULL,
   `id_tipo_gasto` int NOT NULL,
+  `es_reembolsable` tinyint(1) NOT NULL DEFAULT '0',
   `id_estado_reembolso` int NOT NULL,
   `id_responsable` int DEFAULT NULL,
+  `concepto` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id_pago`),
   KEY `id_obra` (`id_obra`),
   KEY `id_beneficiario` (`id_beneficiario`),
@@ -453,7 +457,7 @@ CREATE TABLE `pagos` (
   CONSTRAINT `pagos_ibfk_3` FOREIGN KEY (`id_tipo_gasto`) REFERENCES `tipos_gasto` (`id`),
   CONSTRAINT `pagos_ibfk_4` FOREIGN KEY (`id_estado_reembolso`) REFERENCES `estados_reembolso` (`id`),
   CONSTRAINT `pagos_ibfk_5` FOREIGN KEY (`id_responsable`) REFERENCES `usuarios` (`id_responsable`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -462,6 +466,7 @@ CREATE TABLE `pagos` (
 
 LOCK TABLES `pagos` WRITE;
 /*!40000 ALTER TABLE `pagos` DISABLE KEYS */;
+INSERT INTO `pagos` VALUES (2,8,5,12.00,'2026-01-13',2,1,2,3,'pago 1'),(3,8,5,1.00,'2026-01-13',2,1,2,3,'1');
 /*!40000 ALTER TABLE `pagos` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -477,6 +482,32 @@ DELIMITER ;;
   IF NEW.id_tipo_gasto = (SELECT id FROM tipos_gasto WHERE nombre = 'Administrativo') THEN
     SET NEW.id_estado_reembolso = (SELECT id FROM estados_reembolso WHERE nombre = 'No Reembolsado');
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `validar_reembolsable_antes_insert` BEFORE INSERT ON `pagos` FOR EACH ROW BEGIN
+    DECLARE tipo_nombre VARCHAR(100);
+    
+    SELECT nombre INTO tipo_nombre 
+    FROM tipos_gasto 
+    WHERE id = NEW.id_tipo_gasto;
+    
+    IF tipo_nombre = 'Administrativo' AND NEW.es_reembolsable = 1 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Un gasto administrativo no puede ser reembolsable';
+    END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -514,6 +545,32 @@ DELIMITER ;;
   IF NEW.id_tipo_gasto = (SELECT id FROM tipos_gasto WHERE nombre = 'Administrativo') THEN
     SET NEW.id_estado_reembolso = (SELECT id FROM estados_reembolso WHERE nombre = 'No Reembolsado');
   END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `validar_reembolsable_antes_update` BEFORE UPDATE ON `pagos` FOR EACH ROW BEGIN
+    DECLARE tipo_nombre VARCHAR(100);
+    
+    SELECT nombre INTO tipo_nombre 
+    FROM tipos_gasto 
+    WHERE id = NEW.id_tipo_gasto;
+    
+    IF tipo_nombre = 'Administrativo' AND NEW.es_reembolsable = 1 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Un gasto administrativo no puede ser reembolsable';
+    END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -677,4 +734,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-07  3:13:01
+-- Dump completed on 2026-01-14  3:28:02

@@ -42,31 +42,69 @@ const FilePreview = ({ selectedFile }: { selectedFile: FileObject | null }) => {
   }
 
   const ext = selectedFile.nombre_original?.split(".").pop()?.toLowerCase() || "";
-  const esImagen = ["jpg", "jpeg", "png", "gif"].includes(ext);
-  const esPDF = ext === "pdf";
+  
+  const esImagen = selectedFile.esImagen ?? ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext);
+  const esPDF = selectedFile.esPDF ?? ext === "pdf";
 
-  const encodedSourceUrl = encodeURI(sourceUrl);
+  console.log("[FilePreview] Archivo:", {
+    nombre: selectedFile.nombre_original,
+    ext,
+    esImagen,
+    esPDF,
+    sourceUrl,
+    propEsImagen: selectedFile.esImagen,
+    propEsPDF: selectedFile.esPDF
+  });
+
+  const finalUrl = sourceUrl;
 
   if (esImagen) {
     return (
-      <img
-        src={encodedSourceUrl}
-        alt={selectedFile.nombre_original}
-        style={{ width: "100%", maxHeight: "500px", objectFit: "contain" }}
-        onError={handlePreviewError}
-      />
+      <div style={{ 
+        display: "flex", 
+        justifyContent: "center", 
+        alignItems: "center", 
+        width: "100%", 
+        height: "500px",
+        backgroundColor: "#f5f5f5"
+      }}>
+        <img
+          src={finalUrl}
+          alt={selectedFile.nombre_original}
+          style={{ 
+            maxWidth: "100%", 
+            maxHeight: "100%", 
+            objectFit: "contain" 
+          }}
+          onError={(e) => {
+            console.error("[FilePreview] Error cargando imagen:", finalUrl);
+            handlePreviewError(e);
+          }}
+          onLoad={() => {
+            console.log("[FilePreview] Imagen cargada exitosamente:", finalUrl);
+          }}
+        />
+        {previewError && (
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <p>{previewError}</p>
+            <a href={finalUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#722AE9" }}>
+              Descargar archivo
+            </a>
+          </div>
+        )}
+      </div>
     );
   }
 
   if (esPDF) {
-    const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodedSourceUrl}&embedded=true`;
+    const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(finalUrl)}&embedded=true`;
 
     return (
       <div style={{ textAlign: "center", height: "500px" }}>
         {previewError ? (
           <>
             <p>{previewError}</p>
-            <a href={encodedSourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#722AE9" }}>
+            <a href={finalUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#722AE9" }}>
               Descargar archivo
             </a>
           </>
@@ -82,7 +120,7 @@ const FilePreview = ({ selectedFile }: { selectedFile: FileObject | null }) => {
               referrerPolicy="no-referrer"
             />
             <Button
-              onClick={() => window.open(encodedSourceUrl, "_blank")}
+              onClick={() => window.open(finalUrl, "_blank")}
               style={{ marginTop: "10px" }}
             >
               Abrir PDF en nueva pestaña
@@ -96,7 +134,7 @@ const FilePreview = ({ selectedFile }: { selectedFile: FileObject | null }) => {
   return (
     <div style={{ textAlign: "center" }}>
       <p>Vista previa no disponible para este tipo de archivo.</p>
-      <a href={encodedSourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#722AE9" }}>
+      <a href={finalUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#722AE9" }}>
         Descargar archivo
       </a>
     </div>
@@ -112,6 +150,8 @@ const getFileIcon = (fileName: string | undefined) => {
     case "jpeg":
     case "png":
     case "gif":
+    case "bmp":
+    case "webp":
       return <FaFileImage />;
     default:
       return <FaFilePdf />;
@@ -130,11 +170,16 @@ const ModalVistaPrevia = ({ visible, files, onClose, onRemoveFile }: ModalVistaP
   const [fileList, setFileList] = useState<FileObject[]>([]);
 
   useEffect(() => {
+    console.log("[ModalVistaPrevia] Files recibidos:", files);
+    
     const uniqueFiles = Array.from(
       new Map(files.map((file) => [file.id || file.url || `temp_${Date.now()}`, file])).values()
     );
+    
     setFileList(uniqueFiles);
+    
     if (visible && uniqueFiles.length > 0) {
+      console.log("[ModalVistaPrevia] Seleccionando primer archivo:", uniqueFiles[0]);
       setSelectedFile(uniqueFiles[0]);
     } else {
       setSelectedFile(null);
@@ -157,6 +202,7 @@ const ModalVistaPrevia = ({ visible, files, onClose, onRemoveFile }: ModalVistaP
       const link = document.createElement("a");
       link.href = selectedFile.url;
       link.download = selectedFile.nombre_original || "archivo";
+      link.target = "_blank";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -198,7 +244,10 @@ const ModalVistaPrevia = ({ visible, files, onClose, onRemoveFile }: ModalVistaP
               <S.FileItem
                 key={`${fileObj.id || 'temp'}-${index}`}
                 isSelected={selectedFile?.id === fileObj.id}
-                onClick={() => setSelectedFile(fileObj)}
+                onClick={() => {
+                  console.log("[ModalVistaPrevia] Archivo seleccionado:", fileObj);
+                  setSelectedFile(fileObj);
+                }}
               >
                 <S.FileIconContainer>
                   <S.FileIcon>{getFileIcon(fileObj.nombre_original)}</S.FileIcon>

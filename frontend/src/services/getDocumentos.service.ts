@@ -1,5 +1,5 @@
-// src/services/documentos.service.ts
 import apiClient from "../api/api";
+import { DigidatRoutes, replaceRouteParams } from "../routes";
 import type { 
   DocumentoResponse, 
   DocumentoUrlResponse,
@@ -7,11 +7,18 @@ import type {
   GetDocumentosParams 
 } from "../types/documentos";
 
+const sanitizeFileName = (fileName: string): string => {
+  return fileName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
+};
+
 export const obtenerDocumentos = async (
   params: GetDocumentosParams
 ): Promise<DocumentoResponse[]> => {
   try {
-    const res = await apiClient.get<DocumentoResponse[]>("v1/documents/", { 
+    const res = await apiClient.get<DocumentoResponse[]>(DigidatRoutes.GET_DOCUMENTOS, { 
       params 
     });
     return res.data;
@@ -21,13 +28,16 @@ export const obtenerDocumentos = async (
   }
 };
 
-
 export const subirDocumento = async (
   file: File,
   params: UploadDocumentoParams
 ): Promise<DocumentoResponse> => {
   const formData = new FormData();
-  formData.append("file", file);
+  
+  const sanitizedName = sanitizeFileName(file.name);
+  const newFile = new File([file], sanitizedName, { type: file.type });
+  
+  formData.append("file", newFile);
   formData.append("nombre", file.name);
 
   if (params.id_obra) formData.append("id_obra", params.id_obra.toString());
@@ -42,7 +52,7 @@ export const subirDocumento = async (
 
   try {
     const res = await apiClient.post<DocumentoResponse>(
-      "v1/documents/upload",
+      DigidatRoutes.UPLOAD_DOCUMENTO,
       formData,
       {
         headers: {
@@ -62,12 +72,10 @@ export const obtenerUrlDocumento = async (
   expiration: number = 3600
 ): Promise<string> => {
   try {
-    const res = await apiClient.get<DocumentoUrlResponse>(
-      `v1/documents/${idDocumento}/url`,
-      {
-        params: { expiration }
-      }
-    );
+    const url = replaceRouteParams(DigidatRoutes.GET_DOCUMENTO_URL, { id: idDocumento });
+    const res = await apiClient.get<DocumentoUrlResponse>(url, {
+      params: { expiration }
+    });
     return res.data.url;
   } catch (error: any) {
     console.error("[obtenerUrlDocumento] Error:", error);
@@ -77,7 +85,8 @@ export const obtenerUrlDocumento = async (
 
 export const eliminarDocumento = async (idDocumento: number): Promise<void> => {
   try {
-    await apiClient.delete(`v1/documents/${idDocumento}`);
+    const url = replaceRouteParams(DigidatRoutes.DELETE_DOCUMENTO, { id: idDocumento });
+    await apiClient.delete(url);
   } catch (error: any) {
     console.error("[eliminarDocumento] Error:", error);
     throw error;

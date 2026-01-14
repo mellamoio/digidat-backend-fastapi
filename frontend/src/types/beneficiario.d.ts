@@ -15,7 +15,6 @@ export interface BeneficiarioBase {
  * Interface para crear un nuevo Beneficiario
  */
 export interface BeneficiarioCreate extends BeneficiarioBase {
-  // Hereda nombre y documento de BeneficiarioBase
 }
 
 /**

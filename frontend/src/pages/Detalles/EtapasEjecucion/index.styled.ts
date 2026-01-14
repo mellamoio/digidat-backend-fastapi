@@ -9,7 +9,7 @@ export const SeccionHeader = styled.div`
   padding: 12px;
   border-radius: 4px;
   background: #f5f5f5;
-  
+  margin-bottom: 20px;
   &:hover {
     background: #ebebeb;
   }
@@ -23,13 +23,3 @@ export const IconoFlecha = styled.span<{ abierto: boolean }>`
   transform: ${({ abierto }) => (abierto ? "rotate(90deg)" : "rotate(0deg)")};
   transition: transform 0.2s ease-in-out;
 `;
-
-export const SeccionContent = styled.div`
-  padding: 15px 0;
-  margin-top: 5px;
-  
-  .rdt_Pagination {
-    display: none !important;
-  }
-`;
-

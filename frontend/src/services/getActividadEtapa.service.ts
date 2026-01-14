@@ -1,4 +1,5 @@
 import apiClient from '../api/api'
+import { DigidatRoutes, replaceRouteParams } from '../routes'
 import type { ActividadEtapa } from '../types/actividad_etapa'
 import { setQueryParams } from '../helpers/setQueryParams'
 import { handleErrorRequest } from '../helpers/handleErrorRequest'
@@ -27,7 +28,7 @@ export const getActividadesEtapa = async (
   filters?: GetActividadesEtapaRequest
 ): Promise<ActividadEtapa[]> => {
   try {
-    let url = 'v1/actividad-etapa/'
+    let url: string = DigidatRoutes.GET_ACTIVIDADES_ETAPA
     
     if (filters) {
       const params: Record<string, string> = {}
@@ -45,7 +46,8 @@ export const getActividadesEtapa = async (
 
 export const getActividadEtapaById = async (id_etapa: number): Promise<ActividadEtapa> => {
   try {
-    const { data } = await apiClient.get<ActividadEtapa>(`v1/actividad-etapa/${id_etapa}`)
+    const url = replaceRouteParams(DigidatRoutes.GET_ACTIVIDAD_ETAPA_BY_ID, { id: id_etapa })
+    const { data } = await apiClient.get<ActividadEtapa>(url)
     return data
   } catch (e) {
     throw handleErrorRequest(e)
@@ -54,7 +56,7 @@ export const getActividadEtapaById = async (id_etapa: number): Promise<Actividad
 
 export const inicializarActividadesObra = async (id_obra: number): Promise<{ message: string; total_actividades: number }> => {
   try {
-    const response = await apiClient.post(`v1/actividad-etapa/inicializar-actividades/${id_obra}`)
+    const response = await apiClient.post(DigidatRoutes.INICIALIZAR_ACTIVIDADES_ETAPA, { id_obra })
     return response.data
   } catch (error: any) {
     console.error('Error al inicializar actividades:', error)
@@ -71,7 +73,7 @@ export const createActividadEtapa = async (
 ): Promise<ActividadEtapa> => {
   try {
     const response = await apiClient.post<ActividadEtapa>(
-      'v1/actividad-etapa/',
+      DigidatRoutes.GET_ACTIVIDADES_ETAPA,
       actividadData
     )
     return response.data
@@ -90,10 +92,8 @@ export const updateActividadEtapa = async (
 ): Promise<ActividadEtapa> => {
   try {
     const { id_etapa, ...data } = actividadData
-    const response = await apiClient.put<ActividadEtapa>(
-      `v1/actividad-etapa/${id_etapa}`,
-      data
-    )
+    const url = replaceRouteParams(DigidatRoutes.GET_ACTIVIDAD_ETAPA_BY_ID, { id: id_etapa })
+    const response = await apiClient.put<ActividadEtapa>(url, data)
     return response.data
   } catch (error: any) {
     console.error('Error al actualizar la actividad de etapa:', error)
@@ -107,7 +107,8 @@ export const updateActividadEtapa = async (
 
 export const deleteActividadEtapa = async (id_etapa: number): Promise<void> => {
   try {
-    await apiClient.delete(`v1/actividad-etapa/${id_etapa}`)
+    const url = replaceRouteParams(DigidatRoutes.DELETE_ACTIVIDAD_ETAPA, { id: id_etapa })
+    await apiClient.delete(url)
   } catch (error: any) {
     console.error('Error al eliminar la actividad de etapa:', error)
     throw new Error(

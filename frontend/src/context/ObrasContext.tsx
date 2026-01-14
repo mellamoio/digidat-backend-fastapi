@@ -70,14 +70,12 @@ export const ObrasProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [tiposGastoData, setTiposGastoData] = useState<TipoGasto[] | null>(null)
 
-  // ✅ Cargar obras sin empresaId
   const { data: obrasData, mutate: mutateObras } = useSWR(
     'v1/obras/',
     () => apiClient.get('/v1/obras/').then(res => res.data),
     { revalidateOnFocus: false }
   )
 
-  // ✅ Cargar tipos de gasto desde el nuevo endpoint de FastAPI
   useEffect(() => {
     const loadTiposGasto = async () => {
       try {
@@ -85,7 +83,6 @@ export const ObrasProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setTiposGastoData(tipos)
       } catch (error) {
         console.error("[ObrasContext] Error al cargar tipos de gasto:", error)
-        // Valores por defecto
         setTiposGastoData([
           { id: 1, nombre: "Administrativo" },
           { id: 2, nombre: "Reembolsable" },
@@ -167,7 +164,7 @@ export const ObrasProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         const costo = Number(obra.costo_proyecto ?? 0)
         return sum + (isNaN(costo) ? 0 : costo)
       }, 0),
-      montoPagado: 0, // Este cálculo dependerá de cómo obtengas los pagos
+      montoPagado: 0,
       montoRecuperado: validObrasFiltradas.reduce(
         (sum: number, obra: Obra) => sum + (obra.monto_recuperado || 0),
         0

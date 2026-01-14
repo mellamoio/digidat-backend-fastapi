@@ -88,18 +88,10 @@ export const FiltroPagos: React.FC<FiltroPagosProps> = ({
     }
   }, [id_obra]);
 
-  // ✅ CORREGIDO: No aplicar filtro automáticamente en la primera carga
-  // El componente padre debe llamar a onFilterChange cuando esté listo
   useEffect(() => {
     if (isFirstLoad) {
-      // ❌ COMENTADO: No aplicar filtro automático
-      // const timer = setTimeout(() => {
-      //   onFilterChange(filters);
-      //   setIsFirstLoad(false);
-      // }, 800);
-      // return () => clearTimeout(timer);
       
-      setIsFirstLoad(false); // ✅ Solo marcamos que ya no es la primera carga
+      setIsFirstLoad(false);
     }
   }, [isFirstLoad]);
 

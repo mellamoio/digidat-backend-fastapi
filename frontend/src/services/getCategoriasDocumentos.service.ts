@@ -1,4 +1,5 @@
 import apiClient from "../api/api";
+import { DigidatRoutes } from "../routes";
 
 export interface CategoriaDocumento {
   id_categoria: number;
@@ -10,7 +11,7 @@ export interface CategoriaDocumento {
 
 export const fetchCategoriasDocumento = async (): Promise<CategoriaDocumento[]> => {
   try {
-    const response = await apiClient.get("v1/categorias-documento/");
+    const response = await apiClient.get(DigidatRoutes.GET_CATEGORIAS_DOCUMENTOS);
     return response.data || [];
   } catch (error: any) {
     console.error("[fetchCategoriasDocumento] Error:", error);

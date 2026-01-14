@@ -5,20 +5,26 @@ import { message } from "antd";
 import type { TableColumn } from "react-data-table-component";
 import { DataTableCustom } from "../../../components/DataTableCustom";
 import ModalEliminar from "../../../components/ui/feedback/Modal/ModalEliminar";
+import ModalDocumento from "../../../components/ui/feedback/Modal/ModalDocumento";
+import ModalVistaPrevia from "../../../components/ui/feedback/Modal/ModalVistaPrevia";
 import type { ActividadEtapa } from "../../../types/actividad_etapa";
 import type { EstadoEtapa } from "../../../types/estado_etapa";
-import { 
-  getEstadosEtapa 
+import type { FileObject } from "../../../types/pagos";
+import {
+  getEstadosEtapa
 } from "../../../services/getEstadoEtapa.service";
-import { 
-  getActividadesEtapa, 
+import {
+  getActividadesEtapa,
   deleteActividadEtapa,
-  inicializarActividadesObra 
+  inicializarActividadesObra
 } from "../../../services/getActividadEtapa.service";
+import {
+  obtenerDocumentos,
+  obtenerUrlDocumento
+} from "../../../services/getDocumentos.service";
 import {
   SeccionHeader,
   IconoFlecha,
-  SeccionContent
 } from "./index.styled";
 
 interface EtapasEjecucionProps {
@@ -27,7 +33,11 @@ interface EtapasEjecucionProps {
 
 interface ModalState {
   deleteOpen: boolean;
+  uploadOpen: boolean;
+  previewOpen: boolean;
   selectedActividadId: number | null;
+  selectedActividad: ActividadEtapa | null;
+  documentos: FileObject[];
 }
 
 export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
@@ -38,7 +48,11 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
   const [inicializando, setInicializando] = useState(false);
   const [modalState, setModalState] = useState<ModalState>({
     deleteOpen: false,
+    uploadOpen: false,
+    previewOpen: false,
     selectedActividadId: null,
+    selectedActividad: null,
+    documentos: [],
   });
 
   useEffect(() => {
@@ -63,7 +77,6 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
     try {
       const estadosData = await getEstadosEtapa();
       setEstados(estadosData);
-      
       const initialPagination = estadosData.reduce((acc, estado) => {
         acc[estado.id] = { page: 1, perPage: 10 };
         return acc;
@@ -123,6 +136,7 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
     e.preventDefault();
     e.stopPropagation();
     setModalState({
+      ...modalState,
       deleteOpen: true,
       selectedActividadId: actividad.id_etapa,
     });
@@ -130,6 +144,7 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
 
   const handleCloseDeleteModal = () => {
     setModalState({
+      ...modalState,
       deleteOpen: false,
       selectedActividadId: null,
     });
@@ -157,12 +172,105 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
     message.info(`Editar actividad: ${actividad.nombre_etapa}`);
   };
 
-  const handleUploadDocument = (actividad: ActividadEtapa) => {
-    message.info(`Subir documento para: ${actividad.nombre_etapa}`);
+  const handleUploadDocument = (e: React.MouseEvent, actividad: ActividadEtapa) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!actividad.id_etapa) {
+      message.error("ID de actividad no válido");
+      return;
+    }
+
+    setModalState({
+      ...modalState,
+      uploadOpen: true,
+      selectedActividad: actividad,
+      selectedActividadId: actividad.id_etapa,
+    });
   };
 
-  const handleViewDocument = (actividad: ActividadEtapa) => {
-    message.info(`Ver documentos de: ${actividad.nombre_etapa}`);
+  const handleViewDocument = async (e: React.MouseEvent, actividad: ActividadEtapa) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!actividad.id_etapa) {
+      message.error("ID de actividad no válido");
+      return;
+    }
+
+    try {
+      const documentos = await obtenerDocumentos({ id_etapa: actividad.id_etapa });
+
+      if (documentos.length === 0) {
+        message.info("No hay documentos para esta actividad");
+        return;
+      }
+
+      const documentosConPreview: FileObject[] = [];
+
+      for (const doc of documentos) {
+        try {
+          const url = await obtenerUrlDocumento(doc.id_documento, 3600);
+          
+          if (url) {
+            documentosConPreview.push({
+              id: doc.id_documento.toString(),
+              nombre_original: doc.nombre,
+              url: url,
+              esImagen: doc.mime_type?.startsWith("image/") || false,
+              esPDF: doc.mime_type === "application/pdf" || false,
+            });
+          }
+        } catch (error) {
+          console.error(`Error obteniendo URL para documento ${doc.id_documento}:`, error);
+        }
+      }
+
+      if (documentosConPreview.length === 0) {
+        message.error("No se pudieron cargar los documentos");
+        return;
+      }
+
+      setModalState({
+        ...modalState,
+        previewOpen: true,
+        selectedActividad: actividad,
+        selectedActividadId: actividad.id_etapa,
+        documentos: documentosConPreview,
+      });
+    } catch (error) {
+      console.error("Error al cargar documentos:", error);
+      message.error("Error al cargar los documentos");
+    }
+  };
+
+  const handleCloseUploadModal = () => {
+    setModalState({
+      ...modalState,
+      uploadOpen: false,
+      selectedActividad: null,
+      selectedActividadId: null,
+    });
+  };
+
+  const handleClosePreviewModal = () => {
+    setModalState({
+      ...modalState,
+      previewOpen: false,
+      selectedActividad: null,
+      selectedActividadId: null,
+      documentos: [],
+    });
+  };
+
+  const handleDocumentsSaved = async () => {
+    message.success("Documentos guardados exitosamente");
+    handleCloseUploadModal();
+    await fetchActividades();
+  };
+
+  const handleRemoveDocument = async (index: number) => {
+    message.info("Función de eliminar documento desde preview");
   };
 
   const columns: TableColumn<ActividadEtapa>[] = [
@@ -182,17 +290,7 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
     {
       name: "Comentarios",
       cell: (row: ActividadEtapa) => (
-        <div style={{ 
-          padding: '8px 0',
-          whiteSpace: 'pre-line',
-          lineHeight: '1.5',
-          maxHeight: '100px',
-          overflowY: 'auto',
-          fontSize: '13px',
-          color: '#333'
-        }}>
-          {row.comentarios || 'Sin comentarios'}
-        </div>
+        <div>{row.comentarios || 'Sin comentarios'}</div>
       ),
       sortable: false,
       grow: 3,
@@ -205,12 +303,7 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
       cell: (row: ActividadEtapa) => (
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
           <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleUploadDocument(row);
-            }}
+            onClick={(e) => handleUploadDocument(e, row)}
             style={{
               background: 'transparent',
               border: 'none',
@@ -224,15 +317,11 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
             }}
             title="Subir documento"
           >
-            <FaUpload size={14} />
+            <FaUpload size={16} />
           </button>
+
           <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleViewDocument(row);
-            }}
+            onClick={(e) => handleViewDocument(e, row)}
             style={{
               background: 'transparent',
               border: 'none',
@@ -246,7 +335,7 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
             }}
             title="Ver documentos"
           >
-            <FaEye size={14} />
+            <FaEye size={16} />
           </button>
         </div>
       ),
@@ -257,12 +346,8 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
       width: "100px",
       ignoreRowClick: true,
       cell: (row: ActividadEtapa) => (
-        <div 
-          style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div onClick={(e) => e.stopPropagation()}>
           <button
-            type="button"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -276,10 +361,9 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
             }}
             title="Editar"
           >
-            <FaEdit size={14} color="#868686" />
+            <FaEdit size={14} color="#595959" />
           </button>
           <button
-            type="button"
             onClick={(e) => handleOpenDeleteModal(e, row)}
             style={{
               background: 'transparent',
@@ -289,7 +373,7 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
             }}
             title="Eliminar"
           >
-            <FaTrash size={14} color="#868686" />
+            <FaTrash size={14} color="#595959" />
           </button>
         </div>
       ),
@@ -300,24 +384,10 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
     return actividades.filter(act => act.id_estado_etapa === estadoId);
   };
 
-
   return (
     <>
       {actividades.length === 0 && (
-        <button 
-          onClick={handleInicializarActividades}
-          disabled={inicializando}
-          style={{
-            padding: '10px 20px',
-            background: inicializando ? '#ccc' : '#722AE9',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: inicializando ? 'not-allowed' : 'pointer',
-            marginBottom: '20px',
-            fontWeight: '600'
-          }}
-        >
+        <button onClick={handleInicializarActividades} disabled={inicializando}>
           {inicializando ? 'Inicializando...' : 'Inicializar Actividades de Etapa'}
         </button>
       )}
@@ -330,24 +400,26 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
           const isOpen = seccionesAbiertas[estado.id] || false;
 
           return (
-            <div key={estado.id} style={{ marginBottom: "20px" }}>
+            <div key={estado.id}>
               <SeccionHeader onClick={() => toggleSeccion(estado.id)}>
+                <div>
+                  {estado.nombre}
+                  <span style={{ marginLeft: '10px', fontSize: '14px', color: '#666' }}>
+                    ({actividadesEstado.length} actividades)
+                  </span>
+                </div>
                 <IconoFlecha abierto={isOpen}>
                   <FaChevronRight />
                 </IconoFlecha>
-                <span style={{ color: estado.color, fontWeight: "bold" }}>
-                  {estado.nombre}
-                </span>
-                <span style={{ marginLeft: "10px", color: "#868686" }}>
-                  ({actividadesEstado.length} actividades)
-                </span>
               </SeccionHeader>
               {isOpen && (
-                <SeccionContent>
                   <DataTableCustom
                     title=""
                     columns={columns}
-                    data={actividadesEstado}
+                    data={actividadesEstado.slice(
+                      (paginacionEstado.page - 1) * paginacionEstado.perPage,
+                      paginacionEstado.page * paginacionEstado.perPage
+                    )}
                     totalRows={actividadesEstado.length}
                     currentPage={paginacionEstado.page}
                     rowsPerPage={paginacionEstado.perPage}
@@ -357,7 +429,6 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
                     }
                     emptyText="No hay actividades en esta etapa"
                   />
-                </SeccionContent>
               )}
             </div>
           );
@@ -367,16 +438,16 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
       {modalState.deleteOpen && ReactDOM.createPortal(
         <div
           style={{
-            position: "fixed",
+            position: 'fixed',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -391,6 +462,50 @@ export const EtapasEjecucion: React.FC<EtapasEjecucionProps> = ({ obraId }) => {
             mensaje="¿Estás seguro de eliminar esta actividad?"
           />
         </div>,
+        document.body
+      )}
+
+      {/* Modal de subir documentos */}
+      {modalState.uploadOpen && modalState.selectedActividad && ReactDOM.createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleCloseUploadModal();
+            }
+          }}
+        >
+          <ModalDocumento
+            categoria="Documentos"
+            tipo="actividad"
+            id_etapa={modalState.selectedActividadId!}
+            id_obra={obraId}
+            onClose={handleCloseUploadModal}
+            onDocumentsSaved={handleDocumentsSaved}
+          />
+        </div>,
+        document.body
+      )}
+
+      {/* Modal de vista previa */}
+      {modalState.previewOpen && ReactDOM.createPortal(
+        <ModalVistaPrevia
+          visible={modalState.previewOpen}
+          files={modalState.documentos}
+          onClose={handleClosePreviewModal}
+          onRemoveFile={handleRemoveDocument}
+        />,
         document.body
       )}
     </>

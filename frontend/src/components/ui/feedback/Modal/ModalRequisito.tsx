@@ -80,7 +80,6 @@ const FormularioRequisito = <T extends EntityData>({
       setIsLoading(true);
       setErrorMessage(null);
       try {
-        // ✅ Cargar responsables
         try {
           const responsablesResponse = await getUsers();
           if (Array.isArray(responsablesResponse)) {
@@ -95,7 +94,6 @@ const FormularioRequisito = <T extends EntityData>({
           console.error("[loadData] Error cargando responsables:", error);
         }
 
-        // ✅ Cargar categorías desde el backend
         try {
           const categoriasResponse = await fetchCategoriasDocumento();
           if (Array.isArray(categoriasResponse)) {
@@ -108,7 +106,7 @@ const FormularioRequisito = <T extends EntityData>({
           }
         } catch (error) {
           console.error("[loadData] Error cargando categorías:", error);
-          // Fallback a categorías por defecto si falla
+
           setCategoriasOptions([
             { value: "1", label: "Documentos Legales" },
             { value: "2", label: "Documentos Técnicos" },
@@ -118,7 +116,6 @@ const FormularioRequisito = <T extends EntityData>({
           ]);
         }
 
-        // ✅ Tipos de financista/contratista
         if (tipoFieldName === "id_tipo_financista") {
           setTipoOptions([
             { value: "1", label: "Requisito Legal" },
@@ -150,14 +147,12 @@ const FormularioRequisito = <T extends EntityData>({
         [tipoFieldName]: validTipoValue,
       };
 
-      // Mapear categorías
       if (initialData.id_categoria_documento && Array.isArray(initialData.id_categoria_documento)) {
         formValues.id_categoria_documento = initialData.id_categoria_documento.map((cat) => 
           cat.id.toString()
         );
       }
 
-      // Mapear responsables
       if (initialData.responsables && Array.isArray(initialData.responsables)) {
         formValues.responsables = initialData.responsables.map((resp) => 
           resp.id.toString()
@@ -186,12 +181,10 @@ const FormularioRequisito = <T extends EntityData>({
         ...values,
       };
 
-      // Procesar tipo
       if (values[tipoFieldName as string] !== undefined) {
         formattedValues[tipoFieldName] = parseInt(values[tipoFieldName as string]);
       }
 
-      // Procesar categorías
       if (values.id_categoria_documento) {
         formattedValues.id_categoria_documento = values.id_categoria_documento.map((id: string) => {
           const cat = categoriasOptions.find((opt) => opt.value === id);
@@ -199,7 +192,6 @@ const FormularioRequisito = <T extends EntityData>({
         });
       }
 
-      // Procesar responsables (array)
       if (values.responsables) {
         formattedValues.responsables = values.responsables.map((id: string) => {
           const resp = responsablesOptions.find((opt) => opt.value === id);
@@ -207,7 +199,6 @@ const FormularioRequisito = <T extends EntityData>({
         });
       }
 
-      // Procesar responsable único
       if (values.id_responsable) {
         formattedValues.id_responsable = parseInt(values.id_responsable);
       }

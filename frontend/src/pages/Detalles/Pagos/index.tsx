@@ -147,7 +147,6 @@ const Pagos: React.FC<PagosProps> = ({ id_obra }) => {
     es_reembolsable?: boolean;
   }>({});
 
-  // Cargar responsables
   useEffect(() => {
     const loadResponsables = async () => {
       try {
@@ -430,7 +429,6 @@ const Pagos: React.FC<PagosProps> = ({ id_obra }) => {
       if (name === "concepto") updates.concepto = value as string || "";
       if (name === "id_beneficiario") updates.id_beneficiario = value as number | null;
       if (name === "fecha_pago") {
-        // âœ… CORRECCIÃ“N: Validar el tipo antes de pasar a dayjs
         if (value && typeof value !== 'boolean') {
           updates.fecha_pago = dayjs(value as string | number | dayjs.Dayjs | Date).format("YYYY-MM-DD");
         } else {
@@ -440,7 +438,6 @@ const Pagos: React.FC<PagosProps> = ({ id_obra }) => {
       if (name === "monto_pagado") updates.monto_pagado = typeof value === "string" ? parseFloat(value) || 0 : value as number;
       if (name === "id_tipo_gasto") {
         updates.id_tipo_gasto = value as number;
-        // LÃ³gica: Si selecciona Administrativo, es_reembolsable = false
         const tipoSeleccionado = tiposGasto.find(t => t.id === value);
         if (tipoSeleccionado?.nombre.toLowerCase() === "administrativo") {
           updates.es_reembolsable = false;
@@ -466,7 +463,6 @@ const Pagos: React.FC<PagosProps> = ({ id_obra }) => {
     if (!newPago.id_obra) newErrors.id_obra = true;
     if (!newPago.id_responsable) newErrors.id_responsable = true;
 
-    // ValidaciÃ³n: Si es Administrativo, no puede ser reembolsable
     const tipoSeleccionado = tiposGasto.find(t => t.id === newPago.id_tipo_gasto);
     if (tipoSeleccionado?.nombre.toLowerCase() === "administrativo" && newPago.es_reembolsable) {
       message.error("Un gasto administrativo no puede ser reembolsable");
@@ -628,7 +624,6 @@ const Pagos: React.FC<PagosProps> = ({ id_obra }) => {
     }
 
     try {
-      // AquÃ­ deberÃ­as llamar a tu servicio de eliminaciÃ³n de documentos
       await apiClient.delete(`/archivosdelete/${documentId}`, {
         params: {
           codigo_registro: editPagoId,
@@ -1082,15 +1077,13 @@ const Pagos: React.FC<PagosProps> = ({ id_obra }) => {
           <ModalDocumento
             categoria="Documento"
             tipo="pago"
-            actividadId={editPagoId}
-            carpetaBase={CARPETA_PAGOS}
+            id_pago={editPagoId}
+            id_obra={id_obra}
             onClose={() => {
               setModalUploadOpen(false);
               setEditPagoId(undefined);
             }}
             onDocumentsSaved={handleDocumentsSaved}
-            codigoRegistro={editPagoId}
-            id_obra={id_obra}
           />
         </ModalOverlay>
       )}

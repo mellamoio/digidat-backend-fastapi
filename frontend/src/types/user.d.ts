@@ -1,4 +1,3 @@
-// En types/user.ts
 export interface User {
   id_responsable: number;
   nombre: string;

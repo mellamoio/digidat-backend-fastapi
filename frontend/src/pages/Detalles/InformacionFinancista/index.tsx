@@ -564,21 +564,21 @@ const TablaFinancista: React.FC<TablaFinancistaProps> = ({ id_obra }) => {
           />
         </ModalBackground>
       )}
+
       {modalState.uploadOpen && modalState.editData && (
         <ModalBackground onClick={(e) => e.stopPropagation()}>
           <FormularioSubirDocumentos
             onClose={() => handleCloseModal("uploadOpen")}
             categoria="Documentos"
             tipo="financista"
-            actividadId={modalState.editData.id}
-            carpetaBase={CARPETA_FINANCISTA}
-            onDocumentsSaved={() => handleDocumentsSaved(modalState.editData!.id)}
-            codigoRegistro={modalState.editData.id}
+            id_informacionfinancista={modalState.editData.id}
             id_obra={id_obra}
             categoriaId={modalState.categoriaId}
+            onDocumentsSaved={() => handleDocumentsSaved(modalState.editData!.id)}
           />
         </ModalBackground>
       )}
+
       {modalState.previewOpen && (
         <ModalVistaPrevia
           visible={modalState.previewOpen}

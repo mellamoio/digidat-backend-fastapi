@@ -38,11 +38,10 @@ export interface EstadoReembolso {
   nombre: string;
 }
 export interface FileObject {
-  categoria_id?: number | null;
-  id?: string;
+  id: string;
   file?: File | null;
-  url?: string;
-  nombre_original?: string;
+  url: string;
+  nombre_original: string;
   esImagen?: boolean;
   esPDF?: boolean;
 }

@@ -1,5 +1,5 @@
 import apiClient from '../api/api'
-import { DigidatRoutes } from '../routes'
+import { DigidatRoutes, replaceRouteParams } from '../routes'
 import type { Pago, NewPago, TipoGastoResponse } from "../types/pagos";
 
 interface PagoApiResponse {
@@ -16,7 +16,6 @@ interface PagoApiResponse {
   tipo_gasto: TipoGastoResponse;
 }
 
-// ✅ Usando DigidatRoutes
 export const fetchPagos = async (idObra: number): Promise<Pago[]> => {
   if (!idObra) {
     console.error("[fetchPagos] El parámetro id_obra es requerido.");
@@ -56,7 +55,6 @@ export const fetchPagos = async (idObra: number): Promise<Pago[]> => {
 
 export const addPago = async (pago: NewPago): Promise<Pago> => {
   try {
-    
     const payload = {
       id_obra: pago.id_obra,
       concepto: pago.concepto,
@@ -91,7 +89,7 @@ export const addPago = async (pago: NewPago): Promise<Pago> => {
       tipo_gasto: pagoCreado.tipo_gasto,
     };
   } catch (error: any) {
-    console.error("❌ [addPago] Error completo:", {
+    console.error("[addPago] Error completo:", {
       message: error.message,
       status: error.response?.status,
       statusText: error.response?.statusText,
@@ -102,11 +100,9 @@ export const addPago = async (pago: NewPago): Promise<Pago> => {
   }
 };
 
-
 export const updatePago = async (pago: Pago): Promise<Pago> => {
   try {
-    // ✅ Reemplazar :id con el id real
-    const url = DigidatRoutes.UPDATE_PAGO.replace(':id', pago.id_pago.toString());
+    const url = replaceRouteParams(DigidatRoutes.UPDATE_PAGO, { id: pago.id_pago });
     
     const response = await apiClient.put<PagoApiResponse>(url, {
       id_obra: pago.id_obra,
@@ -151,8 +147,7 @@ export const deletePago = async (idPago: number): Promise<void> => {
   }
 
   try {
-    // ✅ Reemplazar :id con el id real
-    const url = DigidatRoutes.DELETE_PAGO.replace(':id', idPago.toString());
+    const url = replaceRouteParams(DigidatRoutes.DELETE_PAGO, { id: idPago });
     await apiClient.delete(url);
   } catch (error: any) {
     console.error("[deletePago] Error al eliminar pago:", error.response?.data || error.message);

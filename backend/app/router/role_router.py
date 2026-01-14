@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
-from app.config.db import get_db
+from app.core.database import get_db
 from app.model.roles import Role
 from app.schema.role_schema import RoleSchema, RoleCreateSchema
 from app.utils.response import custom_response

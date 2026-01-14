@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Optional
 
 class PagoBase(BaseModel):
-    concepto: str = Field(..., min_length=1, max_length=255)  # ✅ AGREGAR
+    concepto: str = Field(..., min_length=1, max_length=255)
     id_obra: int
     monto_pagado: Decimal = Field(..., gt=0, decimal_places=2)
     fecha_pago: date

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from ..model import beneficiario as model_beneficiario
 from ..schema import beneficiario as schema_beneficiario
-from ..config.db import get_db
+from ..services.db import get_db
 
 router = APIRouter()
 

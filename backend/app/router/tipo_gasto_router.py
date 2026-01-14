@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from app.config.db import get_db
+from app.core.database import get_db
 from app.model.tipo_gasto import TipoGasto
 from app.schema.tipo_gasto import TipoGastoResponse
 

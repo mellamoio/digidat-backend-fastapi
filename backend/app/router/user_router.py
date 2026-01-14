@@ -7,11 +7,10 @@ from typing import List
 
 from app.schema.user_schema import UserSchema, UserCreateSchema, UserEditSchema
 from app.model.users import User
-from app.config.db import get_db
+from app.core.database import get_db
 from app.utils.response import custom_response
 from app.utils.auth import get_current_user
-
-#router = APIRouter(dependencies=[Depends(get_current_user)])
+                      
 router = APIRouter()
 
 @router.get("/", status_code=HTTP_200_OK, response_model=List[UserSchema])

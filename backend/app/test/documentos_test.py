@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.main import app
-from app.config.db import get_db
+from app.core.database import get_db
 from app.model.document import Documento
 from app.core.config import settings
 

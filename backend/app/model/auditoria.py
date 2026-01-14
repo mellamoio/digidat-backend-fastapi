@@ -1,6 +1,6 @@
 import enum
 from sqlalchemy import Column, Integer, String, Enum, TIMESTAMP, func
-from app.config.db import Base
+from app.core.database import Base
 
 class AccionAuditoriaEnum(str, enum.Enum):
     INSERT = "INSERT"

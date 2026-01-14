@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from app.config.db import get_db
+from app.core.database import get_db
 from app.schema import obra as schema_obra
 from app.model import obra as model_obra
 from app.model.centro_operacion import CentroOperacion
@@ -69,13 +69,11 @@ def crear_actividades_para_obra(db: Session, id_obra: int):
                 orden=index
             )
             db.add(nueva_actividad)
-    # ✅ Removemos el db.commit() de aquí
 
 
 @router.post("/", response_model=schema_obra.ObraResponse, status_code=201)
 def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
     try:
-        # 1. Crear la obra
         new_obra = model_obra.Obra(
             nombre=obra.nombre,
             tipo_id=obra.tipo_id,
@@ -87,7 +85,6 @@ def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
             id_empresa=obra.id_empresa
         )
         
-        # 2. Asociar centros de operación si existen
         if obra.centros_operacion:
             centros = db.query(CentroOperacion).filter(
                 CentroOperacion.id.in_(obra.centros_operacion)
@@ -95,12 +92,10 @@ def create_obra(obra: schema_obra.ObraCreate, db: Session = Depends(get_db)):
             new_obra.centros_operacion = centros
         
         db.add(new_obra)
-        db.flush()  # ✅ Usar flush en vez de commit para obtener el ID
+        db.flush()
         
-        # 3. Crear actividades de etapa automáticamente
         crear_actividades_para_obra(db, new_obra.id_obra)
         
-        # 4. Hacer UN SOLO commit de todo junto
         db.commit()
         db.refresh(new_obra)
         

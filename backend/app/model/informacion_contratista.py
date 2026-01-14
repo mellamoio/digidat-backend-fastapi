@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, JSON
 from sqlalchemy.orm import relationship
-from app.config.db import Base
+from app.core.database import Base
 
 
 class InformacionContratista(Base):

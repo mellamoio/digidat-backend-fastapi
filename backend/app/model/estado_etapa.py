@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from app.config.db import Base
+from app.core.database import Base
 
 
 class EstadoEtapa(Base):
@@ -11,7 +11,6 @@ class EstadoEtapa(Base):
     orden = Column(Integer, nullable=False)
     color = Column(String(20), default="#722AE9")
     
-    # Relationship con cascade delete - SIN back_populates
     actividades = relationship(
         "ActividadEtapa",
         foreign_keys="ActividadEtapa.id_estado_etapa",

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from app.config.db import Base
+from app.core.database import Base
 
 
 obra_centro_operacion = Table(

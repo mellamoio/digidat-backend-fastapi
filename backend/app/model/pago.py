@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Numeric, Date, ForeignKey, Boolean, String
 from sqlalchemy.orm import relationship
-from app.config.db import Base
+from app.core.database import Base
 
 
 class Pago(Base):

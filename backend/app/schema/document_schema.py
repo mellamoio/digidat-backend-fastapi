@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
+
 
 class DocumentoBase(BaseModel):
     nombre: str
@@ -10,12 +11,17 @@ class DocumentoBase(BaseModel):
     uploaded_by: Optional[int] = None
     id_obra: Optional[int] = None
     id_etapa: Optional[int] = None
-    id_informacion_financista: Optional[int] = None
-    id_informacion_contratista: Optional[int] = None
+    id_informacionfinancista: Optional[int] = Field(None, alias="id_informacion_financista")
+    id_informacioncontratista: Optional[int] = Field(None, alias="id_informacion_contratista")
     id_pago: Optional[int] = None
+
+    class Config:
+        populate_by_name = True
+
 
 class DocumentoCreate(DocumentoBase):
     pass
+
 
 class DocumentoUpdate(BaseModel):
     nombre: Optional[str] = None
@@ -25,9 +31,12 @@ class DocumentoUpdate(BaseModel):
     uploaded_by: Optional[int] = None
     id_obra: Optional[int] = None
     id_etapa: Optional[int] = None
-    id_informacion_financista: Optional[int] = None
-    id_informacion_contratista: Optional[int] = None
+    id_informacionfinancista: Optional[int] = Field(None, alias="id_informacion_financista")
+    id_informacioncontratista: Optional[int] = Field(None, alias="id_informacion_contratista")
     id_pago: Optional[int] = None
+
+    class Config:
+        populate_by_name = True
 
 
 class DocumentoResponse(DocumentoBase):
@@ -36,4 +45,5 @@ class DocumentoResponse(DocumentoBase):
     delete_date: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        populate_by_name = True

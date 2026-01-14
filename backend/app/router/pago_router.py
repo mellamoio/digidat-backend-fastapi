@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from app.config.db import get_db
+from app.core.database import get_db
 from app.model.pago import Pago
 from app.model.tipo_gasto import TipoGasto
 from app.schema.pago import PagoCreate, PagoResponse, PagoUpdate

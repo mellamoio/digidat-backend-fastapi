@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
 
-
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -15,11 +14,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 from app.core.config import settings
 from app.core.database import create_tables, async_create_tables
 from app.core.exceptions import register_exception_handlers
 
+# Importar S3 solo si está configurado
+s3_client = None
+if settings.S3_ENABLED:
+    try:
+        from app.services.aws import s3_client as s3_client_module
+        s3_client = s3_client_module
+        logger.info("Configuracion S3 detectada e importada")
+    except ImportError as e:
+        logger.error(f"Error al importar modulo S3: {e}")
+        s3_client = None
+    except Exception as e:
+        logger.error(f"Error al inicializar S3: {e}")
+        s3_client = None
+else:
+    logger.warning("S3 no configurado en .env")
 
 from app.router import (
     obra_router,
@@ -45,17 +58,29 @@ from app.router.categoria_documento_router import router as categoria_documento_
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Gestor del ciclo de vida de la aplicación"""
-    logger.info("Iniciando la aplicación...")
+    logger.info("Iniciando la aplicacion...")
+    
     try:
-        create_tables()
+        # Solo usar la función asíncrona
         await async_create_tables()
         logger.info("Tablas de la base de datos creadas correctamente")
     except Exception as e:
         logger.error(f"Error al crear tablas: {str(e)}")
-        raise
+        # No hacer raise para que la app siga corriendo
+        logger.warning("La aplicacion continuara sin crear tablas")
+    
+    if s3_client and settings.S3_ENABLED:
+        try:
+            s3_status = await s3_client.verify_connection()
+            if not s3_status:
+                logger.warning("La aplicacion continuara sin S3 disponible")
+        except Exception as e:
+            logger.error(f"Error al verificar S3: {str(e)}")
+            logger.warning("La aplicacion continuara sin S3")
     
     yield
-    logger.info("Deteniendo la aplicación...")
+    
+    logger.info("Deteniendo la aplicacion...")
 
 
 app = FastAPI(
@@ -68,7 +93,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
@@ -76,21 +100,17 @@ app.add_middleware(
     max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 )
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
 register_exception_handlers(app)
 
-
 api_router = APIRouter()
-
 
 api_router.include_router(auth_router, prefix="/auth", tags=["Autenticación"])
 api_router.include_router(user_router, prefix="/users", tags=["Usuarios"])
@@ -109,17 +129,29 @@ api_router.include_router(tipo_gasto_router, prefix="/tipos-gasto", tags=["Tipos
 api_router.include_router(pago_router, prefix="/pagos", tags=["Pagos"])
 api_router.include_router(categoria_documento_router, prefix="/categorias-documento", tags=["Categorías de Documentos"])
 
-
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 @app.get(f"{settings.API_V1_STR}/health")
 async def health_check():
     """Endpoint de verificación de estado de salud de la API."""
+    
+    s3_status = "not_configured"
+    if s3_client and settings.S3_ENABLED:
+        try:
+            s3_connected = await s3_client.verify_connection()
+            s3_status = "ok" if s3_connected else "error"
+        except:
+            s3_status = "error"
+    
     return {
         "status": "ok",
         "version": "1.0.0",
-        "environment": "development" if settings.DEBUG else "production"
+        "environment": "development" if settings.DEBUG else "production",
+        "services": {
+            "database": "ok",
+            "s3": s3_status
+        }
     }
 
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from app.config.db import get_db
+from app.core.database import get_db
 from app.schema.actividad_etapa import ActividadEtapaResponse, ActividadEtapaCreate, ActividadEtapaEdit
 from app.model.actividad_etapa import ActividadEtapa
 from app.model.estado_etapa import EstadoEtapa
@@ -47,13 +47,11 @@ def inicializar_actividades_obra(id_obra: int, db: Session = Depends(get_db)):
     """
     Inicializar todas las actividades de etapa para una obra
     """
-    # Verificar que la obra existe
     from app.model.obra import Obra
     obra = db.query(Obra).filter(Obra.id_obra == id_obra).first()
     if not obra:
         raise HTTPException(status_code=404, detail="Obra no encontrada")
     
-    # Verificar si ya tiene actividades
     actividades_existentes = db.query(ActividadEtapa).filter(
         ActividadEtapa.id_obra == id_obra
     ).count()
@@ -64,7 +62,6 @@ def inicializar_actividades_obra(id_obra: int, db: Session = Depends(get_db)):
             detail=f"La obra ya tiene {actividades_existentes} actividades registradas"
         )
     
-    # Obtener todos los estados de etapa
     estados = db.query(EstadoEtapa).order_by(EstadoEtapa.orden).all()
     
     actividades_creadas = []
@@ -83,7 +80,6 @@ def inicializar_actividades_obra(id_obra: int, db: Session = Depends(get_db)):
             actividades_creadas.append(nueva_actividad)
     
 
-# Actividades por defecto para cada estado
 ACTIVIDADES_DEFAULT = {
     "Priorización": [
         "Aprobar la Capacidad Presupuestal",
@@ -122,13 +118,11 @@ def inicializar_actividades_obra(id_obra: int, db: Session = Depends(get_db)):
     """
     Inicializar todas las actividades de etapa para una obra
     """
-    # Verificar que la obra existe
     from app.model.obra import Obra
     obra = db.query(Obra).filter(Obra.id_obra == id_obra).first()
     if not obra:
         raise HTTPException(status_code=404, detail="Obra no encontrada")
     
-    # Verificar si ya tiene actividades
     actividades_existentes = db.query(ActividadEtapa).filter(
         ActividadEtapa.id_obra == id_obra
     ).count()
@@ -139,7 +133,6 @@ def inicializar_actividades_obra(id_obra: int, db: Session = Depends(get_db)):
             detail=f"La obra ya tiene {actividades_existentes} actividades registradas"
         )
     
-    # Obtener todos los estados de etapa
     estados = db.query(EstadoEtapa).order_by(EstadoEtapa.orden).all()
     
     actividades_creadas = []

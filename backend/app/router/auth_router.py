@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from starlette.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 from werkzeug.security import check_password_hash
 from sqlalchemy.orm import Session
-from app.config.db import get_db
+from app.core.database import get_db
 from app.model.users import User
 from app.schema.auth_schema import LoginRequest
 from app.utils.auth import create_access_token

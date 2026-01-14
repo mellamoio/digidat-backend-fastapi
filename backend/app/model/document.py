@@ -1,4 +1,4 @@
-from app.config.db import Base
+from app.core.database import Base
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, TIMESTAMP, func
 from sqlalchemy.orm import relationship
 
@@ -20,7 +20,7 @@ class Documento(Base):
     create_date = Column(TIMESTAMP, server_default=func.now())
     delete_date = Column(TIMESTAMP, nullable=True)
 
-    # Relaciones - SIN back_populates para ActividadEtapa para evitar ciclos
+    # Relaciones
     obra = relationship("Obra", back_populates="documentos", foreign_keys=[id_obra])
     informacion_financista = relationship("InformacionFinancista", back_populates="documentos", foreign_keys=[id_informacionfinancista])
     informacion_contratista = relationship("InformacionContratista", back_populates="documentos", foreign_keys=[id_informacioncontratista])

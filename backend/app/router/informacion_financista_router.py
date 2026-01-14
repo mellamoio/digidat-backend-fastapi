@@ -95,7 +95,6 @@ async def create_informacion_financista(
             "responsables": json.loads(new_info.responsables) if isinstance(new_info.responsables, str) else new_info.responsables or []
         }
         
-        # ✅ CAMBIO: Devolver con formato esperado por el frontend
         return {
             "success": True,
             "message": "Información financiera creada exitosamente",

@@ -4,6 +4,17 @@
 -- ------------------------------------------------------
 -- Server version	8.0.43
 
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
 --
 -- Table structure for table `actividades_etapa`
 --
@@ -91,6 +102,35 @@ INSERT INTO `beneficiarios` VALUES (2,'Comunidad Campesina de Cabanaconde - Areq
 UNLOCK TABLES;
 
 --
+-- Table structure for table `categoria_documento`
+--
+
+DROP TABLE IF EXISTS `categoria_documento`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `categoria_documento` (
+  `id_categoria` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `descripcion` text,
+  `estado` tinyint(1) NOT NULL DEFAULT '1',
+  `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_categoria`),
+  UNIQUE KEY `nombre` (`nombre`),
+  KEY `idx_estado` (`estado`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `categoria_documento`
+--
+
+LOCK TABLES `categoria_documento` WRITE;
+/*!40000 ALTER TABLE `categoria_documento` DISABLE KEYS */;
+INSERT INTO `categoria_documento` VALUES (1,'Documentos Legales','Contratos, acuerdos legales y documentos jurdicos',1,'2026-01-14 03:34:49'),(2,'Documentos Tcnicos','Especificaciones tcnicas, manuales y documentacin tcnica',1,'2026-01-14 03:34:49'),(3,'Documentos Administrativos','Documentos de gestin administrativa',1,'2026-01-14 03:34:49'),(4,'Planos y Diseos','Planos arquitectnicos, diseos y esquemas',1,'2026-01-14 03:34:49'),(5,'Permisos y Licencias','Permisos municipales, licencias y autorizaciones',1,'2026-01-14 03:34:49');
+/*!40000 ALTER TABLE `categoria_documento` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `centros_operacion`
 --
 
@@ -149,7 +189,7 @@ CREATE TABLE `documentos` (
   CONSTRAINT `documentos_fk_obras` FOREIGN KEY (`id_obra`) REFERENCES `obras` (`id_obra`) ON DELETE SET NULL,
   CONSTRAINT `documentos_fk_pago` FOREIGN KEY (`id_pago`) REFERENCES `pagos` (`id_pago`) ON DELETE SET NULL,
   CONSTRAINT `documentos_fk_uploaded_by` FOREIGN KEY (`uploaded_by`) REFERENCES `usuarios` (`id_responsable`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,6 +198,7 @@ CREATE TABLE `documentos` (
 
 LOCK TABLES `documentos` WRITE;
 /*!40000 ALTER TABLE `documentos` DISABLE KEYS */;
+INSERT INTO `documentos` VALUES (1,'Captura de pantalla 2026-01-13 194114.png','obras/8/8b76ca5f-e3d4-4c74-9a2a-d52a56b6f787.png','image/png',12856,NULL,8,NULL,NULL,NULL,NULL,'2026-01-14 05:06:54','2026-01-14 05:23:42'),(2,'Captura de pantalla 2026-01-14 001926.png','obras/8/1fed9406-3a66-4a0c-b46e-f816a51abd8f.png','image/png',7922,NULL,8,NULL,NULL,NULL,NULL,'2026-01-14 05:25:39','2026-01-14 05:25:45'),(3,'Captura de pantalla 2026-01-14 002707.png','obras/8/b02d4d22-7d33-4c64-be37-a6c69afa15da.png','image/png',11479,NULL,8,NULL,NULL,NULL,NULL,'2026-01-14 05:33:02','2026-01-14 05:33:04'),(4,'Captura de pantalla 2026-01-13 235139.png','obras/8/03f8071e-4464-497a-85e0-7c9f0d80752b.png','image/png',50958,NULL,8,NULL,NULL,NULL,NULL,'2026-01-14 05:50:00','2026-01-14 16:24:56'),(5,'Captura de pantalla 2026-01-13 235139.png','obras/8/bd563472-da04-402d-9da1-b59b7d200f2c.png','image/png',50958,NULL,8,NULL,NULL,NULL,NULL,'2026-01-14 05:58:32','2026-01-14 16:24:58'),(6,'Captura de pantalla 2026-01-14 112319.png','obras/8/32c36e63-d901-4545-a52e-90e711038c7d.png','image/png',118419,NULL,8,NULL,NULL,NULL,NULL,'2026-01-14 16:25:09','2026-01-14 16:28:28'),(7,'Captura de pantalla 2026-01-14 112319.png','obras/8/1ac0b171-82cb-4a17-b97e-62ed0aa91fb4.png','image/png',118419,NULL,8,NULL,NULL,NULL,NULL,'2026-01-14 16:28:44',NULL),(8,'Captura de pantalla 2026-01-13 160040.png','financistas/4/7604b2aa-356b-406e-912b-f7cfe4ce9fca.png','image/png',25507,NULL,8,NULL,4,NULL,NULL,'2026-01-14 17:18:30',NULL),(9,'Captura de pantalla 2026-01-13 124847.png','etapas/158/78b335b4-dbda-4e74-aceb-8fd87e4cee8e.png','image/png',47956,NULL,17,158,NULL,NULL,NULL,'2026-01-14 17:36:37',NULL),(10,'INGENIERÍA DE SISTEMAS E INFORMÁTICA.pdf','etapas/158/7419034e-1bc0-48e0-be1a-06e9064171af.pdf','application/pdf',98230,NULL,17,158,NULL,NULL,NULL,'2026-01-14 18:01:31',NULL);
 /*!40000 ALTER TABLE `documentos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -264,7 +305,7 @@ CREATE TABLE `informacioncontratista` (
   KEY `id_responsable` (`id_responsable`),
   CONSTRAINT `informacioncontratista_ibfk_1` FOREIGN KEY (`id_obra`) REFERENCES `obras` (`id_obra`) ON DELETE CASCADE,
   CONSTRAINT `informacioncontratista_ibfk_2` FOREIGN KEY (`id_responsable`) REFERENCES `usuarios` (`id_responsable`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -273,6 +314,7 @@ CREATE TABLE `informacioncontratista` (
 
 LOCK TABLES `informacioncontratista` WRITE;
 /*!40000 ALTER TABLE `informacioncontratista` DISABLE KEYS */;
+INSERT INTO `informacioncontratista` VALUES (2,1,8,'dasd','sadasasdsadas','\"[{\\\"id\\\": 2, \\\"nombre\\\": \\\"Documentos Tcnicos\\\"}]\"','\"[{\\\"id\\\": 2, \\\"nombre\\\": \\\"Iosef\\\"}]\"',NULL,NULL);
 /*!40000 ALTER TABLE `informacioncontratista` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -615,6 +657,61 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Table structure for table `permissions`
+--
+
+DROP TABLE IF EXISTS `permissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `permissions` (
+  `id_permissions` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `code` varchar(100) NOT NULL,
+  `create_date` datetime DEFAULT (now()),
+  `update_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_permissions`),
+  UNIQUE KEY `code` (`code`),
+  UNIQUE KEY `ix_permissions_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `permissions`
+--
+
+LOCK TABLES `permissions` WRITE;
+/*!40000 ALTER TABLE `permissions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `permissions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `role_permission`
+--
+
+DROP TABLE IF EXISTS `role_permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `role_permission` (
+  `id_role` int NOT NULL,
+  `id_permissions` int NOT NULL,
+  PRIMARY KEY (`id_role`,`id_permissions`),
+  KEY `id_permissions` (`id_permissions`),
+  CONSTRAINT `role_permission_ibfk_1` FOREIGN KEY (`id_role`) REFERENCES `roles` (`id_role`),
+  CONSTRAINT `role_permission_ibfk_2` FOREIGN KEY (`id_permissions`) REFERENCES `permissions` (`id_permissions`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `role_permission`
+--
+
+LOCK TABLES `role_permission` WRITE;
+/*!40000 ALTER TABLE `role_permission` DISABLE KEYS */;
+/*!40000 ALTER TABLE `role_permission` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `roles`
 --
 
@@ -734,4 +831,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-14  3:28:02
+-- Dump completed on 2026-01-14 18:18:23

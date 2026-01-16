@@ -3,7 +3,6 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
-from app.core.database import close_engines
 
 logging.basicConfig(
     level=logging.INFO,
@@ -103,7 +102,12 @@ app.add_middleware(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:5173", 
+        "http://backend.carimsac.com",
+        "http://digidat-storage-950071105194.s3-website-us-east-1.amazonaws.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -155,9 +159,6 @@ async def health_check():
         }
     }
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    await close_engines()
 
 @app.get("/")
 async def root():

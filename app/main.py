@@ -3,6 +3,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
+from app.core.database import close_engines
 
 logging.basicConfig(
     level=logging.INFO,
@@ -154,6 +155,9 @@ async def health_check():
         }
     }
 
+@app.on_event("shutdown")
+async def shutdown_event():
+    await close_engines()
 
 @app.get("/")
 async def root():

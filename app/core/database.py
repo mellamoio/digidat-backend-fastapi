@@ -37,6 +37,13 @@ async_engine = create_async_engine(
     echo=os.getenv("SQL_ECHO", "False").lower() == "true",
 )
 
+async def close_engines():
+    # Cierra engine async (aiomysql)
+    await async_engine.dispose()
+
+    # Cierra engine sync (pymysql)
+    engine.dispose()
+
 AsyncSessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,

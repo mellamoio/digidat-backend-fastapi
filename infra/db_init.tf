@@ -18,8 +18,8 @@ resource "aws_iam_role_policy" "ecs_db_init_s3_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow",
-        Action = ["s3:GetObject"],
+        Effect   = "Allow",
+        Action   = ["s3:GetObject"],
         Resource = ["${aws_s3_bucket.backend_bucket.arn}/*"]
       }
     ]
@@ -42,7 +42,7 @@ resource "aws_ecs_task_definition" "db_init" {
       name      = "db-init",
       image     = "amazonlinux:2",
       essential = true,
-      command = ["/bin/sh","-c",
+      command = ["/bin/sh", "-c",
         "yum install -y python3 unzip mariadb && pip3 install --no-cache-dir awscli && aws s3 cp s3://${aws_s3_bucket.backend_bucket.bucket}/digidat.sql /tmp/digidat.sql && mysql -h ${aws_db_instance.mysql.address} -P ${aws_db_instance.mysql.port} -u ${var.db_username} -p'${var.db_password}' ${var.db_name} < /tmp/digidat.sql"
       ],
       logConfiguration = {
@@ -60,14 +60,14 @@ resource "aws_ecs_task_definition" "db_init" {
 # Run the init task once after the SQL object changes or task definition updates
 resource "null_resource" "run_db_init" {
   triggers = {
-    sql_etag   = aws_s3_object.digidat_sql.etag
-    task_arn    = aws_ecs_task_definition.db_init.arn
+    sql_etag = aws_s3_object.digidat_sql.etag
+    task_arn = aws_ecs_task_definition.db_init.arn
   }
 
 
-    provisioner "local-exec" {
+  provisioner "local-exec" {
     interpreter = ["PowerShell", "-Command"]
-    command = <<EOT
+    command     = <<EOT
     aws ecs run-task `
     --cluster ${aws_ecs_cluster.main.name} `
     --task-definition ${aws_ecs_task_definition.db_init.family} `
@@ -75,5 +75,5 @@ resource "null_resource" "run_db_init" {
     --network-configuration "awsvpcConfiguration={subnets=[${aws_subnet.public1.id},${aws_subnet.public2.id}],securityGroups=[${aws_security_group.ecs_sg.id}],assignPublicIp=ENABLED}" `
     --region ${var.aws_region}
     EOT
-    }
+  }
 }

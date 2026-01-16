@@ -1,0 +1,43 @@
+# 📝 PLANTILLA - Copiar como terraform.tfvars y completar valores
+
+# AWS
+aws_region = "us-east-1"
+
+# Database (CAMBIAR CREDENCIALES)
+db_username     = "admin"
+db_password     = "TuPassword123!Seguro"  # ⚠️ CAMBIAR A ALGO SEGURO
+db_name         = "digidat"
+ssh_allowed_ip  = "tu.ip.publica/32"      # ⚠️ CAMBIAR A TU IP (ej: 203.0.113.45/32)
+
+# FastAPI (CAMBIAR SECRET)
+secret_key  = "tu-secret-key-super-seguro-cambiar-esto"  # ⚠️ CAMBIAR
+debug       = false
+algorithm   = "HS256"
+access_token_expire_minutes = 1440
+
+# Project
+project_name = "digidat"
+environment  = "dev"
+
+# VPC & Networking
+vpc_cidr              = "10.0.0.0/16"
+public_subnet_1_cidr  = "10.0.1.0/24"
+public_subnet_2_cidr  = "10.0.2.0/24"
+private_subnet_1_cidr = "10.0.10.0/24"
+private_subnet_2_cidr = "10.0.11.0/24"
+
+# ECS (COSTO CERO - No cambiar)
+ecs_desired_count = 1
+ecs_cpu           = "256"
+ecs_memory        = "512"
+
+# S3 (COSTO CERO - No cambiar)
+enable_s3_versioning = false
+
+# Tags
+tags = {
+  Project     = "digidat"
+  Environment = "dev"
+  ManagedBy   = "terraform"
+  CostCenter  = "engineering"
+}
